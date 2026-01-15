@@ -1,0 +1,59 @@
+name: flutter_debounce_throttle_workspace
+repository: https://github.com/brewkits/flutter_debounce_throttle
+
+packages:
+  - packages/**
+
+command:
+  version:
+    # Generate commit links in changelog.
+    linkToCommits: true
+    # Include changelog entries for scopes that are not package names.
+    includeScopes: true
+    # Generates a workspace-level changelog.
+    workspaceChangelog: true
+
+  bootstrap:
+    # Use pubspec_overrides.yaml for local development
+    usePubspecOverrides: true
+
+scripts:
+  # Run all tests
+  test:
+    run: melos exec -- flutter test
+    description: Run tests in all packages
+
+  # Run tests for core only (Pure Dart)
+  test:core:
+    run: melos exec --scope="flutter_debounce_throttle_core" -- dart test
+    description: Run tests for core package only
+
+  # Run analysis
+  analyze:
+    run: melos exec -- flutter analyze
+    description: Run flutter analyze in all packages
+
+  # Format code
+  format:
+    run: melos exec -- dart format .
+    description: Format code in all packages
+
+  # Clean all packages
+  clean:
+    run: melos exec -- flutter clean
+    description: Clean all packages
+
+  # Get dependencies for all packages
+  get:
+    run: melos exec -- flutter pub get
+    description: Get dependencies for all packages
+
+  # Publish dry-run (check if ready to publish)
+  publish:dry:
+    run: melos exec -- flutter pub publish --dry-run
+    description: Dry run publish for all packages
+
+  # Publish all packages
+  publish:
+    run: melos exec --no-private -- flutter pub publish --force
+    description: Publish all packages to pub.dev
