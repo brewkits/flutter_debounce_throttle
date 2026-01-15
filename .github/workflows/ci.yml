@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # Pure Dart package - flutter_debounce_throttle_core
+  core:
+    name: Core Package (Pure Dart)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/flutter_debounce_throttle_core
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze project source
+        run: dart analyze --fatal-infos
+
+      - name: Run tests
+        run: dart test
+
+  # Flutter package - flutter_debounce_throttle
+  flutter:
+    name: Flutter Package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/flutter_debounce_throttle
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: |
+          cd ../flutter_debounce_throttle_core && flutter pub get
+          cd ../flutter_debounce_throttle && flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze project source
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests
+        run: flutter test
+        working-directory: .
+
+  # Flutter Hooks package - flutter_debounce_throttle_hooks
+  hooks:
+    name: Hooks Package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/flutter_debounce_throttle_hooks
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: |
+          cd ../flutter_debounce_throttle_core && flutter pub get
+          cd ../flutter_debounce_throttle && flutter pub get
+          cd ../flutter_debounce_throttle_hooks && flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze project source
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests
+        run: flutter test
+        working-directory: .
+
+  # Main package tests (root)
+  main-tests:
+    name: Main Package Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: |
+          cd packages/flutter_debounce_throttle_core && flutter pub get
+          cd ../../packages/flutter_debounce_throttle && flutter pub get
+          cd ../../packages/flutter_debounce_throttle_hooks && flutter pub get
+          cd ../.. && flutter pub get
+
+      - name: Run all tests
+        run: flutter test
