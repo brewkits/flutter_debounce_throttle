@@ -29,3 +29,17 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 /build/
 /coverage/
+
+# AI Assistant files
+.claude/
+*.txt
+
+# Internal docs (not needed for public release)
+COMPLETION_SUMMARY.md
+MASTER_PLAN_CHECK.md
+MASTER_PLAN_FINAL_REPORT.md
+PUBLISH_CHECKLIST.md
+
+# Example app dependencies
+example/pubspec.lock
+example/pubspec_overrides.yaml

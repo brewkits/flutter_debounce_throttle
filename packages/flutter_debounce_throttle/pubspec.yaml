@@ -1,0 +1,41 @@
+name: flutter_debounce_throttle
+description: >-
+  The Safe, Unified & Universal Event Limiter for Flutter.
+  Debounce, throttle, and rate limit with automatic lifecycle management.
+  Prevent double clicks, race conditions, and memory leaks.
+  Works on Mobile, Web, and Desktop.
+version: 1.0.0
+homepage: https://brewkits.dev
+repository: https://github.com/brewkits/flutter_debounce_throttle
+issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
+
+topics:
+  - debounce
+  - throttle
+  - rate-limiting
+  - async
+  - ui
+
+environment:
+  sdk: ^3.0.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_debounce_throttle_core: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
+flutter:

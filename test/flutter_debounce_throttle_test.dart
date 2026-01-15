@@ -1,188 +1,44 @@
-import 'package:flutter_test/flutter_test.dart';
+// Main test file - runs all tests for flutter_debounce_throttle
+//
+// Run all tests: flutter test
+// Run specific test file: flutter test test/core/throttler_test.dart
 
-import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
+// Core tests
+import 'core/throttler_test.dart' as throttler_test;
+import 'core/debouncer_test.dart' as debouncer_test;
+import 'core/async_debouncer_test.dart' as async_debouncer_test;
+import 'core/async_throttler_test.dart' as async_throttler_test;
+import 'core/batch_throttler_test.dart' as batch_throttler_test;
+import 'core/concurrent_async_throttler_test.dart'
+    as concurrent_async_throttler_test;
+import 'core/high_frequency_throttler_test.dart'
+    as high_frequency_throttler_test;
+import 'core/throttle_debouncer_test.dart' as throttle_debouncer_test;
+
+// Flutter widget tests
+import 'flutter/widgets_test.dart' as widgets_test;
+import 'flutter/stream_listeners_test.dart' as stream_listeners_test;
+import 'flutter/text_controllers_test.dart' as text_controllers_test;
+
+// Mixin tests
+import 'mixin/event_limiter_mixin_test.dart' as event_limiter_mixin_test;
 
 void main() {
-  group('Throttler', () {
-    test('executes immediately on first call', () {
-      final throttler = Throttler(duration: const Duration(milliseconds: 100));
-      int callCount = 0;
+  // Core
+  throttler_test.main();
+  debouncer_test.main();
+  async_debouncer_test.main();
+  async_throttler_test.main();
+  batch_throttler_test.main();
+  concurrent_async_throttler_test.main();
+  high_frequency_throttler_test.main();
+  throttle_debouncer_test.main();
 
-      throttler.call(() => callCount++);
+  // Flutter
+  widgets_test.main();
+  stream_listeners_test.main();
+  text_controllers_test.main();
 
-      expect(callCount, 1);
-      throttler.dispose();
-    });
-
-    test('blocks subsequent calls within duration', () {
-      final throttler = Throttler(duration: const Duration(milliseconds: 100));
-      int callCount = 0;
-
-      throttler.call(() => callCount++);
-      throttler.call(() => callCount++);
-      throttler.call(() => callCount++);
-
-      expect(callCount, 1);
-      throttler.dispose();
-    });
-
-    test('allows calls after duration expires', () async {
-      final throttler = Throttler(duration: const Duration(milliseconds: 50));
-      int callCount = 0;
-
-      throttler.call(() => callCount++);
-      expect(callCount, 1);
-
-      await Future.delayed(const Duration(milliseconds: 60));
-      throttler.call(() => callCount++);
-      expect(callCount, 2);
-
-      throttler.dispose();
-    });
-  });
-
-  group('Debouncer', () {
-    test('delays execution until pause', () async {
-      final debouncer = Debouncer(duration: const Duration(milliseconds: 50));
-      int callCount = 0;
-
-      debouncer.call(() => callCount++);
-      expect(callCount, 0);
-
-      await Future.delayed(const Duration(milliseconds: 60));
-      expect(callCount, 1);
-
-      debouncer.dispose();
-    });
-
-    test('resets timer on each call', () async {
-      final debouncer = Debouncer(duration: const Duration(milliseconds: 50));
-      int callCount = 0;
-
-      debouncer.call(() => callCount++);
-      await Future.delayed(const Duration(milliseconds: 30));
-      debouncer.call(() => callCount++);
-      await Future.delayed(const Duration(milliseconds: 30));
-      debouncer.call(() => callCount++);
-      await Future.delayed(const Duration(milliseconds: 60));
-
-      expect(callCount, 1);
-      debouncer.dispose();
-    });
-  });
-
-  group('AsyncDebouncer', () {
-    test('cancels previous calls', () async {
-      final debouncer = AsyncDebouncer(duration: const Duration(milliseconds: 50));
-      final results = <int>[];
-
-      debouncer.run(() async {
-        await Future.delayed(const Duration(milliseconds: 10));
-        return 1;
-      }).then((r) {
-        if (r != null) results.add(r);
-      });
-
-      debouncer.run(() async {
-        await Future.delayed(const Duration(milliseconds: 10));
-        return 2;
-      }).then((r) {
-        if (r != null) results.add(r);
-      });
-
-      debouncer.run(() async {
-        await Future.delayed(const Duration(milliseconds: 10));
-        return 3;
-      }).then((r) {
-        if (r != null) results.add(r);
-      });
-
-      await Future.delayed(const Duration(milliseconds: 100));
-      expect(results, [3]);
-
-      debouncer.dispose();
-    });
-  });
-
-  group('HighFrequencyThrottler', () {
-    test('allows first call immediately', () {
-      final throttler = HighFrequencyThrottler(
-        duration: const Duration(milliseconds: 16),
-      );
-      int callCount = 0;
-
-      throttler.call(() => callCount++);
-      expect(callCount, 1);
-
-      throttler.dispose();
-    });
-
-    test('blocks calls within duration', () {
-      final throttler = HighFrequencyThrottler(
-        duration: const Duration(milliseconds: 100),
-      );
-      int callCount = 0;
-
-      throttler.call(() => callCount++);
-      throttler.call(() => callCount++);
-      throttler.call(() => callCount++);
-
-      expect(callCount, 1);
-      throttler.dispose();
-    });
-  });
-
-  group('ConcurrentAsyncThrottler', () {
-    test('drop mode ignores calls while busy', () async {
-      final throttler = ConcurrentAsyncThrottler(
-        mode: ConcurrencyMode.drop,
-        maxDuration: const Duration(seconds: 5),
-      );
-      final results = <int>[];
-
-      throttler.call(() async {
-        await Future.delayed(const Duration(milliseconds: 50));
-        results.add(1);
-      });
-      throttler.call(() async {
-        results.add(2);
-      });
-
-      await Future.delayed(const Duration(milliseconds: 100));
-      expect(results, [1]);
-
-      throttler.dispose();
-    });
-  });
-
-  group('EventLimiterMixin', () {
-    test('debounce works with ID', () async {
-      final controller = TestController();
-
-      controller.debounce('test', () => controller.value++);
-      controller.debounce('test', () => controller.value++);
-      controller.debounce('test', () => controller.value++);
-
-      await Future.delayed(const Duration(milliseconds: 400));
-      expect(controller.value, 1);
-
-      controller.cancelAllLimiters();
-    });
-
-    test('throttle works with ID', () {
-      final controller = TestController();
-
-      controller.throttle('test', () => controller.value++);
-      controller.throttle('test', () => controller.value++);
-      controller.throttle('test', () => controller.value++);
-
-      expect(controller.value, 1);
-
-      controller.cancelAllLimiters();
-    });
-  });
-}
-
-class TestController with EventLimiterMixin {
-  int value = 0;
+  // Mixin
+  event_limiter_mixin_test.main();
 }
