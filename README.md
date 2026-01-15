@@ -2,10 +2,28 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle.svg)](https://pub.dev/packages/flutter_debounce_throttle)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Dart 3](https://img.shields.io/badge/Dart-3.x-blue.svg)](https://dart.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B.svg)](https://flutter.dev)
 
 **The Safe, Unified & Universal Event Limiter for Flutter & Dart.**
 
 Debounce, throttle, and rate limit with automatic lifecycle management. Prevent double clicks, race conditions, and memory leaks. Works on Mobile, Web, Desktop, and Server.
+
+---
+
+## ✨ Highlights
+
+| | Feature |
+|---|---------|
+| 🎯 | **One API, All Platforms** - Works on Flutter (Mobile, Web, Desktop) and Pure Dart (Server, CLI) |
+| 🔒 | **Memory Safe** - Auto-dispose with widget lifecycle, mounted checks prevent memory leaks |
+| ⚡ | **Type Safe** - Full generic support, no dynamic types, null-safe results |
+| 🧪 | **Production Ready** - 143+ tests, comprehensive coverage, battle-tested |
+| 🏗️ | **Zero Dependencies** - Core package has no external dependencies |
+| 🎨 | **Modern API** - Callable class pattern: `debouncer(() => ...)` |
+| 🔄 | **4 Concurrency Modes** - drop, enqueue, replace, keepLatest |
+| 🪝 | **Flutter Hooks Support** - Optional hooks integration |
+| 📦 | **Tree Shakeable** - Monorepo structure, import only what you need |
 
 ---
 
@@ -806,8 +824,7 @@ Upgrading from another library or older version? See our comprehensive [Migratio
 
 ## Resources
 
-- **[Master Plan & Roadmap](MASTER_PLAN_FINAL_REPORT.md)** - Project vision and completion status
-- **[Master Plan Checklist](MASTER_PLAN_CHECK.md)** - Feature validation checklist
+- **[Migration Guide](MIGRATION_GUIDE.md)** - Migrate from easy_debounce, Timer, rxdart
 - **[Server Demo](example/server_demo/server_example.dart)** - Pure Dart Core examples
 - **[Example App](example/)** - 5 interactive demos
 - **[API Documentation](https://pub.dev/documentation/flutter_debounce_throttle/latest/)** - Complete API reference
@@ -826,4 +843,11 @@ Contributions welcome! Please read our [contributing guidelines](CONTRIBUTING.md
 
 ---
 
-**Made with ❤️ by BrewKits** (coming soon: brewkits.dev)
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/brewkits/flutter_debounce_throttle/issues)
+- **Email**: datacenter111@gmail.com
+
+---
+
+Made with ❤️ by **Nguyễn Tuấn Việt** at **[Brewkits](https://github.com/brewkits)**
