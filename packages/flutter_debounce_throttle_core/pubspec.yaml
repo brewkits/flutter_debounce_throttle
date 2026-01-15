@@ -4,7 +4,7 @@ description: >-
   Debounce, throttle, and rate limit with no Flutter dependency.
   Works on Mobile, Web, Desktop, Server, and CLI.
 version: 1.0.0
-homepage: https://brewkits.dev
+homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
 

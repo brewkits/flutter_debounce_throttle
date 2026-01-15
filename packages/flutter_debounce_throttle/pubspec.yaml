@@ -5,7 +5,7 @@ description: >-
   Prevent double clicks, race conditions, and memory leaks.
   Works on Mobile, Web, and Desktop.
 version: 1.0.0
-homepage: https://brewkits.dev
+homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
 
