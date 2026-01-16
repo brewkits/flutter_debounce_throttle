@@ -10,6 +10,10 @@ import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.da
 /// Works with any class: ChangeNotifier, GetxController, Cubit, MobX Store,
 /// and even Dart Server controllers.
 ///
+/// **Important:** Use static IDs for limiters. If you use dynamic IDs like
+/// `debounce('post_$postId')`, call [remove] to clean up when the item is
+/// removed, otherwise the internal maps will grow unbounded.
+///
 /// **Example with Provider:**
 /// ```dart
 /// class SearchProvider extends ChangeNotifier with EventLimiterMixin {
@@ -170,7 +174,7 @@ mixin EventLimiterMixin {
     return _asyncThrottlers[id]!.call(action);
   }
 
-  /// Cancel a specific limiter by ID.
+  /// Cancel a specific limiter by ID (keeps the limiter instance).
   ///
   /// Example: `cancel('search')` to cancel search debouncer.
   void cancel(String id) {
@@ -178,6 +182,30 @@ mixin EventLimiterMixin {
     _throttlers[id]?.cancel();
     _asyncDebouncers[id]?.cancel();
     _asyncThrottlers[id]?.reset();
+  }
+
+  /// Remove and dispose a limiter by ID.
+  ///
+  /// Use this when using dynamic IDs (e.g., `'post_$postId'`) to prevent
+  /// memory leaks. Unlike [cancel], this also removes the limiter instance
+  /// from internal maps.
+  ///
+  /// Example:
+  /// ```dart
+  /// // When item is removed from infinite scroll list
+  /// void onItemRemoved(String postId) {
+  ///   remove('like_$postId');
+  /// }
+  /// ```
+  void remove(String id) {
+    _debouncers[id]?.dispose();
+    _debouncers.remove(id);
+    _throttlers[id]?.dispose();
+    _throttlers.remove(id);
+    _asyncDebouncers[id]?.dispose();
+    _asyncDebouncers.remove(id);
+    _asyncThrottlers[id]?.dispose();
+    _asyncThrottlers.remove(id);
   }
 
   /// Alias for [cancel]. Prefer using `cancel()`.

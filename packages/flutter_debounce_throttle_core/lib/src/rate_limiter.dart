@@ -87,9 +87,13 @@ class RateLimiter with EventLimiterLogging {
   final void Function(int tokensRemaining, bool acquired)? onMetrics;
 
   double _tokens;
-  DateTime _lastRefill;
+  final Stopwatch _stopwatch;
+  int _lastRefillMicroseconds;
 
   /// Creates a new [RateLimiter] with Token Bucket algorithm.
+  ///
+  /// Uses [Stopwatch] (monotonic clock) instead of [DateTime] to ensure
+  /// accurate timing even if system clock is adjusted.
   ///
   /// - [maxTokens]: Maximum tokens (burst capacity). Must be > 0.
   /// - [refillRate]: Tokens added per interval. Defaults to 1.
@@ -109,19 +113,22 @@ class RateLimiter with EventLimiterLogging {
   })  : assert(maxTokens > 0, 'maxTokens must be positive'),
         assert(refillRate > 0, 'refillRate must be positive'),
         _tokens = maxTokens.toDouble(),
-        _lastRefill = DateTime.now();
+        _stopwatch = Stopwatch()..start(),
+        _lastRefillMicroseconds = 0;
 
   /// Refills tokens based on elapsed time since last refill.
+  ///
+  /// Uses [Stopwatch] for monotonic timing (not affected by system clock changes).
   void _refillTokens() {
-    final now = DateTime.now();
-    final elapsed = now.difference(_lastRefill);
+    final nowMicroseconds = _stopwatch.elapsedMicroseconds;
+    final elapsedMicroseconds = nowMicroseconds - _lastRefillMicroseconds;
     final intervalsElapsed =
-        elapsed.inMicroseconds / refillInterval.inMicroseconds;
+        elapsedMicroseconds / refillInterval.inMicroseconds;
     final tokensToAdd = intervalsElapsed * refillRate;
 
     if (tokensToAdd > 0) {
       _tokens = math.min(maxTokens.toDouble(), _tokens + tokensToAdd);
-      _lastRefill = now;
+      _lastRefillMicroseconds = nowMicroseconds;
       debugLog('Refilled ${tokensToAdd.toStringAsFixed(2)} tokens, '
           'now at ${_tokens.toStringAsFixed(2)}');
     }
@@ -209,12 +216,13 @@ class RateLimiter with EventLimiterLogging {
   /// Reset to full capacity.
   void reset() {
     _tokens = maxTokens.toDouble();
-    _lastRefill = DateTime.now();
+    _lastRefillMicroseconds = _stopwatch.elapsedMicroseconds;
     debugLog('Reset to full capacity ($maxTokens tokens)');
   }
 
-  /// Dispose resources. No cleanup needed for this implementation.
+  /// Dispose resources.
   void dispose() {
+    _stopwatch.stop();
     debugLog('Disposed');
   }
 }
