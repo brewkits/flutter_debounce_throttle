@@ -1,0 +1,12 @@
+name: flutter_debounce_throttle_hooks_example
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_hooks: ^0.21.3
+  flutter_debounce_throttle_hooks: ^1.0.0

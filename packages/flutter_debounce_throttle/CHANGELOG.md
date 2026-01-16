@@ -1,3 +1,9 @@
+## 1.0.1
+
+- Fix package description length to meet pub.dev requirements (60-180 chars)
+- Add example Flutter app demonstrating debounce and throttle usage
+- Update flutter_debounce_throttle_core dependency to ^1.0.1
+
 ## 1.0.0
 
 **Enterprise Edition** - The Safe, Unified & Universal Event Limiter for Flutter & Dart.

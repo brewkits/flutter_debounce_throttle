@@ -1,3 +1,9 @@
+## 1.0.1
+
+- Fix package description length to meet pub.dev requirements (60-180 chars)
+- Add example demonstrating debounce and throttle usage
+- Update meta dependency to ^1.16.0 for better Flutter SDK compatibility
+
 ## 1.0.0
 
 **Enterprise Edition** - The Safe, Unified & Universal Event Limiter for Flutter & Dart.
