@@ -9,6 +9,15 @@ import 'async_throttler.dart';
 import 'concurrency_mode.dart';
 import 'throttler.dart';
 
+/// Strategy for handling queue overflow when [ConcurrentAsyncThrottler.maxQueueSize] is reached.
+enum QueueOverflowStrategy {
+  /// Reject new calls when queue is full (return immediately without execution).
+  dropNewest,
+
+  /// Remove oldest queued call to make room for new one.
+  dropOldest,
+}
+
 /// Advanced async throttler with concurrency control strategies.
 ///
 /// Wraps [AsyncThrottler] with different concurrency modes:
@@ -72,7 +81,16 @@ import 'throttler.dart';
 class ConcurrentAsyncThrottler {
   final AsyncThrottler _throttler;
   final ConcurrencyMode mode;
-  final Queue<Future<void> Function()> _queue = Queue();
+
+  /// Maximum queue size for enqueue mode.
+  /// Null means unlimited (default for backward compatibility).
+  /// Only applies to [ConcurrencyMode.enqueue].
+  final int? maxQueueSize;
+
+  /// Strategy to use when [maxQueueSize] is reached in enqueue mode.
+  final QueueOverflowStrategy queueOverflowStrategy;
+
+  final Queue<_QueuedCall> _queue = Queue();
   Future<void> Function()? _latestCall;
   bool _isProcessingQueue = false;
   int _latestCallId = 0;
@@ -85,6 +103,8 @@ class ConcurrentAsyncThrottler {
     bool enabled = true,
     bool resetOnError = false,
     void Function(Duration executionTime, bool executed)? onMetrics,
+    this.maxQueueSize,
+    this.queueOverflowStrategy = QueueOverflowStrategy.dropNewest,
   }) : _throttler = AsyncThrottler(
           maxDuration: maxDuration,
           debugMode: debugMode,
@@ -114,16 +134,33 @@ class ConcurrentAsyncThrottler {
   /// Enqueue mode: Queue calls and execute sequentially (FIFO).
   Future<void> _enqueueCall(Future<void> Function() callback) async {
     final completer = Completer<void>();
+    final queuedCall = _QueuedCall(callback, completer);
+
+    // Handle queue overflow if maxQueueSize is set
+    if (maxQueueSize != null && _queue.length >= maxQueueSize!) {
+      switch (queueOverflowStrategy) {
+        case QueueOverflowStrategy.dropOldest:
+          final dropped = _queue.removeFirst();
+          dropped.completer.completeError(
+            StateError('Dropped from queue due to overflow (dropOldest)'),
+          );
+          _throttler.debugLog(
+            'Queue full ($maxQueueSize), dropped oldest (dropOldest strategy)',
+          );
+          break;
+        case QueueOverflowStrategy.dropNewest:
+          _throttler.debugLog(
+            'Queue full ($maxQueueSize), rejecting new call (dropNewest strategy)',
+          );
+          completer.completeError(
+            StateError('Rejected: queue full (dropNewest)'),
+          );
+          return completer.future;
+      }
+    }
 
     // Add to queue
-    _queue.add(() async {
-      try {
-        await callback();
-        completer.complete();
-      } catch (e, stack) {
-        completer.completeError(e, stack);
-      }
-    });
+    _queue.add(queuedCall);
 
     _throttler.debugLog(
       'Enqueued call (queue size: ${_queue.length}, processing: $_isProcessingQueue)',
@@ -145,14 +182,16 @@ class ConcurrentAsyncThrottler {
     _throttler.debugLog('Started queue processing');
 
     while (_queue.isNotEmpty) {
-      final action = _queue.removeFirst();
+      final queuedCall = _queue.removeFirst();
       _throttler
           .debugLog('Processing queued item (${_queue.length} remaining)');
 
       try {
-        await _throttler.call(action);
-      } catch (e) {
+        await _throttler.call(queuedCall.callback);
+        queuedCall.completer.complete();
+      } catch (e, stack) {
         _throttler.debugLog('Queue processing error: $e');
+        queuedCall.completer.completeError(e, stack);
         // Continue processing queue even if one item fails
       }
     }
@@ -267,4 +306,12 @@ class ConcurrentAsyncThrottler {
     _latestCall = null;
     _isProcessingQueue = false;
   }
+}
+
+/// Internal class to hold queued callback and its completer.
+class _QueuedCall {
+  final Future<void> Function() callback;
+  final Completer<void> completer;
+
+  _QueuedCall(this.callback, this.completer);
 }

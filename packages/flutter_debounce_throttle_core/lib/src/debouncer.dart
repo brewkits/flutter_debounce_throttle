@@ -16,11 +16,14 @@ import 'throttler.dart';
 /// - Performance metrics: `onMetrics` callback tracks timing
 /// - Conditional debouncing: `enabled` parameter to bypass debounce
 /// - Reset on error: `resetOnError: true` auto-resets on exceptions
+/// - Leading edge: `leading: true` executes immediately on first call
+/// - Trailing edge: `trailing: true` executes after pause (default)
 ///
 /// **Use cases:**
 /// - Search input: Wait for user to stop typing
 /// - Window resize: Recalculate after resize stops
 /// - Form validation: Validate after user stops editing
+/// - Button feedback: `leading: true` for immediate response + debounced follow-up
 ///
 /// **Example:**
 /// ```dart
@@ -35,6 +38,13 @@ import 'throttler.dart';
 /// void onTextChanged(String text) {
 ///   debouncer.call(() => searchApi(text));
 /// }
+///
+/// // Leading + trailing edge (like lodash)
+/// final buttonDebouncer = Debouncer(
+///   duration: Duration(milliseconds: 300),
+///   leading: true,   // Execute immediately on first call
+///   trailing: true,  // Also execute after pause
+/// );
 ///
 /// // Don't forget to dispose
 /// debouncer.dispose();
@@ -53,7 +63,17 @@ class Debouncer extends CallbackController {
   /// Callback for performance metrics.
   final void Function(Duration waitTime, bool cancelled)? onMetrics;
 
+  /// Execute callback immediately on first call (leading edge).
+  /// Default is false (trailing edge only).
+  final bool leading;
+
+  /// Execute callback after pause (trailing edge).
+  /// Default is true (standard debounce behavior).
+  final bool trailing;
+
   DateTime? _lastCallTime;
+  bool _isInDebounceWindow = false;
+  VoidCallback? _pendingCallback;
 
   Debouncer({
     Duration? duration,
@@ -62,7 +82,13 @@ class Debouncer extends CallbackController {
     this.enabled = true,
     this.resetOnError = false,
     this.onMetrics,
-  }) : super(duration: duration ?? defaultDuration);
+    this.leading = false,
+    this.trailing = true,
+  })  : assert(
+          leading || trailing,
+          'At least one of leading or trailing must be true',
+        ),
+        super(duration: duration ?? defaultDuration);
 
   @override
   void call(VoidCallback callback) {
@@ -88,7 +114,7 @@ class Debouncer extends CallbackController {
     }
 
     // Cancel previous timer (if any)
-    if (_lastCallTime != null) {
+    if (_lastCallTime != null && timer?.isActive == true) {
       final waitTime = callTime.difference(_lastCallTime!);
       debugLog(
         'Debounce cancelled (new call after ${waitTime.inMilliseconds}ms)',
@@ -96,12 +122,38 @@ class Debouncer extends CallbackController {
       onMetrics?.call(waitTime, true);
     }
 
+    // Store the latest callback for trailing edge
+    _pendingCallback = callback;
     _lastCallTime = callTime;
+
+    // Leading edge: execute immediately if not already in a debounce window
+    if (leading && !_isInDebounceWindow) {
+      _isInDebounceWindow = true;
+      debugLog('Leading edge: executing immediately');
+      _executeCallback(callback, callTime, cancelled: false);
+    }
+
+    // Reset the timer
     timer?.cancel();
     timer = Timer(effectiveDuration, () {
       final totalWaitTime = DateTime.now().difference(callTime);
-      debugLog('Debounce executed after ${totalWaitTime.inMilliseconds}ms');
-      _executeCallback(callback, callTime, cancelled: false);
+
+      // Trailing edge: execute after pause
+      if (trailing && _pendingCallback != null) {
+        // Only execute trailing if it's different from leading execution
+        // or if leading is false
+        if (!leading || _lastCallTime != callTime) {
+          debugLog(
+              'Trailing edge: executed after ${totalWaitTime.inMilliseconds}ms');
+          _executeCallback(_pendingCallback!, callTime, cancelled: false);
+        } else {
+          debugLog('Trailing edge: skipped (same as leading call)');
+        }
+      }
+
+      // Reset debounce window
+      _isInDebounceWindow = false;
+      _pendingCallback = null;
     });
   }
 
@@ -141,5 +193,7 @@ class Debouncer extends CallbackController {
   void dispose() {
     super.dispose();
     _lastCallTime = null;
+    _isInDebounceWindow = false;
+    _pendingCallback = null;
   }
 }

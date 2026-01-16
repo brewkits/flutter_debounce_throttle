@@ -7,6 +7,18 @@ import 'dart:async';
 import 'logger.dart';
 import 'throttler.dart';
 
+/// Strategy for handling batch overflow when [BatchThrottler.maxBatchSize] is reached.
+enum BatchOverflowStrategy {
+  /// Drop oldest actions when batch is full (FIFO eviction).
+  dropOldest,
+
+  /// Drop newest actions (reject new calls) when batch is full.
+  dropNewest,
+
+  /// Force immediate flush and start new batch when full.
+  flushAndAdd,
+}
+
 /// Batch execution utility for throttling/debouncing multiple actions as one.
 ///
 /// Collects multiple throttled calls and executes them as a single batch.
@@ -66,6 +78,14 @@ class BatchThrottler with EventLimiterLogging {
   final Duration duration;
   final void Function(List<VoidCallback> actions) onBatchExecute;
 
+  /// Maximum number of actions to hold in the batch.
+  /// When reached, [overflowStrategy] determines behavior.
+  /// Null means unlimited (default for backward compatibility).
+  final int? maxBatchSize;
+
+  /// Strategy to use when [maxBatchSize] is reached.
+  final BatchOverflowStrategy overflowStrategy;
+
   @override
   final bool debugMode;
 
@@ -78,6 +98,8 @@ class BatchThrottler with EventLimiterLogging {
   BatchThrottler({
     required this.duration,
     required this.onBatchExecute,
+    this.maxBatchSize,
+    this.overflowStrategy = BatchOverflowStrategy.flushAndAdd,
     this.debugMode = false,
     this.name,
   });
@@ -85,7 +107,32 @@ class BatchThrottler with EventLimiterLogging {
   /// Add an action to the batch.
   ///
   /// Can be called directly as a function: `batcher(() => ...)`
+  ///
+  /// If [maxBatchSize] is set and reached, behavior depends on [overflowStrategy]:
+  /// - [BatchOverflowStrategy.dropOldest]: Removes oldest action to make room
+  /// - [BatchOverflowStrategy.dropNewest]: Rejects this new action
+  /// - [BatchOverflowStrategy.flushAndAdd]: Immediately flushes current batch, then adds
   void call(VoidCallback action) {
+    // Handle overflow if maxBatchSize is set
+    if (maxBatchSize != null && _pendingActions.length >= maxBatchSize!) {
+      switch (overflowStrategy) {
+        case BatchOverflowStrategy.dropOldest:
+          _pendingActions.removeAt(0);
+          debugLog(
+              'Batch full ($maxBatchSize), dropped oldest action (dropOldest strategy)');
+          break;
+        case BatchOverflowStrategy.dropNewest:
+          debugLog(
+              'Batch full ($maxBatchSize), rejecting new action (dropNewest strategy)');
+          return; // Don't add the new action
+        case BatchOverflowStrategy.flushAndAdd:
+          debugLog(
+              'Batch full ($maxBatchSize), flushing immediately (flushAndAdd strategy)');
+          flush();
+          break;
+      }
+    }
+
     _pendingActions.add(action);
     debugLog('Action added to batch (${_pendingActions.length} total)');
 
