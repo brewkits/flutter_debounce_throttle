@@ -18,7 +18,7 @@ Debounce, throttle, and rate limit with automatic lifecycle management. Prevent 
 | 🎯 | **One API, All Platforms** - Works on Flutter (Mobile, Web, Desktop) and Pure Dart (Server, CLI) |
 | 🔒 | **Memory Safe** - Auto-dispose with widget lifecycle, mounted checks prevent memory leaks |
 | ⚡ | **Type Safe** - Full generic support, no dynamic types, null-safe results |
-| 🧪 | **Production Ready** - 143+ tests, comprehensive coverage, battle-tested |
+| 🧪 | **Production Ready** - 340+ tests, comprehensive coverage, battle-tested |
 | 🏗️ | **Zero Dependencies** - Core package has no external dependencies |
 | 🎨 | **Modern API** - Callable class pattern: `debouncer(() => ...)` |
 | 🔄 | **4 Concurrency Modes** - drop, enqueue, replace, keepLatest |
@@ -64,18 +64,22 @@ Using Flutter?
 | Server compatibility | Pure Dart core - works on servers |
 | State management | `EventLimiterMixin` for any controller |
 
-**New in v1.0:** Modern callable class API, ID-based limiting, backward compatible. See [Migration Guide](MIGRATION_GUIDE.md) and [Server Demo](example/server_demo/)
+**New in v1.1.0:** RateLimiter (Token Bucket), Duration/Callback extensions, Debouncer leading/trailing edge, BatchThrottler maxBatchSize, ConcurrentAsyncThrottler maxQueueSize. See [Migration Guide](MIGRATION_GUIDE.md) and [Server Demo](example/server_demo/)
 
 ---
 
 ## Features
 
 - **Throttle**: Execute immediately, block subsequent calls for duration
-- **Debounce**: Delay execution until pause in calls
+- **Debounce**: Delay execution until pause in calls + **leading/trailing edge** (v1.1.0)
 - **Async Support**: Handle async operations with cancellation
 - **Concurrency Control**: 4 modes - drop, enqueue, replace, keepLatest
+- **Rate Limiter**: Token Bucket algorithm for burst-capable rate limiting (v1.1.0)
 - **High Frequency**: Optimized for scroll/mouse events (60fps)
-- **Batch Operations**: Group multiple calls into single execution
+- **Batch Operations**: Group multiple calls into single execution + **maxBatchSize** (v1.1.0)
+- **Queue Control**: `maxQueueSize` with overflow strategies for enqueue mode (v1.1.0)
+- **Duration Extensions**: `300.ms`, `2.seconds`, `5.minutes` (v1.1.0)
+- **Callback Extensions**: `.debounced()`, `.throttled()` on functions (v1.1.0)
 - **Stream Listeners**: Safe stream subscriptions with auto-cancel
 - **Flutter Hooks**: Full hooks integration
 - **State Management Mixin**: Works with Provider, GetX, Bloc, etc.
@@ -88,20 +92,20 @@ Using Flutter?
 ### Flutter App (No Hooks)
 ```yaml
 dependencies:
-  flutter_debounce_throttle: ^1.0.0
+  flutter_debounce_throttle: ^1.1.0
 ```
 
 ### Flutter App with Hooks
 ```yaml
 dependencies:
-  flutter_debounce_throttle_hooks: ^1.0.0
-  flutter_hooks: ^0.20.0
+  flutter_debounce_throttle_hooks: ^1.1.0
+  flutter_hooks: ^0.21.0
 ```
 
 ### Pure Dart (Server, CLI)
 ```yaml
 dependencies:
-  flutter_debounce_throttle_core: ^1.0.0
+  flutter_debounce_throttle_core: ^1.1.0
 ```
 
 ### Imports
@@ -187,6 +191,59 @@ Debounce: ─────────────────●─────�
 
 ---
 
+## Extensions (v1.1.0)
+
+### Duration Extensions
+
+Create Duration objects with convenient syntax:
+
+```dart
+// Before
+final delay = Duration(milliseconds: 300);
+
+// After (v1.1.0)
+final delay = 300.ms;
+```
+
+| Extension | Equivalent |
+|-----------|------------|
+| `300.ms` | `Duration(milliseconds: 300)` |
+| `2.seconds` | `Duration(seconds: 2)` |
+| `5.minutes` | `Duration(minutes: 5)` |
+| `1.hours` | `Duration(hours: 1)` |
+
+**Example usage:**
+
+```dart
+final debouncer = Debouncer(duration: 300.ms);
+final throttler = Throttler(duration: 500.ms);
+
+await Future.delayed(2.seconds);
+```
+
+### Callback Extensions
+
+Create debounced/throttled callbacks from any function:
+
+```dart
+// Before
+final debouncer = Debouncer(duration: Duration(milliseconds: 300));
+void handleSearch() => debouncer.call(() => search());
+
+// After (v1.1.0)
+final search = () => api.search();
+final debouncedSearch = search.debounced(300.ms);
+final throttledSearch = search.throttled(500.ms);
+
+// Use directly
+debouncedSearch();
+throttledSearch();
+```
+
+> **Note:** Each call to `.debounced()` or `.throttled()` creates a new internal limiter instance. For repeated use in widgets, prefer creating a `Debouncer` or `Throttler` instance directly.
+
+---
+
 ## API Reference
 
 ### Basic Limiters
@@ -227,6 +284,36 @@ debouncer.cancel();
 // Cleanup
 debouncer.dispose();
 ```
+
+**v1.1.0: Leading/Trailing Edge (like lodash):**
+
+```dart
+// Default: trailing edge only (standard debounce)
+final debouncer = Debouncer(
+  duration: Duration(milliseconds: 300),
+  trailing: true,  // Execute after pause (default)
+);
+
+// Leading edge: execute immediately on first call
+final buttonDebouncer = Debouncer(
+  duration: Duration(milliseconds: 300),
+  leading: true,   // Execute immediately
+  trailing: false, // Don't execute after pause
+);
+
+// Both edges (like lodash _.debounce with leading & trailing)
+final hybridDebouncer = Debouncer(
+  duration: Duration(milliseconds: 300),
+  leading: true,   // Execute immediately on first call
+  trailing: true,  // Also execute after pause if new calls came
+);
+```
+
+| Mode | First Call | During Debounce | After Pause |
+|------|-----------|-----------------|-------------|
+| `trailing: true` (default) | Waits | Resets timer | Executes |
+| `leading: true` | Executes | Blocked | - |
+| `leading + trailing` | Executes | Resets timer | Executes (if new calls) |
 
 ### Async Limiters
 
@@ -291,6 +378,25 @@ throttler.call(() async => await fetchData());
 | `replace` | Cancel current, start new |
 | `keepLatest` | Keep only latest pending |
 
+**v1.1.0: maxQueueSize with overflow strategies (enqueue mode):**
+
+```dart
+final chatSender = ConcurrentAsyncThrottler(
+  mode: ConcurrencyMode.enqueue,
+  maxDuration: Duration(seconds: 30),
+  maxQueueSize: 10,  // Limit queue to 10 items
+  queueOverflowStrategy: QueueOverflowStrategy.dropOldest,
+);
+
+// QueueOverflowStrategy options:
+// - dropNewest: Reject new calls when queue is full (default)
+// - dropOldest: Remove oldest queued call to make room
+
+// Check queue status
+print('Queue size: ${chatSender.queueSize}');
+print('Pending: ${chatSender.pendingCount}');
+```
+
 #### HighFrequencyThrottler
 
 Optimized for high-frequency events (scroll, mouse move):
@@ -313,6 +419,11 @@ Batch multiple operations into single execution:
 ```dart
 final batcher = BatchThrottler(
   duration: Duration(milliseconds: 100),
+  onBatchExecute: (actions) {
+    for (final action in actions) {
+      action();
+    }
+  },
 );
 
 // Callable class pattern
@@ -320,6 +431,75 @@ batcher(() => save('item1'));
 batcher(() => save('item2'));
 batcher(() => save('item3'));
 // After 100ms: executes all 3 actions in batch
+```
+
+**v1.1.0: maxBatchSize with overflow strategies:**
+
+```dart
+final batcher = BatchThrottler(
+  duration: Duration(milliseconds: 500),
+  maxBatchSize: 5, // Limit batch to 5 items
+  overflowStrategy: BatchOverflowStrategy.dropOldest,
+  onBatchExecute: (actions) { /* ... */ },
+);
+
+// BatchOverflowStrategy options:
+// - dropOldest: Remove oldest item when full
+// - dropNewest: Reject new item when full
+// - flushAndAdd: Flush immediately, then add new item
+```
+
+#### RateLimiter (v1.1.0)
+
+Token Bucket algorithm for burst-capable rate limiting:
+
+```dart
+final limiter = RateLimiter(
+  maxTokens: 10,           // Burst capacity
+  refillRate: 2,           // 2 tokens per interval
+  refillInterval: Duration(seconds: 1),
+  debugMode: true,
+  name: 'api-limiter',
+);
+
+// Check before calling
+if (limiter.tryAcquire()) {
+  await api.call();
+} else {
+  showRateLimitError();
+}
+
+// Or use with callback (only executes if token available)
+final executed = limiter.call(() => api.submit());
+
+// Async version
+final result = await limiter.callAsync(() async => await api.getData());
+
+// Check status
+print('Available: ${limiter.availableTokens}');
+print('Time until next: ${limiter.timeUntilNextToken}');
+
+limiter.dispose();
+```
+
+**Server-side rate limiting:**
+
+```dart
+final apiLimiter = RateLimiter(
+  maxTokens: 100,          // Allow burst of 100 requests
+  refillRate: 10,          // Refill 10 tokens per second
+  refillInterval: Duration(seconds: 1),
+  name: 'api-rate-limiter',
+);
+
+Future<Response> handleRequest(Request request) async {
+  if (!apiLimiter.tryAcquire()) {
+    return Response.tooManyRequests(
+      retryAfter: apiLimiter.timeUntilNextToken,
+    );
+  }
+  return await processRequest(request);
+}
 ```
 
 ---
@@ -564,8 +744,8 @@ mixin EventLimiterMixin {
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle: ^1.0.0
-  flutter_hooks: ^0.20.0  # Add this only if you need hooks
+  flutter_debounce_throttle: ^1.1.0
+  flutter_hooks: ^0.21.0  # Add this only if you need hooks
 ```
 
 ```dart
@@ -809,6 +989,187 @@ AsyncThrottler() // If API hangs, UI locked forever!
 | Form submission | 30-60 seconds |
 | File upload | 5-10 minutes |
 | Background sync | No timeout (handle separately) |
+
+---
+
+## Best Practices by Use Case
+
+### Button Anti-Spam (Prevent Double Clicks)
+
+```dart
+// ✅ BEST: ThrottledInkWell for one-time setup
+ThrottledInkWell(
+  duration: 500.ms,
+  onTap: () => submitOrder(),
+  child: Text('Submit'),
+)
+
+// ✅ GOOD: Throttler with leading edge (immediate feedback)
+final _submitThrottler = Throttler(duration: 500.ms);
+
+ElevatedButton(
+  onPressed: _submitThrottler.wrap(() => submitOrder()),
+  child: Text('Submit'),
+)
+
+// ❌ AVOID: AsyncThrottler without loading indicator
+// User can't see why button "doesn't work"
+```
+
+### Search Input (Wait for Typing to Stop)
+
+```dart
+// ✅ BEST: DebouncedQueryBuilder with loading state
+DebouncedQueryBuilder<List<User>>(
+  duration: 300.ms,
+  onQuery: (text) async => await api.search(text),
+  onResult: (users) => setState(() => _users = users),
+  onError: (e) => showError(e),
+  builder: (context, search, isLoading) => TextField(
+    onChanged: search,
+    decoration: InputDecoration(
+      suffixIcon: isLoading ? CircularProgressIndicator() : Icon(Icons.search),
+    ),
+  ),
+)
+
+// ✅ GOOD: Debouncer for simple cases
+final _searchDebouncer = Debouncer(duration: 300.ms);
+
+TextField(
+  onChanged: (text) => _searchDebouncer.call(() => search(text)),
+)
+
+// ⚠️ TIP: Use ConcurrencyMode.replace to cancel old searches
+final _searchController = ConcurrentAsyncThrottler(
+  mode: ConcurrencyMode.replace,
+  maxDuration: 10.seconds,
+);
+```
+
+### Form Validation (Validate After Input Stops)
+
+```dart
+// ✅ BEST: Debouncer with trailing edge (default)
+final _validator = Debouncer(duration: 300.ms);
+
+TextFormField(
+  onChanged: (value) => _validator.call(() => validateEmail(value)),
+)
+
+// ✅ ALTERNATIVE: Leading + Trailing for immediate + final validation
+final _validator = Debouncer(
+  duration: 300.ms,
+  leading: true,   // Immediate feedback
+  trailing: true,  // Final validation after pause
+);
+```
+
+### API Rate Limiting (Server-side)
+
+```dart
+// ✅ BEST: RateLimiter for burst-capable rate limiting
+final _apiLimiter = RateLimiter(
+  maxTokens: 100,        // Allow burst of 100
+  refillRate: 10,        // 10 requests/second sustained
+  refillInterval: 1.seconds,
+);
+
+Future<Response> handleRequest(Request req) async {
+  if (!_apiLimiter.tryAcquire()) {
+    return Response.tooManyRequests(
+      retryAfter: _apiLimiter.timeUntilNextToken,
+    );
+  }
+  return await processRequest(req);
+}
+
+// ✅ GOOD: Simple Throttler for fixed-rate limiting
+final _throttler = Throttler(duration: 100.ms); // 10 req/s max
+```
+
+### Scroll/Resize Events (High Frequency)
+
+```dart
+// ✅ BEST: HighFrequencyThrottler for 60fps
+final _scrollThrottler = HighFrequencyThrottler(
+  duration: 16.ms, // ~60fps
+);
+
+NotificationListener<ScrollNotification>(
+  onNotification: (notification) {
+    _scrollThrottler.call(() => updateParallax(notification.metrics.pixels));
+    return false;
+  },
+  child: ListView(...),
+)
+
+// ❌ AVOID: Regular Throttler uses Timer (less precise)
+```
+
+### Chat Messages (Sequential Order)
+
+```dart
+// ✅ BEST: ConcurrentAsyncThrottler with enqueue mode
+final _chatSender = ConcurrentAsyncThrottler(
+  mode: ConcurrencyMode.enqueue,  // Preserve order
+  maxDuration: 30.seconds,
+  maxQueueSize: 20,               // Prevent memory buildup
+  queueOverflowStrategy: QueueOverflowStrategy.dropOldest,
+);
+
+void sendMessage(String text) {
+  _chatSender.call(() async => await api.sendMessage(text));
+}
+```
+
+### Auto-Save (Save Latest Version)
+
+```dart
+// ✅ BEST: ConcurrentAsyncThrottler with keepLatest mode
+final _autoSaver = ConcurrentAsyncThrottler(
+  mode: ConcurrencyMode.keepLatest,  // Only save final version
+  maxDuration: 30.seconds,
+);
+
+void onDocumentChanged(Document doc) {
+  _autoSaver.call(() async => await api.saveDraft(doc));
+}
+
+// Result: Multiple rapid edits → Only first + last saved
+```
+
+### Analytics Batching (Group Events)
+
+```dart
+// ✅ BEST: BatchThrottler with size limit
+final _analyticsBatcher = BatchThrottler(
+  duration: 2.seconds,
+  maxBatchSize: 50,  // Prevent memory issues
+  overflowStrategy: BatchOverflowStrategy.flushAndAdd,
+  onBatchExecute: (actions) async {
+    final events = actions.map((a) => a()).toList();
+    await analytics.trackBatch(events);
+  },
+);
+
+void trackEvent(String name) {
+  _analyticsBatcher(() => AnalyticsEvent(name));
+}
+```
+
+### Quick Reference: Which Limiter to Use?
+
+| Use Case | Recommended Limiter | Mode/Options |
+|----------|---------------------|--------------|
+| Button anti-spam | `Throttler` / `ThrottledInkWell` | - |
+| Search input | `Debouncer` + `ConcurrentAsyncThrottler` | `replace` mode |
+| Form validation | `Debouncer` | `leading + trailing` |
+| API rate limiting | `RateLimiter` | Token bucket |
+| Scroll/resize | `HighFrequencyThrottler` | 16ms for 60fps |
+| Chat messages | `ConcurrentAsyncThrottler` | `enqueue` mode |
+| Auto-save | `ConcurrentAsyncThrottler` | `keepLatest` mode |
+| Analytics | `BatchThrottler` | `maxBatchSize` |
 
 ---
 
