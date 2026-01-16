@@ -85,3 +85,7 @@ export 'src/concurrent_async_throttler.dart';
 
 // Utilities
 export 'src/batch_throttler.dart';
+export 'src/rate_limiter.dart';
+
+// Extensions
+export 'src/extensions.dart';
