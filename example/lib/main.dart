@@ -56,6 +56,7 @@ class _HomePageState extends State<HomePage> {
     SearchDemo(),
     ButtonDemo(),
     AdvancedDemo(),
+    EnterpriseDemo(), // NEW: v1.1.0 features
   ];
 
   final List<NavigationDestination> _destinations = const [
@@ -84,6 +85,11 @@ class _HomePageState extends State<HomePage> {
       selectedIcon: Icon(Icons.tune),
       label: 'Advanced',
     ),
+    NavigationDestination(
+      icon: Icon(Icons.rocket_launch_outlined),
+      selectedIcon: Icon(Icons.rocket_launch),
+      label: 'Enterprise',
+    ),
   ];
 
   @override
@@ -97,7 +103,8 @@ class _HomePageState extends State<HomePage> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        onDestinationSelected: (index) =>
+            setState(() => _selectedIndex = index),
         destinations: _destinations,
       ),
     );
@@ -187,16 +194,9 @@ class _ThrottleDemoState extends State<ThrottleDemo> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.speed,
-                    size: 48,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.speed, size: 48, color: theme.colorScheme.primary),
                   const SizedBox(height: 12),
-                  Text(
-                    'Throttle Demo',
-                    style: theme.textTheme.headlineSmall,
-                  ),
+                  Text('Throttle Demo', style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 8),
                   Text(
                     'Throttle executes immediately, then blocks for 500ms.\nTap rapidly to see how many clicks are blocked!',
@@ -272,7 +272,9 @@ class _ThrottleDemoState extends State<ThrottleDemo> {
                       padding: const EdgeInsets.all(12),
                       itemCount: _logs.length,
                       itemBuilder: (context, index) {
-                        final isThrottled = _logs[index].startsWith('Throttled');
+                        final isThrottled = _logs[index].startsWith(
+                          'Throttled',
+                        );
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 2),
                           child: Text(
@@ -283,8 +285,9 @@ class _ThrottleDemoState extends State<ThrottleDemo> {
                               color: isThrottled
                                   ? theme.colorScheme.primary
                                   : theme.colorScheme.onSurfaceVariant,
-                              fontWeight:
-                                  isThrottled ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isThrottled
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           ),
                         );
@@ -369,16 +372,9 @@ class _DebounceDemoState extends State<DebounceDemo> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.timer,
-                    size: 48,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.timer, size: 48, color: theme.colorScheme.primary),
                   const SizedBox(height: 12),
-                  Text(
-                    'Debounce Demo',
-                    style: theme.textTheme.headlineSmall,
-                  ),
+                  Text('Debounce Demo', style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 8),
                   Text(
                     'Debounce waits until you stop typing for 500ms.\nPerfect for search inputs!',
@@ -438,8 +434,8 @@ class _DebounceDemoState extends State<DebounceDemo> {
                       ),
                     )
                   : _inputText.isNotEmpty
-                      ? const Icon(Icons.check_circle, color: Colors.green)
-                      : null,
+                  ? const Icon(Icons.check_circle, color: Colors.green)
+                  : null,
             ),
           ),
           const SizedBox(height: 24),
@@ -474,7 +470,9 @@ class _DebounceDemoState extends State<DebounceDemo> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      _debouncedText.isEmpty ? '(waiting for input...)' : _debouncedText,
+                      _debouncedText.isEmpty
+                          ? '(waiting for input...)'
+                          : _debouncedText,
                       style: TextStyle(
                         fontFamily: 'monospace',
                         color: _debouncedText.isEmpty
@@ -524,10 +522,25 @@ class _SearchDemoState extends State<SearchDemo> {
   String? _error;
 
   final List<String> _mockDatabase = [
-    'Apple', 'Banana', 'Cherry', 'Date', 'Elderberry',
-    'Fig', 'Grape', 'Honeydew', 'Kiwi', 'Lemon',
-    'Mango', 'Nectarine', 'Orange', 'Papaya', 'Quince',
-    'Raspberry', 'Strawberry', 'Tangerine', 'Watermelon',
+    'Apple',
+    'Banana',
+    'Cherry',
+    'Date',
+    'Elderberry',
+    'Fig',
+    'Grape',
+    'Honeydew',
+    'Kiwi',
+    'Lemon',
+    'Mango',
+    'Nectarine',
+    'Orange',
+    'Papaya',
+    'Quince',
+    'Raspberry',
+    'Strawberry',
+    'Tangerine',
+    'Watermelon',
   ];
 
   @override
@@ -613,14 +626,14 @@ class _SearchDemoState extends State<SearchDemo> {
                       ),
                     )
                   : _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _results = []);
-                          },
-                        )
-                      : null,
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _results = []);
+                      },
+                    )
+                  : null,
             ),
           ),
           const SizedBox(height: 16),
@@ -631,55 +644,64 @@ class _SearchDemoState extends State<SearchDemo> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.error_outline,
-                              size: 48, color: theme.colorScheme.error),
+                          Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: theme.colorScheme.error,
+                          ),
                           const SizedBox(height: 8),
-                          Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+                          Text(
+                            _error!,
+                            style: TextStyle(color: theme.colorScheme.error),
+                          ),
                         ],
                       ),
                     )
                   : _results.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.local_florist,
-                                size: 64,
-                                color: theme.colorScheme.outlineVariant,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _searchController.text.isEmpty
-                                    ? 'Start typing to search'
-                                    : 'No results found',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.local_florist,
+                            size: 64,
+                            color: theme.colorScheme.outlineVariant,
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: _results.length,
-                          padding: const EdgeInsets.all(8),
-                          itemBuilder: (context, index) {
-                            final item = _results[index];
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: theme.colorScheme.primaryContainer,
-                                child: Text(
-                                  item[0],
-                                  style: TextStyle(
-                                    color: theme.colorScheme.onPrimaryContainer,
-                                  ),
-                                ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _searchController.text.isEmpty
+                                ? 'Start typing to search'
+                                : 'No results found',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _results.length,
+                      padding: const EdgeInsets.all(8),
+                      itemBuilder: (context, index) {
+                        final item = _results[index];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.colorScheme.primaryContainer,
+                            child: Text(
+                              item[0],
+                              style: TextStyle(
+                                color: theme.colorScheme.onPrimaryContainer,
                               ),
-                              title: Text(item),
-                              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                            );
-                          },
-                        ),
+                            ),
+                          ),
+                          title: Text(item),
+                          trailing: const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                          ),
+                        );
+                      },
+                    ),
             ),
           ),
         ],
@@ -794,8 +816,11 @@ class _ButtonDemoState extends State<ButtonDemo> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.check_circle,
-                      color: theme.colorScheme.primary, size: 32),
+                  Icon(
+                    Icons.check_circle,
+                    color: theme.colorScheme.primary,
+                    size: 32,
+                  ),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -824,7 +849,10 @@ class _ButtonDemoState extends State<ButtonDemo> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(12),
-                    child: Text('Submission Log', style: theme.textTheme.titleSmall),
+                    child: Text(
+                      'Submission Log',
+                      style: theme.textTheme.titleSmall,
+                    ),
                   ),
                   const Divider(height: 1),
                   Expanded(
@@ -842,7 +870,9 @@ class _ButtonDemoState extends State<ButtonDemo> {
                             itemCount: _submissions.length,
                             itemBuilder: (context, index) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
                                 child: Row(
                                   children: [
                                     Icon(
@@ -917,11 +947,7 @@ class _AdvancedDemoState extends State<AdvancedDemo> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.tune,
-                    size: 48,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.tune, size: 48, color: theme.colorScheme.primary),
                   const SizedBox(height: 12),
                   Text(
                     'Concurrency Modes',
@@ -1061,7 +1087,10 @@ class _AdvancedDemoState extends State<AdvancedDemo> {
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       children: [
-                        Text('Operation Log', style: theme.textTheme.titleSmall),
+                        Text(
+                          'Operation Log',
+                          style: theme.textTheme.titleSmall,
+                        ),
                         const Spacer(),
                         TextButton(
                           onPressed: () => setState(() {
@@ -1087,7 +1116,9 @@ class _AdvancedDemoState extends State<AdvancedDemo> {
                           child: Row(
                             children: [
                               Icon(
-                                isCompleted ? Icons.check_circle : Icons.play_circle,
+                                isCompleted
+                                    ? Icons.check_circle
+                                    : Icons.play_circle,
                                 size: 16,
                                 color: isCompleted
                                     ? Colors.green
@@ -1150,8 +1181,8 @@ class _StatCard extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
