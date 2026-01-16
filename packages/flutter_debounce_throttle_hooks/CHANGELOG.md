@@ -1,3 +1,8 @@
+## 1.0.1
+
+- Add example Flutter app with hooks demonstrating auto-disposal
+- Update flutter_debounce_throttle dependency to ^1.0.1
+
 ## 1.0.0
 
 **Enterprise Edition** - The Safe, Unified & Universal Event Limiter for Flutter & Dart.

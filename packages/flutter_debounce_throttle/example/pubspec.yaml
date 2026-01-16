@@ -1,0 +1,11 @@
+name: flutter_debounce_throttle_example
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_debounce_throttle: ^1.0.0
