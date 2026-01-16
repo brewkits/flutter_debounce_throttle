@@ -1,3 +1,50 @@
+## 1.1.0
+
+**Enterprise Features** - Advanced event limiting capabilities for production workloads.
+
+### New Classes
+
+- **`RateLimiter`** - Token Bucket algorithm for burst-capable rate limiting
+  - Allow burst of N requests then throttle to sustained rate
+  - Perfect for API rate limiting, game input, server protection
+  - `tryAcquire()`, `call()`, `callAsync()`, `availableTokens`, `timeUntilNextToken`
+
+### New Extension Methods
+
+- **Duration shortcuts:** `300.ms`, `2.seconds`, `5.minutes`, `1.hours`
+- **Callback extensions:** `myFunc.debounced(300.ms)`, `myFunc.throttled(500.ms)`
+
+### Enhanced Debouncer
+
+- **Leading edge:** `leading: true` - Execute immediately on first call
+- **Trailing edge:** `trailing: true` - Execute after pause (default)
+- **Both edges:** Combine for lodash-style behavior
+
+```dart
+final debouncer = Debouncer(
+  duration: Duration(milliseconds: 300),
+  leading: true,   // Execute immediately
+  trailing: true,  // Also execute after pause
+);
+```
+
+### Enhanced BatchThrottler
+
+- **`maxBatchSize`** - Prevent OOM by limiting batch size
+- **`BatchOverflowStrategy`** - Choose behavior when batch is full:
+  - `dropOldest` - Remove oldest action to make room
+  - `dropNewest` - Reject new action
+  - `flushAndAdd` - Immediately flush batch, then add new action
+
+### Enhanced ConcurrentAsyncThrottler
+
+- **`maxQueueSize`** - Limit queue size in enqueue mode
+- **`QueueOverflowStrategy`** - Choose behavior when queue is full:
+  - `dropNewest` - Reject new call
+  - `dropOldest` - Remove oldest queued call
+
+All new features are backward compatible with null defaults.
+
 ## 1.0.1
 
 - Fix package description length to meet pub.dev requirements (60-180 chars)

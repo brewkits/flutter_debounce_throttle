@@ -1,6 +1,6 @@
 name: flutter_debounce_throttle_core
 description: Pure Dart debounce, throttle, and rate limiting. Zero dependencies, works everywhere - Mobile, Web, Desktop, Server, CLI.
-version: 1.0.1
+version: 1.1.0
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
