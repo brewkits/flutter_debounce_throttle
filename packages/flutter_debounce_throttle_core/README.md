@@ -1,95 +1,148 @@
 # flutter_debounce_throttle_core
 
-Pure Dart core library for debounce and throttle operations. **Zero Flutter dependencies** - works on Mobile, Web, Desktop, Server, and CLI.
+[![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_core.svg)](https://pub.dev/packages/flutter_debounce_throttle_core)
+
+> **Pure Dart Event Control — Zero Dependencies**
+>
+> Production-ready debounce, throttle, and rate limiting for Dart servers, CLI tools, and any platform.
+
+```dart
+// Simple, safe, powerful
+final debouncer = Debouncer(duration: 300.ms);
+debouncer(() => search(query));
+```
+
+---
+
+## Why This Package?
+
+- **Zero dependencies** — only `meta` package
+- **Server-ready** — no Flutter required
+- **Type-safe** — full generic support
+- **Battle-tested** — 340+ tests
+
+---
 
 ## Installation
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle_core: ^1.0.0
+  flutter_debounce_throttle_core: ^1.1.0
 ```
+
+---
 
 ## Quick Start
 
-### Basic Throttle (prevent spam clicks)
+### Throttle (Rate Limit)
 ```dart
 final throttler = Throttler(duration: Duration(milliseconds: 500));
-throttler.call(() => submitForm());
-// Don't forget to dispose!
-throttler.dispose();
+throttler(() => processRequest());
 ```
 
-### Basic Debounce (wait for user to stop)
+### Debounce (Wait for Pause)
 ```dart
 final debouncer = Debouncer(duration: Duration(milliseconds: 300));
-debouncer.call(() => search(query));
-debouncer.dispose();
+debouncer(() => search(query));
 ```
 
-### Async Throttle (API calls)
+### Async with Cancellation
 ```dart
-final asyncThrottler = AsyncThrottler(maxDuration: Duration(seconds: 15));
-await asyncThrottler.call(() async => await api.submit());
-asyncThrottler.dispose();
+final asyncDebouncer = AsyncDebouncer(duration: 300.ms);
+final result = await asyncDebouncer(() async => await api.search(query));
+if (result != null) updateUI(result);
 ```
 
-### Async Debounce (search autocomplete)
+### Token Bucket Rate Limiting
 ```dart
-final asyncDebouncer = AsyncDebouncer(duration: Duration(milliseconds: 300));
-final result = await asyncDebouncer.run(() async => await searchApi(query));
-if (result == null) return; // Cancelled by newer call
-updateResults(result);
-asyncDebouncer.dispose();
-```
-
-### Server-side Batching
-```dart
-final batcher = BatchThrottler(
-  duration: Duration(seconds: 1),
-  onBatchExecute: (actions) async {
-    final logs = actions.map((a) => a()).toList();
-    await database.insertAll(logs);
-  },
+final limiter = RateLimiter(
+  maxTokens: 100,     // Burst capacity
+  refillRate: 10,     // 10 tokens/second
+  refillInterval: 1.seconds,
 );
-batcher.add(() => 'User logged in');
-batcher.add(() => 'Page viewed');
-// After 1 second, all logs inserted in single batch
-batcher.dispose();
-```
 
-## Available Classes
-
-### Sync Controllers
-- `Throttler`: Immediate execution, blocks for duration
-- `Debouncer`: Delayed execution after pause
-- `HighFrequencyThrottler`: Optimized for scroll/resize (no Timer overhead)
-- `ThrottleDebouncer`: Leading + trailing edge execution
-
-### Async Controllers
-- `AsyncThrottler`: Lock-based async throttle
-- `AsyncDebouncer`: Debounce with auto-cancel for async operations
-- `ConcurrentAsyncThrottler`: Advanced async with drop/enqueue/replace/keepLatest modes
-
-### Utilities
-- `BatchThrottler`: Batch multiple actions for bulk execution
-- `DebounceThrottleConfig`: Global configuration
-- `EventLimiterLogger`: Centralized logging
-
-## Configuration
-
-```dart
-void main() {
-  DebounceThrottleConfig.init(
-    defaultDebounceDuration: Duration(milliseconds: 300),
-    defaultThrottleDuration: Duration(milliseconds: 500),
-    enableDebugLog: true,
+if (limiter.tryAcquire()) {
+  await processRequest();
+} else {
+  return Response.tooManyRequests(
+    retryAfter: limiter.timeUntilNextToken,
   );
-
-  // Your app code...
 }
 ```
 
+### Batch Operations
+```dart
+final batcher = BatchThrottler(
+  duration: 1.seconds,
+  maxBatchSize: 100,
+  onBatchExecute: (actions) async {
+    final logs = actions.map((a) => a()).toList();
+    await database.insertBatch(logs);
+  },
+);
+
+// 1000 log calls → 10 database writes
+batcher(() => 'User logged in');
+batcher(() => 'Page viewed');
+```
+
+---
+
+## Complete Toolkit
+
+| Class | Use Case |
+|-------|----------|
+| `Throttler` | Rate limiting, spam prevention |
+| `Debouncer` | Search input, form validation |
+| `AsyncThrottler` | Async operations with timeout |
+| `AsyncDebouncer` | Auto-cancel stale async calls |
+| `ConcurrentAsyncThrottler` | 4 concurrency modes |
+| `HighFrequencyThrottler` | 60fps events (no Timer overhead) |
+| `BatchThrottler` | Batch database writes |
+| `RateLimiter` | Token Bucket algorithm |
+
+**Concurrency Modes:**
+```dart
+ConcurrentAsyncThrottler(mode: ConcurrencyMode.drop)       // Ignore while busy
+ConcurrentAsyncThrottler(mode: ConcurrencyMode.replace)    // Cancel old, run new
+ConcurrentAsyncThrottler(mode: ConcurrencyMode.enqueue)    // Queue in order
+ConcurrentAsyncThrottler(mode: ConcurrencyMode.keepLatest) // Current + last only
+```
+
+---
+
+## v1.1.0 Features
+
+```dart
+// Duration extensions
+300.ms        // Duration(milliseconds: 300)
+2.seconds     // Duration(seconds: 2)
+5.minutes     // Duration(minutes: 5)
+
+// Callback extensions
+final debouncedFn = myFunction.debounced(300.ms);
+final throttledFn = myFunction.throttled(500.ms);
+
+// Leading + trailing edge (like lodash)
+Debouncer(leading: true, trailing: true)
+
+// Overflow strategies
+BatchThrottler(maxBatchSize: 50, overflowStrategy: BatchOverflowStrategy.dropOldest)
+ConcurrentAsyncThrottler(maxQueueSize: 10, queueOverflowStrategy: QueueOverflowStrategy.dropNewest)
+```
+
+---
+
 ## Related Packages
 
-- [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle) - Flutter widgets + mixin
-- [flutter_debounce_throttle_hooks](https://pub.dev/packages/flutter_debounce_throttle_hooks) - Flutter Hooks integration
+| Package | Use When |
+|---------|----------|
+| [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle) | Flutter apps |
+| [flutter_debounce_throttle_hooks](https://pub.dev/packages/flutter_debounce_throttle_hooks) | Flutter + Hooks |
+
+---
+
+<p align="center">
+  <a href="https://github.com/brewkits/flutter_debounce_throttle">GitHub</a> ·
+  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/API_REFERENCE.md">API Reference</a>
+</p>

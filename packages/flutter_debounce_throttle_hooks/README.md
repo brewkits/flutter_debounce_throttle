@@ -1,93 +1,99 @@
 # flutter_debounce_throttle_hooks
 
-Flutter Hooks integration for flutter_debounce_throttle. Auto-dispose debounce and throttle controllers with HookWidget.
+[![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_hooks.svg)](https://pub.dev/packages/flutter_debounce_throttle_hooks)
+
+> **Event Control Hooks for Flutter**
+>
+> Debounce, throttle, and async race handling with automatic cleanup — the hooks way.
+
+```dart
+class SearchWidget extends HookWidget {
+  Widget build(BuildContext context) {
+    final debouncedSearch = useDebouncedCallback<String>(
+      (text) => api.search(text),
+      duration: 300.ms,
+    );
+
+    return TextField(onChanged: debouncedSearch);
+  }
+}
+```
+
+---
+
+## Why Hooks?
+
+- **Zero boilerplate** — no dispose, no state management
+- **Automatic cleanup** — unmount = auto-cancel
+- **Reactive values** — `useDebouncedValue`, `useThrottledValue`
+- **Full power** — access to all core controllers
+
+---
 
 ## Installation
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle_hooks: ^1.0.0
-  flutter_hooks: ^0.20.0
+  flutter_debounce_throttle_hooks: ^1.1.0
+  flutter_hooks: ^0.21.0
 ```
+
+---
 
 ## Quick Start
 
+### Debounced Callback
 ```dart
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_debounce_throttle_hooks/flutter_debounce_throttle_hooks.dart';
-
-class SearchWidget extends HookWidget {
-  @override
-  Widget build(BuildContext context) {
-    // Auto-dispose when widget unmounts
-    final debouncer = useDebouncer(duration: Duration(milliseconds: 300));
-    final throttler = useThrottler(duration: Duration(milliseconds: 500));
-
-    // Convenient callback hooks
-    final debouncedSearch = useDebouncedCallback<String>(
-      (text) => searchApi(text),
-      duration: Duration(milliseconds: 300),
-    );
-
-    return Column(
-      children: [
-        TextField(onChanged: debouncedSearch),
-        ElevatedButton(
-          onPressed: throttler.wrap(() => submit()),
-          child: Text('Submit'),
-        ),
-      ],
-    );
-  }
-}
-```
-
-## Available Hooks
-
-### Basic Hooks
-```dart
-// Get controller instances (auto-dispose)
-final debouncer = useDebouncer(duration: Duration(milliseconds: 300));
-final throttler = useThrottler(duration: Duration(milliseconds: 500));
-final asyncDebouncer = useAsyncDebouncer(duration: Duration(milliseconds: 300));
-final asyncThrottler = useAsyncThrottler(maxDuration: Duration(seconds: 15));
-```
-
-### Callback Hooks
-```dart
-// Debounced callback
 final debouncedSearch = useDebouncedCallback<String>(
-  (text) => search(text),
+  (text) => api.search(text),
   duration: Duration(milliseconds: 300),
 );
 
-// Throttled callback
+TextField(onChanged: debouncedSearch)
+```
+
+### Throttled Callback
+```dart
 final throttledSubmit = useThrottledCallback(
   () => submitForm(),
   duration: Duration(milliseconds: 500),
 );
+
+ElevatedButton(onPressed: throttledSubmit, child: Text('Submit'))
 ```
 
-### Value Hooks
+### Debounced Value
 ```dart
-// Debounced value
 final searchText = useState('');
-final debouncedText = useDebouncedValue(searchText.value);
+final debouncedText = useDebouncedValue(
+  searchText.value,
+  duration: Duration(milliseconds: 300),
+);
 
 useEffect(() {
   if (debouncedText.isNotEmpty) {
-    searchApi(debouncedText);
+    api.search(debouncedText);
   }
   return null;
 }, [debouncedText]);
-
-// Throttled value (e.g., for scroll)
-final scrollOffset = useState(0.0);
-final throttledOffset = useThrottledValue(
-  scrollOffset.value,
-  duration: Duration(milliseconds: 16), // ~60fps
-);
 ```
+
+---
+
+## Available Hooks
+
+| Hook | Returns | Use Case |
+|------|---------|----------|
+| `useDebouncer` | `Debouncer` | Direct controller access |
+| `useThrottler` | `Throttler` | Direct controller access |
+| `useAsyncDebouncer` | `AsyncDebouncer` | Async with cancellation |
+| `useAsyncThrottler` | `AsyncThrottler` | Async with lock |
+| `useDebouncedCallback<T>` | `void Function(T)` | Debounced callback |
+| `useThrottledCallback` | `VoidCallback` | Throttled callback |
+| `useDebouncedValue<T>` | `T` | Reactive debounced value |
+| `useThrottledValue<T>` | `T` | Reactive throttled value |
+
+---
 
 ## Complete Example
 
@@ -95,25 +101,19 @@ final throttledOffset = useThrottledValue(
 class AutocompleteSearch extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    final searchText = useState('');
     final results = useState<List<String>>([]);
     final isLoading = useState(false);
 
-    final asyncDebouncer = useAsyncDebouncer(
-      duration: Duration(milliseconds: 300),
-    );
+    final asyncDebouncer = useAsyncDebouncer(duration: 300.ms);
 
     Future<void> handleSearch(String text) async {
-      searchText.value = text;
       if (text.isEmpty) {
         results.value = [];
         return;
       }
 
       isLoading.value = true;
-      final result = await asyncDebouncer.run(() async {
-        return await api.search(text);
-      });
+      final result = await asyncDebouncer(() async => await api.search(text));
 
       if (result != null) {
         results.value = result;
@@ -143,7 +143,31 @@ class AutocompleteSearch extends HookWidget {
 }
 ```
 
+---
+
+## v1.1.0 Features
+
+```dart
+// Duration extensions work with hooks too
+final debouncer = useDebouncer(duration: 300.ms);
+final throttler = useThrottler(duration: 500.ms);
+
+// All core features available
+final debouncedValue = useDebouncedValue(value, duration: 300.ms);
+```
+
+---
+
 ## Related Packages
 
-- [flutter_debounce_throttle_core](https://pub.dev/packages/flutter_debounce_throttle_core) - Pure Dart
-- [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle) - Flutter widgets + mixin
+| Package | Use When |
+|---------|----------|
+| [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle) | Flutter without hooks |
+| [flutter_debounce_throttle_core](https://pub.dev/packages/flutter_debounce_throttle_core) | Pure Dart (Server/CLI) |
+
+---
+
+<p align="center">
+  <a href="https://github.com/brewkits/flutter_debounce_throttle">GitHub</a> ·
+  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/API_REFERENCE.md">API Reference</a>
+</p>
