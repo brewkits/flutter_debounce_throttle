@@ -1190,3 +1190,1100 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
+
+// ============================================================================
+// ENTERPRISE DEMO - v1.1.0 Features
+// ============================================================================
+class EnterpriseDemo extends StatefulWidget {
+  const EnterpriseDemo({super.key});
+
+  @override
+  State<EnterpriseDemo> createState() => _EnterpriseDemoState();
+}
+
+class _EnterpriseDemoState extends State<EnterpriseDemo> {
+  int _selectedFeature = 0;
+
+  final List<String> _features = [
+    'RateLimiter',
+    'Extensions',
+    'Leading/Trailing',
+    'BatchThrottler',
+    'Queue Limit',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Feature selector
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: List.generate(_features.length, (index) {
+              final isSelected = index == _selectedFeature;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(_features[index]),
+                  selected: isSelected,
+                  onSelected: (_) => setState(() => _selectedFeature = index),
+                ),
+              );
+            }),
+          ),
+        ),
+        // Feature demo
+        Expanded(
+          child: IndexedStack(
+            index: _selectedFeature,
+            children: const [
+              _RateLimiterDemo(),
+              _ExtensionsDemo(),
+              _LeadingTrailingDemo(),
+              _BatchThrottlerDemo(),
+              _QueueLimitDemo(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ----------------------------------------------------------------------------
+// 1. RateLimiter Demo - Token Bucket Algorithm
+// ----------------------------------------------------------------------------
+class _RateLimiterDemo extends StatefulWidget {
+  const _RateLimiterDemo();
+
+  @override
+  State<_RateLimiterDemo> createState() => _RateLimiterDemoState();
+}
+
+class _RateLimiterDemoState extends State<_RateLimiterDemo> {
+  late final RateLimiter _rateLimiter;
+  int _attempts = 0;
+  int _allowed = 0;
+  int _blocked = 0;
+  final List<String> _log = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Allow burst of 3 requests, then 1 per second
+    _rateLimiter = RateLimiter(
+      maxTokens: 3,
+      refillInterval: 1.seconds, // Using Duration extension!
+      debugMode: true,
+      name: 'api-limiter',
+    );
+  }
+
+  @override
+  void dispose() {
+    _rateLimiter.dispose();
+    super.dispose();
+  }
+
+  void _makeRequest() {
+    setState(() => _attempts++);
+
+    final allowed = _rateLimiter.call(() {
+      setState(() {
+        _allowed++;
+        _log.add(
+          '[${_formatTime()}] Request #$_attempts - ALLOWED (tokens: ${_rateLimiter.availableTokens})',
+        );
+      });
+    });
+
+    if (!allowed) {
+      setState(() {
+        _blocked++;
+        _log.add(
+          '[${_formatTime()}] Request #$_attempts - BLOCKED (wait: ${_rateLimiter.timeUntilNextToken.inMilliseconds}ms)',
+        );
+      });
+    }
+  }
+
+  String _formatTime() {
+    final now = DateTime.now();
+    return '${now.second}.${now.millisecond.toString().padLeft(3, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(Icons.token, size: 40, color: theme.colorScheme.primary),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Token Bucket Rate Limiter',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Burst: 3 tokens | Refill: 1 token/second',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Token gauge
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Available Tokens: ',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        _rateLimiter.availableTokens.toStringAsFixed(1),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(' / 3', style: theme.textTheme.bodyMedium),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: _rateLimiter.availableTokens / 3,
+                    minHeight: 8,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: 'Attempts',
+                  value: '$_attempts',
+                  color: theme.colorScheme.tertiary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Allowed',
+                  value: '$_allowed',
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Blocked',
+                  value: '$_blocked',
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _makeRequest,
+            icon: const Icon(Icons.send),
+            label: const Text('Make API Request'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => setState(() {
+              _log.clear();
+              _attempts = 0;
+              _allowed = 0;
+              _blocked = 0;
+            }),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reset'),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Card(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: _log.length,
+                itemBuilder: (context, index) {
+                  final entry = _log[_log.length - 1 - index];
+                  final isAllowed = entry.contains('ALLOWED');
+                  return Text(
+                    entry,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      color: isAllowed ? Colors.green : theme.colorScheme.error,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------------------------------
+// 2. Extensions Demo - Duration & Callback
+// ----------------------------------------------------------------------------
+class _ExtensionsDemo extends StatefulWidget {
+  const _ExtensionsDemo();
+
+  @override
+  State<_ExtensionsDemo> createState() => _ExtensionsDemoState();
+}
+
+class _ExtensionsDemoState extends State<_ExtensionsDemo> {
+  int _rawClicks = 0;
+  int _debouncedClicks = 0;
+  int _throttledClicks = 0;
+
+  // Using callback extensions!
+  late final void Function() _debouncedIncrement;
+  late final void Function() _throttledIncrement;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create debounced callback using extension
+    _debouncedIncrement = (() {
+      setState(() => _debouncedClicks++);
+    }).debounced(500.ms); // Using Duration extension!
+
+    // Create throttled callback using extension
+    _throttledIncrement = (() {
+      setState(() => _throttledClicks++);
+    }).throttled(500.ms); // Using Duration extension!
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.extension,
+                    size: 40,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Duration & Callback Extensions',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Duration Extensions:',
+                          style: theme.textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '300.ms  500.ms\n2.seconds  5.minutes  1.hours',
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                          ),
+                        ),
+                        const Divider(height: 16),
+                        Text(
+                          'Callback Extensions:',
+                          style: theme.textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'myFunc.debounced(300.ms)\nmyFunc.throttled(500.ms)',
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: 'Raw Clicks',
+                  value: '$_rawClicks',
+                  color: theme.colorScheme.tertiary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Debounced',
+                  value: '$_debouncedClicks',
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Throttled',
+                  value: '$_throttledClicks',
+                  color: theme.colorScheme.secondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: () {
+              setState(() => _rawClicks++);
+              _debouncedIncrement();
+              _throttledIncrement();
+            },
+            icon: const Icon(Icons.touch_app),
+            label: const Text('Tap Rapidly!'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(56),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Debounce waits 500ms after last tap\nThrottle allows 1 tap per 500ms',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () => setState(() {
+              _rawClicks = 0;
+              _debouncedClicks = 0;
+              _throttledClicks = 0;
+            }),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------------------------------
+// 3. Leading/Trailing Edge Demo
+// ----------------------------------------------------------------------------
+class _LeadingTrailingDemo extends StatefulWidget {
+  const _LeadingTrailingDemo();
+
+  @override
+  State<_LeadingTrailingDemo> createState() => _LeadingTrailingDemoState();
+}
+
+class _LeadingTrailingDemoState extends State<_LeadingTrailingDemo> {
+  bool _leading = true;
+  bool _trailing = true;
+  int _clicks = 0;
+  int _executions = 0;
+  final List<String> _log = [];
+  final _scrollController = ScrollController();
+
+  Debouncer? _debouncer;
+
+  @override
+  void initState() {
+    super.initState();
+    _createDebouncer();
+  }
+
+  void _createDebouncer() {
+    _debouncer?.dispose();
+    _debouncer = Debouncer(
+      duration: 1.seconds,
+      leading: _leading,
+      trailing: _trailing,
+      debugMode: true,
+      name: 'edge-demo',
+    );
+  }
+
+  @override
+  void dispose() {
+    _debouncer?.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _handleClick() {
+    final clickNum = _clicks + 1;
+    setState(() {
+      _clicks++;
+      _log.add('[${_formatTime()}] Click #$clickNum');
+    });
+
+    _debouncer?.call(() {
+      setState(() {
+        _executions++;
+        _log.add('[${_formatTime()}] >>> EXECUTED #$_executions');
+      });
+    });
+
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: 200.ms,
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  String _formatTime() {
+    final now = DateTime.now();
+    return '${now.second}.${now.millisecond.toString().padLeft(3, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.swap_horiz,
+                    size: 40,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Leading/Trailing Edge',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Debounce duration: 1 second',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CheckboxListTile(
+                      title: const Text('Leading'),
+                      subtitle: const Text('Execute on first call'),
+                      value: _leading,
+                      dense: true,
+                      onChanged: (v) {
+                        setState(() => _leading = v ?? true);
+                        _createDebouncer();
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: CheckboxListTile(
+                      title: const Text('Trailing'),
+                      subtitle: const Text('Execute after pause'),
+                      value: _trailing,
+                      dense: true,
+                      onChanged: (v) {
+                        setState(() => _trailing = v ?? true);
+                        _createDebouncer();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: 'Clicks',
+                  value: '$_clicks',
+                  color: theme.colorScheme.tertiary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Executions',
+                  value: '$_executions',
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _handleClick,
+            icon: const Icon(Icons.touch_app),
+            label: const Text('Click Rapidly!'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => setState(() {
+              _clicks = 0;
+              _executions = 0;
+              _log.clear();
+            }),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reset'),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Card(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(8),
+                itemCount: _log.length,
+                itemBuilder: (context, index) {
+                  final entry = _log[index];
+                  final isExecution = entry.contains('EXECUTED');
+                  return Text(
+                    entry,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: isExecution
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                      fontWeight: isExecution
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------------------------------
+// 4. BatchThrottler Demo with maxBatchSize
+// ----------------------------------------------------------------------------
+class _BatchThrottlerDemo extends StatefulWidget {
+  const _BatchThrottlerDemo();
+
+  @override
+  State<_BatchThrottlerDemo> createState() => _BatchThrottlerDemoState();
+}
+
+class _BatchThrottlerDemoState extends State<_BatchThrottlerDemo> {
+  BatchOverflowStrategy _strategy = BatchOverflowStrategy.dropOldest;
+  int _addedCount = 0;
+  int _batchCount = 0;
+  final List<String> _log = [];
+
+  BatchThrottler? _batcher;
+
+  @override
+  void initState() {
+    super.initState();
+    _createBatcher();
+  }
+
+  void _createBatcher() {
+    _batcher?.dispose();
+    _batcher = BatchThrottler(
+      duration: 2.seconds,
+      maxBatchSize: 3, // Only allow 3 items in batch
+      overflowStrategy: _strategy,
+      onBatchExecute: (actions) {
+        // Execute all batched actions
+        for (final action in actions) {
+          action();
+        }
+        setState(() {
+          _batchCount++;
+          _log.add(
+            '[${_formatTime()}] >>> BATCH #$_batchCount executed (${actions.length} items)!',
+          );
+        });
+      },
+      debugMode: true,
+      name: 'batch-demo',
+    );
+  }
+
+  @override
+  void dispose() {
+    _batcher?.dispose();
+    super.dispose();
+  }
+
+  void _addItem() {
+    final itemNum = _addedCount + 1;
+    setState(() {
+      _addedCount++;
+      _log.add(
+        '[${_formatTime()}] Added item #$itemNum (pending: ${(_batcher?.pendingCount ?? 0) + 1})',
+      );
+    });
+
+    // Add action to batch - will execute with other batched items via onBatchExecute
+    _batcher?.call(() {
+      // This action just logs that this item was processed
+      debugPrint('Item #$itemNum processed in batch');
+    });
+  }
+
+  String _formatTime() {
+    final now = DateTime.now();
+    return '${now.second}.${now.millisecond.toString().padLeft(3, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.inventory_2,
+                    size: 40,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'BatchThrottler with maxBatchSize',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Max batch: 3 items | Duration: 2 seconds',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Overflow Strategy:',
+                    style: theme.textTheme.labelMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: BatchOverflowStrategy.values.map((s) {
+                      return ChoiceChip(
+                        label: Text(s.name),
+                        selected: _strategy == s,
+                        onSelected: (_) {
+                          setState(() => _strategy = s);
+                          _createBatcher();
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: 'Added',
+                  value: '$_addedCount',
+                  color: theme.colorScheme.tertiary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Pending',
+                  value: '${_batcher?.pendingCount ?? 0}',
+                  color: theme.colorScheme.secondary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Batches',
+                  value: '$_batchCount',
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _addItem,
+            icon: const Icon(Icons.add),
+            label: const Text('Add Item to Batch'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () {
+              setState(() {
+                _addedCount = 0;
+                _batchCount = 0;
+                _log.clear();
+              });
+              _createBatcher();
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reset'),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Card(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: _log.length,
+                itemBuilder: (context, index) {
+                  final entry = _log[_log.length - 1 - index];
+                  final isBatch = entry.contains('BATCH');
+                  return Text(
+                    entry,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      color: isBatch
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                      fontWeight: isBatch ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------------------------------
+// 5. ConcurrentAsyncThrottler with maxQueueSize
+// ----------------------------------------------------------------------------
+class _QueueLimitDemo extends StatefulWidget {
+  const _QueueLimitDemo();
+
+  @override
+  State<_QueueLimitDemo> createState() => _QueueLimitDemoState();
+}
+
+class _QueueLimitDemoState extends State<_QueueLimitDemo> {
+  QueueOverflowStrategy _strategy = QueueOverflowStrategy.dropNewest;
+  int _requestCount = 0;
+  int _completedCount = 0;
+  int _droppedCount = 0;
+  final List<String> _log = [];
+
+  ConcurrentAsyncThrottler? _throttler;
+
+  @override
+  void initState() {
+    super.initState();
+    _createThrottler();
+  }
+
+  void _createThrottler() {
+    _throttler?.dispose();
+    _throttler = ConcurrentAsyncThrottler(
+      mode: ConcurrencyMode.enqueue,
+      maxQueueSize: 2, // Only allow 2 items in queue
+      queueOverflowStrategy: _strategy,
+      maxDuration: 10.seconds,
+      debugMode: true,
+      name: 'queue-demo',
+    );
+  }
+
+  @override
+  void dispose() {
+    _throttler?.dispose();
+    super.dispose();
+  }
+
+  void _makeRequest() {
+    final requestNum = _requestCount + 1;
+    final queueBefore = _throttler?.pendingCount ?? 0;
+
+    setState(() {
+      _requestCount++;
+      _log.add(
+        '[${_formatTime()}] Request #$requestNum queued (queue: $queueBefore)',
+      );
+    });
+
+    // Note: ConcurrentAsyncThrottler.call() returns Future<void>
+    // We track completion inside the callback
+    _throttler?.call(() async {
+      await Future.delayed(2.seconds); // Simulate slow API
+      if (mounted) {
+        setState(() {
+          _completedCount++;
+          _log.add('[${_formatTime()}] >>> Request #$requestNum COMPLETED');
+        });
+      }
+    });
+
+    // Check if request was dropped (queue didn't increase as expected)
+    Future.delayed(const Duration(milliseconds: 50), () {
+      // If queue size is at max and we're in dropNewest mode, request may be dropped
+      if (_strategy == QueueOverflowStrategy.dropNewest &&
+          queueBefore >= 2 &&
+          mounted) {
+        // Request was likely dropped
+        setState(() {
+          _droppedCount++;
+          _log.add(
+            '[${_formatTime()}] Request #$requestNum DROPPED (queue full)',
+          );
+        });
+      }
+    });
+  }
+
+  String _formatTime() {
+    final now = DateTime.now();
+    return '${now.second}.${now.millisecond.toString().padLeft(3, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(Icons.queue, size: 40, color: theme.colorScheme.primary),
+                  const SizedBox(height: 8),
+                  Text(
+                    'ConcurrentAsyncThrottler Queue Limit',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Mode: enqueue | Max queue: 2 | Task: 2s',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Queue Overflow Strategy:',
+                    style: theme.textTheme.labelMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: QueueOverflowStrategy.values.map((s) {
+                      return ChoiceChip(
+                        label: Text(s.name),
+                        selected: _strategy == s,
+                        onSelected: (_) {
+                          setState(() => _strategy = s);
+                          _createThrottler();
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  label: 'Requests',
+                  value: '$_requestCount',
+                  color: theme.colorScheme.tertiary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Completed',
+                  value: '$_completedCount',
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _StatCard(
+                  label: 'Dropped',
+                  value: '$_droppedCount',
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: _makeRequest,
+            icon: const Icon(Icons.send),
+            label: Text(
+              'Make Request (queue: ${_throttler?.pendingCount ?? 0})',
+            ),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () {
+              setState(() {
+                _requestCount = 0;
+                _completedCount = 0;
+                _droppedCount = 0;
+                _log.clear();
+              });
+              _createThrottler();
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reset'),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Card(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: _log.length,
+                itemBuilder: (context, index) {
+                  final entry = _log[_log.length - 1 - index];
+                  final isCompleted = entry.contains('COMPLETED');
+                  final isDropped = entry.contains('DROPPED');
+                  return Text(
+                    entry,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      color: isCompleted
+                          ? Colors.green
+                          : isDropped
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.onSurfaceVariant,
+                      fontWeight: (isCompleted || isDropped)
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
