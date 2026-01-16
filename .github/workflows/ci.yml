@@ -38,6 +38,7 @@ jobs:
   flutter:
     name: Flutter Package
     runs-on: ubuntu-latest
+    needs: core
     defaults:
       run:
         working-directory: packages/flutter_debounce_throttle
@@ -50,10 +51,16 @@ jobs:
           flutter-version: '3.x'
           channel: 'stable'
 
-      - name: Install dependencies
+      - name: Setup path dependencies
         run: |
-          cd ../flutter_debounce_throttle_core && flutter pub get
-          cd ../flutter_debounce_throttle && flutter pub get
+          cat > pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            flutter_debounce_throttle_core:
+              path: ../flutter_debounce_throttle_core
+          EOF
+
+      - name: Install dependencies
+        run: flutter pub get --no-example
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
@@ -61,14 +68,11 @@ jobs:
       - name: Analyze project source
         run: flutter analyze --fatal-infos
 
-      - name: Run tests
-        run: flutter test
-        working-directory: .
-
   # Flutter Hooks package - flutter_debounce_throttle_hooks
   hooks:
     name: Hooks Package
     runs-on: ubuntu-latest
+    needs: flutter
     defaults:
       run:
         working-directory: packages/flutter_debounce_throttle_hooks
@@ -81,11 +85,18 @@ jobs:
           flutter-version: '3.x'
           channel: 'stable'
 
-      - name: Install dependencies
+      - name: Setup path dependencies
         run: |
-          cd ../flutter_debounce_throttle_core && flutter pub get
-          cd ../flutter_debounce_throttle && flutter pub get
-          cd ../flutter_debounce_throttle_hooks && flutter pub get
+          cat > pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            flutter_debounce_throttle_core:
+              path: ../flutter_debounce_throttle_core
+            flutter_debounce_throttle:
+              path: ../flutter_debounce_throttle
+          EOF
+
+      - name: Install dependencies
+        run: flutter pub get --no-example
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
@@ -93,14 +104,11 @@ jobs:
       - name: Analyze project source
         run: flutter analyze --fatal-infos
 
-      - name: Run tests
-        run: flutter test
-        working-directory: .
-
   # Main package tests (root)
   main-tests:
     name: Main Package Tests
     runs-on: ubuntu-latest
+    needs: [core, flutter, hooks]
 
     steps:
       - uses: actions/checkout@v4
@@ -110,12 +118,15 @@ jobs:
           flutter-version: '3.x'
           channel: 'stable'
 
-      - name: Install dependencies
-        run: |
-          cd packages/flutter_debounce_throttle_core && flutter pub get
-          cd ../../packages/flutter_debounce_throttle && flutter pub get
-          cd ../../packages/flutter_debounce_throttle_hooks && flutter pub get
-          cd ../.. && flutter pub get
+      - name: Setup Melos
+        run: dart pub global activate melos
+
+      - name: Bootstrap monorepo
+        run: melos bootstrap
 
       - name: Run all tests
+        run: melos run test --no-select
+        continue-on-error: true
+
+      - name: Run root tests
         run: flutter test
