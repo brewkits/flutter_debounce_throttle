@@ -1,3 +1,18 @@
+## 1.1.0
+
+**Enterprise Features** - Advanced event limiting capabilities for production workloads.
+
+Includes all features from `flutter_debounce_throttle_core` 1.1.0:
+
+- **`RateLimiter`** - Token Bucket algorithm for burst-capable rate limiting
+- **Duration extensions:** `300.ms`, `2.seconds`, `5.minutes`, `1.hours`
+- **Callback extensions:** `myFunc.debounced(300.ms)`, `myFunc.throttled(500.ms)`
+- **Debouncer leading/trailing edge:** Execute on first call and/or after pause
+- **BatchThrottler `maxBatchSize`:** Prevent OOM with overflow strategies
+- **ConcurrentAsyncThrottler `maxQueueSize`:** Limit queue in enqueue mode
+
+All new features are backward compatible.
+
 ## 1.0.1
 
 - Fix package description length to meet pub.dev requirements (60-180 chars)
