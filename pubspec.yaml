@@ -16,5 +16,15 @@ publish_to: none
 environment:
   sdk: ^3.0.0
 
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_debounce_throttle:
+    path: packages/flutter_debounce_throttle
+  flutter_debounce_throttle_core:
+    path: packages/flutter_debounce_throttle_core
+
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   melos: ^7.3.0

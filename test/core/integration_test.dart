@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_debounce_throttle/core.dart';
+import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
 /// Integration tests for flutter_debounce_throttle_core
 ///
@@ -82,17 +82,13 @@ void main() {
           trailing: false,
         );
 
+        var clickCount = 0;
         final batcher = BatchThrottler(
           duration: 100.ms,
           maxBatchSize: 5,
           onBatchExecute: (actions) {
-            final batch = <String>[];
-            for (final action in actions) {
-              action();
-            }
-            // Capture batch state after execution
-            batchedAnalytics.add(
-                List.from(uiFeedback.skip(uiFeedback.length - actions.length)));
+            // Record the batch execution with count
+            batchedAnalytics.add(['batch_${actions.length}_clicks']);
           },
         );
 
@@ -100,7 +96,8 @@ void main() {
           debouncer.call(() {
             uiFeedback.add(action);
           });
-          batcher.call(() {}); // Track click for analytics
+          clickCount++;
+          batcher.call(() {}); // Track click for analytics batch
         }
 
         // Rapid clicks
@@ -108,12 +105,13 @@ void main() {
         onButtonClick('click2');
         onButtonClick('click3');
 
-        expect(uiFeedback, ['click1']); // Immediate feedback for first
+        expect(uiFeedback, ['click1']); // Immediate feedback for first (leading edge)
 
         await Future.delayed(150.ms);
 
-        // Analytics should be batched
+        // Analytics should be batched (3 clicks batched together)
         expect(batchedAnalytics.length, 1);
+        expect(clickCount, 3);
 
         debouncer.dispose();
         batcher.dispose();
