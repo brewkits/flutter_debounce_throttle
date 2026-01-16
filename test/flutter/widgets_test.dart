@@ -225,7 +225,8 @@ void main() {
       expect(result, 'Result: test');
     });
 
-    testWidgets('backward compatibility - AsyncDebouncedCallbackBuilder', (tester) async {
+    testWidgets('backward compatibility - AsyncDebouncedCallbackBuilder',
+        (tester) async {
       String? result;
 
       await tester.pumpWidget(
