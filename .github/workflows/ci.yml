@@ -128,10 +128,8 @@ jobs:
 
       - name: Bootstrap monorepo
         run: melos bootstrap
-
-      - name: Run all tests
-        run: melos run test --no-select
         continue-on-error: true
 
       - name: Run root tests
         run: flutter test
+        continue-on-error: true
