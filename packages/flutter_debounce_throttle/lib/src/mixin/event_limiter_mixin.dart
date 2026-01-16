@@ -118,7 +118,8 @@ mixin EventLimiterMixin {
     Duration? duration,
   }) {
     _debouncers[id] ??= Debouncer(
-      duration: duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
+      duration:
+          duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
     );
     _debouncers[id]!.call(action);
   }
@@ -132,7 +133,8 @@ mixin EventLimiterMixin {
     Duration? duration,
   }) {
     _throttlers[id] ??= Throttler(
-      duration: duration ?? DebounceThrottleConfig.config.defaultThrottleDuration,
+      duration:
+          duration ?? DebounceThrottleConfig.config.defaultThrottleDuration,
     );
     _throttlers[id]!.call(action);
   }
@@ -146,7 +148,8 @@ mixin EventLimiterMixin {
     Duration? duration,
   }) {
     _asyncDebouncers[id] ??= AsyncDebouncer(
-      duration: duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
+      duration:
+          duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
     );
     // ignore: deprecated_member_use_from_same_package
     return _asyncDebouncers[id]!.call(action);
@@ -161,7 +164,8 @@ mixin EventLimiterMixin {
     Duration? maxDuration,
   }) {
     _asyncThrottlers[id] ??= AsyncThrottler(
-      maxDuration: maxDuration ?? DebounceThrottleConfig.config.defaultAsyncTimeout,
+      maxDuration:
+          maxDuration ?? DebounceThrottleConfig.config.defaultAsyncTimeout,
     );
     return _asyncThrottlers[id]!.call(action);
   }

@@ -146,7 +146,8 @@ class ConcurrentAsyncThrottler {
 
     while (_queue.isNotEmpty) {
       final action = _queue.removeFirst();
-      _throttler.debugLog('Processing queued item (${_queue.length} remaining)');
+      _throttler
+          .debugLog('Processing queued item (${_queue.length} remaining)');
 
       try {
         await _throttler.call(action);
