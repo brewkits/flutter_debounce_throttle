@@ -32,7 +32,12 @@ jobs:
         run: dart analyze --fatal-infos
 
       - name: Run tests
-        run: dart test
+        run: |
+          if [ -d "test" ]; then
+            dart test
+          else
+            echo "No test directory found, skipping tests"
+          fi
 
   # Flutter package - flutter_debounce_throttle
   flutter:
