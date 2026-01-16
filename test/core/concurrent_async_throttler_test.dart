@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_debounce_throttle/core.dart';
+import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
 void main() {
   group('ConcurrentAsyncThrottler', () {
@@ -285,6 +285,7 @@ void main() {
           mode: ConcurrencyMode.enqueue,
           maxDuration: const Duration(seconds: 5),
           maxQueueSize: 5,
+          // dropNewest is default - rejected calls will throw
         );
 
         // Start task to lock
@@ -292,9 +293,11 @@ void main() {
           await Future.delayed(const Duration(milliseconds: 200));
         });
 
-        // Try to queue more than limit
+        // Try to queue more than limit - catch expected rejections
         for (var i = 0; i < 10; i++) {
-          throttler.call(() async {});
+          throttler.call(() async {}).catchError((_) {
+            // Expected: some calls rejected due to queue full
+          });
         }
 
         // Queue should be capped at maxQueueSize

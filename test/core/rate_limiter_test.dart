@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_debounce_throttle/core.dart';
+import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
 void main() {
   group('RateLimiter', () {

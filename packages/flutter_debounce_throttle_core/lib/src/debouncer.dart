@@ -72,6 +72,7 @@ class Debouncer extends CallbackController {
   final bool trailing;
 
   DateTime? _lastCallTime;
+  DateTime? _leadingExecutedAt; // Track when leading edge was executed
   bool _isInDebounceWindow = false;
   VoidCallback? _pendingCallback;
 
@@ -129,6 +130,7 @@ class Debouncer extends CallbackController {
     // Leading edge: execute immediately if not already in a debounce window
     if (leading && !_isInDebounceWindow) {
       _isInDebounceWindow = true;
+      _leadingExecutedAt = callTime;
       debugLog('Leading edge: executing immediately');
       _executeCallback(callback, callTime, cancelled: false);
     }
@@ -140,9 +142,12 @@ class Debouncer extends CallbackController {
 
       // Trailing edge: execute after pause
       if (trailing && _pendingCallback != null) {
-        // Only execute trailing if it's different from leading execution
-        // or if leading is false
-        if (!leading || _lastCallTime != callTime) {
+        // Execute trailing if:
+        // 1. Leading is disabled, OR
+        // 2. There were additional calls after the leading execution
+        final hasNewCallsAfterLeading =
+            _leadingExecutedAt != null && _lastCallTime != _leadingExecutedAt;
+        if (!leading || hasNewCallsAfterLeading) {
           debugLog(
               'Trailing edge: executed after ${totalWaitTime.inMilliseconds}ms');
           _executeCallback(_pendingCallback!, callTime, cancelled: false);
@@ -153,6 +158,7 @@ class Debouncer extends CallbackController {
 
       // Reset debounce window
       _isInDebounceWindow = false;
+      _leadingExecutedAt = null;
       _pendingCallback = null;
     });
   }

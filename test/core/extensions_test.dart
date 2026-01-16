@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_debounce_throttle/core.dart';
+import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
 void main() {
   group('DurationIntExtension', () {
@@ -226,13 +226,8 @@ void main() {
       final searchQueries = <String>[];
       void search(String query) => searchQueries.add(query);
 
-      // Simulate rapid typing
-      final debouncedSearch = search.debounced(50.ms);
-
-      // This doesn't work directly because debounced returns void Function()
-      // The extension is for simple callbacks, not parameterized ones
-      // For parameterized callbacks, use Debouncer directly
-
+      // Note: The .debounced() extension is for void Function() only
+      // For parameterized callbacks, use a closure pattern:
       var lastQuery = '';
       final debouncedCallback = () => search(lastQuery);
       final debounced = debouncedCallback.debounced(50.ms);

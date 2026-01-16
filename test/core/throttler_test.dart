@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_debounce_throttle/core.dart';
+import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
 void main() {
   group('Throttler', () {
@@ -80,7 +80,7 @@ void main() {
     });
 
     test('uses global config duration when not specified', () {
-      FlutterDebounceThrottle.init(
+      DebounceThrottleConfig.init(
         defaultThrottleDuration: const Duration(milliseconds: 200),
       );
 
@@ -93,7 +93,7 @@ void main() {
       expect(callCount, 1);
 
       // Reset global config
-      FlutterDebounceThrottle.reset();
+      DebounceThrottleConfig.reset();
     });
 
     test('debugMode logs messages', () {
