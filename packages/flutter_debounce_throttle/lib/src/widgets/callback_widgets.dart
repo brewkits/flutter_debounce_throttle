@@ -411,8 +411,7 @@ class DebouncedQueryBuilder<T> extends StatefulWidget {
       _DebouncedQueryBuilderState<T>();
 }
 
-class _DebouncedQueryBuilderState<T>
-    extends State<DebouncedQueryBuilder<T>> {
+class _DebouncedQueryBuilderState<T> extends State<DebouncedQueryBuilder<T>> {
   late final AsyncDebouncer _debouncer;
   bool _isLoading = false;
 
