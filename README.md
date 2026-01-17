@@ -54,6 +54,103 @@ Production-ready library unifying **debounce, throttle, rate limiting, and async
 
 ---
 
+## How It Works — Visualized
+
+### Throttle vs Debounce
+
+Understanding the core difference with `duration: 300ms`:
+
+#### ➤ Throttle (Button Clicks)
+Executes **immediately**, then locks for the duration. Subsequent events are **ignored** during the lock.
+
+```
+Events:    (Click1)    (Click2)    (Click3)              (Click4)
+Time:      |─ 0ms ─────── 100ms ──── 200ms ──── 300ms ──── 400ms ──|
+           ▼                                     ▲
+Execution: [EXECUTE] ····················· [LOCKED/DROP] ······· [EXECUTE]
+           └─────── 300ms cooldown ──────┘
+```
+
+**Use for:** Payment buttons, save buttons, scroll events
+
+---
+
+#### ➤ Debounce (Search Input)
+Waits for a **pause** in events for the duration before executing.
+
+```
+Events:    (Type 'A')   (Type 'B')   (Type 'C')    [User stops typing]
+Time:      |─ 0ms ──── 100ms ──── 200ms ────────────── 500ms ──────|
+           ▼            ▼            ▼                  ▲
+Execution: [WAIT] ····· [RESET] ····· [RESET] ········ [EXECUTE 'ABC']
+                                      └─────── 300ms wait ──────┘
+```
+
+**Use for:** Search autocomplete, form validation, window resize
+
+---
+
+### Concurrency Modes (Async)
+
+How overlapping async tasks are handled (example: two 500ms API calls):
+
+#### ➤ Mode: `drop` (Default for Throttle)
+If busy, **new tasks are ignored** entirely.
+
+```
+Task 1:  [──────── 500ms API Call ────────]  ✅ Completes
+Task 2:            ↓ Try to start
+                   [DROPPED ❌]
+Result:  Only Task 1 runs. Task 2 is ignored.
+```
+
+**Use for:** Payment processing, file uploads
+
+---
+
+#### ➤ Mode: `replace` (Perfect for Search)
+The new task **immediately cancels** the running task.
+
+```
+Task 1:  [──────── 500ms API Call ──X Cancelled
+Task 2:              ↓ New task starts
+                     [──────── 500ms API Call ────────]  ✅ Completes
+Result:  Task 1 cancelled. Only Task 2's result is used.
+```
+
+**Use for:** Search autocomplete, switching tabs, real-time filters
+
+---
+
+#### ➤ Mode: `enqueue` (Queue)
+Tasks **wait in line** for their turn.
+
+```
+Task 1:  [──────── 500ms ────────]  ✅
+Task 2:            ↓ Queued
+                   [Waiting...]      [──────── 500ms ────────]  ✅
+Result:  Task 1 runs, then Task 2 runs immediately after.
+```
+
+**Use for:** Chat messages, notification queue, ordered operations
+
+---
+
+#### ➤ Mode: `keepLatest` (Current + Last Only)
+Only keeps the **current running task** and **one latest queued task**.
+
+```
+Task 1:  [──────── 500ms ────────]  ✅
+Task 2:            ↓ Queued
+Task 3:                      ↓ Replaces Task 2 in queue
+                             [Waiting...]      [──────── 500ms ────────]  ✅
+Result:  Task 1 runs, Task 2 is dropped, Task 3 runs after Task 1.
+```
+
+**Use for:** Auto-save, data sync, real-time updates
+
+---
+
 ## Solution Matrix
 
 *"What should I use for...?"*

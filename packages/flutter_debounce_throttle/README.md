@@ -35,6 +35,81 @@ ThrottledInkWell(
 
 ---
 
+## How It Works — Visualized
+
+### Throttle vs Debounce (Duration: 300ms)
+
+#### ➤ Throttle (Button Clicks)
+Executes **immediately**, then **locks** for the duration. Subsequent events are **ignored**.
+
+```
+Events:    (Click1)    (Click2)    (Click3)              (Click4)
+Time:      |─ 0ms ─────── 100ms ──── 200ms ──── 300ms ──── 400ms ──|
+           ▼                                     ▲
+Execution: [EXECUTE] ····················· [LOCKED/DROP] ······· [EXECUTE]
+           └─────── 300ms cooldown ──────┘
+```
+
+**Use:** Payment buttons, save buttons, scroll handlers
+
+---
+
+#### ➤ Debounce (Search Input)
+Waits for a **pause** in events before executing.
+
+```
+Events:    (Type 'A')   (Type 'B')   (Type 'C')    [User stops typing]
+Time:      |─ 0ms ──── 100ms ──── 200ms ────────────── 500ms ──────|
+           ▼            ▼            ▼                  ▲
+Execution: [WAIT] ····· [RESET] ····· [RESET] ········ [EXECUTE 'ABC']
+                                      └─────── 300ms wait ──────┘
+```
+
+**Use:** Search autocomplete, form validation, window resize
+
+---
+
+### Concurrency Modes (Async)
+
+#### Mode: `replace` (Perfect for Search)
+New task **cancels** the old one.
+
+```
+Task 1:  [──────── 500ms API Call ──X Cancelled
+Task 2:              ↓ New search query
+                     [──────── 500ms API Call ────────]  ✅ Result shown
+```
+
+**Use:** Search autocomplete, tab switching
+
+---
+
+#### Mode: `drop` (Default)
+If busy, new tasks are **ignored**.
+
+```
+Task 1:  [──────── 500ms API Call ────────]  ✅ Completes
+Task 2:            ↓ User taps again
+                   [DROPPED ❌]
+```
+
+**Use:** Payment buttons, preventing double-tap
+
+---
+
+#### Mode: `enqueue`
+Tasks **queue** and run in order.
+
+```
+Task 1:  [──────── 500ms ────────]  ✅
+Task 2:            ↓ Queued
+                   [Waiting...]      [──────── 500ms ────────]  ✅
+```
+
+**Use:** Chat messages, ordered operations
+
+---
+
 ## 5-Second Start
 
 **Anti-Spam Button:**
