@@ -60,14 +60,14 @@ packages:
       path: "../flutter_debounce_throttle"
       relative: true
     source: path
-    version: "1.1.0"
+    version: "1.1.1"
   flutter_debounce_throttle_core:
     dependency: "direct overridden"
     description:
       path: "../flutter_debounce_throttle_core"
       relative: true
     source: path
-    version: "1.1.0"
+    version: "1.1.1"
   flutter_hooks:
     dependency: "direct main"
     description:
