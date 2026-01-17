@@ -6,11 +6,12 @@
 [![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Pure Dart](https://img.shields.io/badge/pure-Dart-02569B)](https://dart.dev)
 
-## The Complete Event Rate Limiting Infrastructure for Dart & Flutter
+## The Traffic Control System for Your App Architecture
 
-Production-ready library unifying **debounce, throttle, rate limiting, and async concurrency control** into a single, battle-tested package. Built for applications where memory safety, data integrity, and cross-platform consistency are non-negotiable.
+> Stop using manual Timers. They cause memory leaks and crashes.
+> Switch to the standard traffic control system for Flutter & Dart.
 
-**Replaces:** `easy_debounce` + `rxdart` throttle/debounce + manual Timer hacks + custom rate limiters
+Production-ready library unifying **debounce, throttle, rate limiting, and async concurrency control** into a single, battle-tested package. Like **ABS brakes** for your app — smooth, safe, and automatic.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -21,6 +22,51 @@ Production-ready library unifying **debounce, throttle, rate limiting, and async
 │  Flutter UI  │  Dart Backend  │  CLI  │  Serverpod  │  Dart Frog  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+### Core Values
+
+| | |
+|:---:|---|
+| **Universal** | Runs everywhere — Mobile, Web, Desktop, Server |
+| **Safety First** | No crashes, no memory leaks, lifecycle-aware |
+| **Zero Friction** | Simple API, no boilerplate, zero dependencies |
+
+---
+
+## Why You Need This
+
+### 📱 Mobile Problems
+
+| Problem | Impact | Solution |
+|---------|--------|----------|
+| **Phantom Clicks** | User taps "Buy" 10x → 10 orders → refund nightmare | `ThrottledInkWell` blocks duplicates |
+| **Battery Drain** | Search fires every keystroke → drains battery, burns data | `Debouncer` waits for typing pause |
+| **UI Jank** | Scroll events fire 60x/sec → laggy animations | `HighFrequencyThrottler` at 16ms |
+| **Race Conditions** | Old search results override new ones | `ConcurrencyMode.replace` cancels stale |
+
+### 🖥️ Server Problems
+
+| Problem | Impact | Solution |
+|---------|--------|----------|
+| **Cost Explosion** | Calling OpenAI/Maps API every request → $$$$ bill | `RateLimiter` controls outbound calls |
+| **Database Overload** | Writing logs one-by-one → DB locks up | `BatchThrottler` batches 100 writes → 1 |
+| **DDoS Vulnerability** | No rate limiting → server goes down | `RateLimiter` with Token Bucket |
+
+---
+
+## Solution Matrix
+
+*"What should I use for...?"*
+
+| Environment | Use Case | Solution | Why It's Better |
+|-------------|----------|----------|-----------------|
+| **Flutter UI** | Button Click | `ThrottledBuilder` | Auto loading state, auto dispose |
+| **Flutter UI** | Search Input | `DebouncedTextController` | One line, integrates with TextField |
+| **State Mgmt** | Provider/Bloc/GetX | `EventLimiterMixin` | No manual Timer management |
+| **Streams** | Socket/Sensor data | `StreamDebounceListener` | Auto-cancel subscription |
+| **Hooks** | Functional widgets | `useDebouncedCallback` | No nested widgets, clean code |
+| **Server** | Batch DB writes | `BatchThrottler` | 100x fewer DB calls |
+| **Server** | Rate limit API | `RateLimiter` | Token Bucket algorithm |
 
 ---
 
@@ -42,12 +88,10 @@ Production-ready library unifying **debounce, throttle, rate limiting, and async
 
 ---
 
-## Real Problems, Real Solutions
+## Quick Start
 
-### Problem: User spams payment button → Double charge
-
+### Anti-Spam Button
 ```dart
-// Solution: ThrottledInkWell blocks duplicate taps
 ThrottledInkWell(
   duration: 500.ms,
   onTap: () => processPayment(),
@@ -55,10 +99,8 @@ ThrottledInkWell(
 )
 ```
 
-### Problem: Search API fires on every keystroke → Server overload & race conditions
-
+### Smart Search Bar
 ```dart
-// Solution: ConcurrencyMode.replace cancels stale requests
 final controller = ConcurrentAsyncThrottler(mode: ConcurrencyMode.replace);
 
 void onSearch(String query) {
@@ -69,68 +111,23 @@ void onSearch(String query) {
 }
 ```
 
-### Problem: Chat messages arrive out of order
-
+### Server-Side Batching
 ```dart
-// Solution: ConcurrencyMode.enqueue preserves sequence
-final sender = ConcurrentAsyncThrottler(
-  mode: ConcurrencyMode.enqueue,
-  maxQueueSize: 20,
-);
-
-void sendMessage(String text) {
-  sender(() async => await api.send(text));  // Guaranteed order
-}
-```
-
-### Problem: Analytics logs overwhelm the server
-
-```dart
-// Solution: BatchThrottler groups events
 final batcher = BatchThrottler(
   duration: 2.seconds,
   maxBatchSize: 50,
-  onBatchExecute: (logs) => analytics.sendBatch(logs),
+  onBatchExecute: (logs) => database.insertBatch(logs),
 );
 
-batcher(() => 'page_view');  // 1000 calls → 20 batches
+batcher(() => logEntry);  // 1000 calls → 20 DB writes
 ```
-
-### Problem: API needs burst protection (DDoS, spam)
-
-```dart
-// Solution: RateLimiter with Token Bucket algorithm
-final limiter = RateLimiter(
-  maxTokens: 100,      // Allow burst of 100
-  refillRate: 10,      // Sustain 10/second
-  refillInterval: 1.seconds,
-);
-
-if (!limiter.tryAcquire()) {
-  return Response.tooManyRequests(retryAfter: limiter.timeUntilNextToken);
-}
-```
-
----
-
-## Enterprise Features
-
-| Feature | Use Case |
-|---------|----------|
-| **4 Concurrency Modes** | `drop` (payments), `replace` (search), `enqueue` (chat), `keepLatest` (auto-save) |
-| **Token Bucket Rate Limiter** | Backend API protection, burst control |
-| **Batch Processing** | Analytics, logging, bulk operations |
-| **Queue Backpressure** | `maxQueueSize` + overflow strategies |
-| **Pure Dart Core** | Works on Flutter, Serverpod, Dart Frog, CLI |
-| **Auto-dispose** | Memory-safe with widget lifecycle |
-| **State Management Mixin** | Provider, Bloc, GetX, Riverpod, MobX |
 
 ---
 
 ## Installation
 
 ```yaml
-# Flutter
+# Flutter App
 dependencies:
   flutter_debounce_throttle: ^1.1.0
 
@@ -145,44 +142,15 @@ dependencies:
 
 ---
 
-## Quick Reference
+## Quality Assurance
 
-| Problem | Solution | Mode |
-|---------|----------|------|
-| Button spam | `Throttler` | - |
-| Search input | `AsyncDebouncer` | - |
-| Cancel old requests | `ConcurrentAsyncThrottler` | `replace` |
-| Preserve order | `ConcurrentAsyncThrottler` | `enqueue` |
-| Save only latest | `ConcurrentAsyncThrottler` | `keepLatest` |
-| API rate limiting | `RateLimiter` | Token Bucket |
-| High-frequency scroll | `HighFrequencyThrottler` | 16ms (60fps) |
-| Batch operations | `BatchThrottler` | `maxBatchSize` |
-
----
-
-## v1.1.0 Highlights
-
-```dart
-// Duration extensions
-final debouncer = Debouncer(duration: 300.ms);
-
-// Callback extensions
-final debouncedFn = myFunction.debounced(300.ms);
-
-// Leading + trailing edge (like lodash)
-Debouncer(leading: true, trailing: true);
-
-// DebounceResult - distinguish cancelled from null
-final result = await debouncer.callWithResult(() async => api.findUser(id));
-if (result.isCancelled) return;
-showUser(result.value);  // May be null, but not cancelled
-
-// Rate limiter with Token Bucket
-RateLimiter(maxTokens: 100, refillRate: 10, refillInterval: 1.seconds);
-
-// Queue backpressure control
-ConcurrentAsyncThrottler(maxQueueSize: 10, queueOverflowStrategy: ...);
-```
+| Guarantee | How |
+|-----------|-----|
+| **Stability** | 360+ tests, 95% coverage |
+| **Type Safety** | No `dynamic`, full generic support |
+| **Lifecycle Safe** | Auto-checks `mounted`, auto-cancel on dispose |
+| **Memory Safe** | Zero leaks (verified with LeakTracker) |
+| **Zero Dependencies** | Only `meta` package in core |
 
 ---
 
@@ -208,9 +176,9 @@ ConcurrentAsyncThrottler(maxQueueSize: 10, queueOverflowStrategy: ...);
 ---
 
 <p align="center">
-  <b>360+ tests</b> · <b>Zero dependencies</b> (core) · <b>Type-safe</b> · <b>Production-ready</b>
+  <b>360+ tests</b> · <b>Zero dependencies</b> · <b>Type-safe</b> · <b>Production-ready</b>
 </p>
 
 <p align="center">
-  Made by <a href="https://github.com/brewkits">Brewkits</a>
+  Made with craftsmanship by <a href="https://github.com/brewkits">Brewkits</a>
 </p>
