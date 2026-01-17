@@ -1,49 +1,35 @@
 // lib/hooks.dart
 //
-// Flutter Hooks support for flutter_debounce_throttle.
+// DEPRECATED: Hooks have moved to a separate package.
 //
 // ============================================================================
-// IMPORTANT: This is an OPTIONAL module that requires flutter_hooks package.
+// MIGRATION: Use flutter_debounce_throttle_hooks instead
 // ============================================================================
 //
-// To use hooks, add flutter_hooks to YOUR project's pubspec.yaml:
+// 1. Add the hooks package to your pubspec.yaml:
 //
 //   dependencies:
-//     flutter_debounce_throttle: ^1.0.0
-//     flutter_hooks: ^0.20.0  # Required for hooks support
+//     flutter_debounce_throttle: ^1.1.0
+//     flutter_debounce_throttle_hooks: ^1.1.0  # Add this
 //
-// If you don't need hooks, just use the main import instead:
-//   import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
+// 2. Update your imports:
 //
-// **Usage:**
-// ```dart
-// import 'package:flutter_debounce_throttle/hooks.dart';
+//   // Old (deprecated):
+//   import 'package:flutter_debounce_throttle/hooks.dart';
 //
-// class MyWidget extends HookWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     final debouncer = useDebouncer(duration: Duration(milliseconds: 300));
-//     final throttler = useThrottler(duration: Duration(milliseconds: 500));
+//   // New:
+//   import 'package:flutter_debounce_throttle_hooks/flutter_debounce_throttle_hooks.dart';
 //
-//     final debouncedSearch = useDebouncedCallback<String>(
-//       (text) => search(text),
-//       duration: Duration(milliseconds: 300),
-//     );
-//
-//     return Column(
-//       children: [
-//         TextField(onChanged: debouncedSearch),
-//         ElevatedButton(
-//           onPressed: throttler.wrap(() => submit()),
-//           child: Text('Submit'),
-//         ),
-//       ],
-//     );
-//   }
-// }
-// ```
+// ============================================================================
 
-export 'src/flutter/hooks/hooks.dart';
+// This file is kept for backward compatibility documentation only.
+// The actual hooks implementation is in flutter_debounce_throttle_hooks package.
 
-// Also export core for convenience
+@Deprecated(
+  'Hooks have moved to flutter_debounce_throttle_hooks package. '
+  'Add flutter_debounce_throttle_hooks to pubspec.yaml and import from there.',
+)
+library hooks;
+
+// Re-export core for convenience (this still works)
 export 'core.dart';
