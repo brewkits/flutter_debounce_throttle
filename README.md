@@ -88,9 +88,29 @@ Production-ready library unifying **debounce, throttle, rate limiting, and async
 
 ---
 
-## Quick Start
+## 5-Second Start
 
-### Anti-Spam Button
+Just need a throttled button? **One line:**
+
+```dart
+ThrottledInkWell(onTap: () => pay(), child: Text('Pay'))
+```
+
+Just need debounced search? **One line:**
+
+```dart
+TextField(onChanged: (s) => debouncer(() => search(s)))
+```
+
+That's it. No setup. No dispose. Works immediately.
+
+---
+
+## Quick Start by Level
+
+### 🟢 Basic — Just Works
+
+**Anti-Spam Button** (prevents double-tap)
 ```dart
 ThrottledInkWell(
   duration: 500.ms,
@@ -99,7 +119,28 @@ ThrottledInkWell(
 )
 ```
 
-### Smart Search Bar
+**Debounced Search** (waits for typing pause)
+```dart
+final debouncer = Debouncer(duration: 300.ms);
+
+TextField(
+  onChanged: (text) => debouncer(() => search(text)),
+)
+```
+
+### 🟡 Intermediate — More Control
+
+**Async with Loading State**
+```dart
+AsyncThrottledBuilder(
+  builder: (context, throttle) => ElevatedButton(
+    onPressed: throttle(() async => await submitForm()),
+    child: Text('Submit'),
+  ),
+)
+```
+
+**Cancel Stale Requests** (search autocomplete)
 ```dart
 final controller = ConcurrentAsyncThrottler(mode: ConcurrencyMode.replace);
 
@@ -111,7 +152,9 @@ void onSearch(String query) {
 }
 ```
 
-### Server-Side Batching
+### 🔴 Advanced — Enterprise Features
+
+**Server-Side Batching** (100x fewer DB writes)
 ```dart
 final batcher = BatchThrottler(
   duration: 2.seconds,
@@ -119,8 +162,34 @@ final batcher = BatchThrottler(
   onBatchExecute: (logs) => database.insertBatch(logs),
 );
 
-batcher(() => logEntry);  // 1000 calls → 20 DB writes
+batcher(() => logEntry);  // 1000 calls → 20 batches
 ```
+
+**Token Bucket Rate Limiting** (API cost control)
+```dart
+final limiter = RateLimiter(maxTokens: 100, refillRate: 10);
+
+if (!limiter.tryAcquire()) {
+  return Response.tooManyRequests();
+}
+```
+
+---
+
+## Coming from easy_debounce?
+
+Migration takes 2 minutes. You get memory safety for free.
+
+```dart
+// Before (easy_debounce) - manual cancel, possible memory leak
+EasyDebounce.debounce('search', Duration(ms: 300), () => search(q));
+
+// After - auto-dispose, lifecycle-aware
+final debouncer = Debouncer(duration: 300.ms);
+debouncer(() => search(q));
+```
+
+See full [Migration Guide](MIGRATION_GUIDE.md) →
 
 ---
 
@@ -172,6 +241,21 @@ dependencies:
 | [`flutter_debounce_throttle`](https://pub.dev/packages/flutter_debounce_throttle) | Flutter | Widgets, Mixin |
 | [`flutter_debounce_throttle_hooks`](https://pub.dev/packages/flutter_debounce_throttle_hooks) | Flutter + Hooks | useDebouncer, useThrottler |
 | [`flutter_debounce_throttle_core`](https://pub.dev/packages/flutter_debounce_throttle_core) | Pure Dart | Server, CLI, anywhere |
+
+---
+
+## Roadmap
+
+We're committed to long-term maintenance and improvement.
+
+| Version | Status | Features |
+|---------|--------|----------|
+| **v1.0** | ✅ Released | Core debounce/throttle, widgets, mixin |
+| **v1.1** | ✅ Released | RateLimiter, extensions, leading/trailing edge, batch limits |
+| **v1.2** | 🔜 Planned | Retry policies, circuit breaker pattern |
+| **v2.0** | 📋 Roadmap | Web Workers support, isolate-safe controllers |
+
+Have a feature request? [Open an issue](https://github.com/brewkits/flutter_debounce_throttle/issues)
 
 ---
 
