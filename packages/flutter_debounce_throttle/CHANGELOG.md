@@ -1,3 +1,15 @@
+## 1.1.1
+
+**Documentation** - Enhanced README for better pub.dev presentation.
+
+- Added badges (tests, coverage, license)
+- Added comparison table vs easy_debounce
+- Added 5-Second Start section
+- Added Quality Assurance section
+- Improved widget and mixin documentation
+
+---
+
 ## 1.1.0
 
 **Enterprise Features** - Advanced event limiting capabilities for production workloads.

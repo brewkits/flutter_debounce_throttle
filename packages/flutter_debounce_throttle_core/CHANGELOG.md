@@ -1,3 +1,14 @@
+## 1.1.1
+
+**Documentation** - Enhanced README for better pub.dev presentation.
+
+- Improved package description and badges
+- Added server-problem examples (API cost, DB overload, DDoS)
+- Added comparison table vs manual implementation
+- Better Token Bucket and Batch Processing documentation
+
+---
+
 ## 1.1.0
 
 **Enterprise Features** - Advanced event limiting capabilities for production workloads.
