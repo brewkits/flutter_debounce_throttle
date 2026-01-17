@@ -2,15 +2,18 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle.svg)](https://pub.dev/packages/flutter_debounce_throttle)
 
-> **Complete Event Control for Flutter**
->
-> Ready-to-use widgets, builders, and mixins for debounce, throttle, and async race condition handling.
+## The Complete Event Rate Limiting Solution for Flutter
+
+**All-in-one package** combining ready-to-use widgets, builders, and mixins for debounce, throttle, rate limiting, and async concurrency control. Replaces `easy_debounce` + manual timers + custom race condition handling.
+
+**Prevents:** Double-tap bugs, stale API results, memory leaks, race conditions
 
 ```dart
-// One line to prevent double-tap payment bugs
+// One widget to prevent double-tap payment bugs forever
 ThrottledInkWell(
+  duration: 500.ms,
   onTap: () => processPayment(),
-  child: Text('Pay Now'),
+  child: Text('Pay \$99'),
 )
 ```
 
@@ -18,10 +21,13 @@ ThrottledInkWell(
 
 ## Why This Package?
 
-- **Memory safe** — auto-dispose with widget lifecycle
-- **Race condition control** — 4 concurrency modes
-- **Loading states** — built-in `isLoading` for async widgets
-- **State management ready** — mixin for Provider, Bloc, GetX, Riverpod
+| Capability | What You Get |
+|------------|-------------|
+| **Memory Safe** | Auto-dispose with widget lifecycle — no manual cleanup |
+| **Race Condition Control** | 4 concurrency modes: `drop`, `replace`, `enqueue`, `keepLatest` |
+| **Loading States** | Built-in `isLoading` for async widgets |
+| **State Management Ready** | Mixin for Provider, Bloc, GetX, Riverpod, MobX |
+| **Pure Dart Core** | Same API works on backend — shared logic |
 
 ---
 

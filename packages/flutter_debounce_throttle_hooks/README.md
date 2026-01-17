@@ -2,13 +2,16 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_hooks.svg)](https://pub.dev/packages/flutter_debounce_throttle_hooks)
 
-> **Event Control Hooks for Flutter**
->
-> Debounce, throttle, and async race handling with automatic cleanup — the hooks way.
+## Event Rate Limiting Hooks — Zero Boilerplate, Full Power
+
+The **flutter_hooks integration** for [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle). All the enterprise-grade debounce, throttle, and async concurrency control — with automatic lifecycle management the hooks way.
+
+**No dispose. No state classes. Just works.**
 
 ```dart
 class SearchWidget extends HookWidget {
   Widget build(BuildContext context) {
+    // Automatic cleanup on unmount — zero boilerplate
     final debouncedSearch = useDebouncedCallback<String>(
       (text) => api.search(text),
       duration: 300.ms,
@@ -23,10 +26,12 @@ class SearchWidget extends HookWidget {
 
 ## Why Hooks?
 
-- **Zero boilerplate** — no dispose, no state management
-- **Automatic cleanup** — unmount = auto-cancel
-- **Reactive values** — `useDebouncedValue`, `useThrottledValue`
-- **Full power** — access to all core controllers
+| Feature | Benefit |
+|---------|---------|
+| **Zero boilerplate** | No dispose, no initState, no state management |
+| **Automatic cleanup** | Unmount = auto-cancel pending operations |
+| **Reactive values** | `useDebouncedValue`, `useThrottledValue` |
+| **Full ecosystem** | Access to all core controllers and modes |
 
 ---
 

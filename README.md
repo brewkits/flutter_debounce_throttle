@@ -6,18 +6,28 @@
 [![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Pure Dart](https://img.shields.io/badge/pure-Dart-02569B)](https://dart.dev)
 
-> **The Definitive Event Rate Limiting & Concurrency Control System for Dart & Flutter**
->
-> Build robust, race-condition-free applications with a standardized API that works everywhere: from Flutter UI to Dart Backend.
+## The Complete Event Rate Limiting Infrastructure for Dart & Flutter
+
+Production-ready library unifying **debounce, throttle, rate limiting, and async concurrency control** into a single, battle-tested package. Built for applications where memory safety, data integrity, and cross-platform consistency are non-negotiable.
+
+**Replaces:** `easy_debounce` + `rxdart` throttle/debounce + manual Timer hacks + custom rate limiters
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                   flutter_debounce_throttle                         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Debounce  │  Throttle  │  Rate Limit  │  Async Queue  │  Batch    │
+├─────────────────────────────────────────────────────────────────────┤
+│  Flutter UI  │  Dart Backend  │  CLI  │  Serverpod  │  Dart Frog  │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Why This is the Standard
+## Why Not Just Use easy_debounce or rxdart?
 
-Unlike simple utility packages, `flutter_debounce_throttle` is engineered for **production environments** where reliability and data integrity are critical.
-
-| | This Library | easy_debounce | rxdart | Manual Timer |
-|---|:---:|:---:|:---:|:---:|
+| Capability | This Library | easy_debounce | rxdart | Manual Timer |
+|------------|:---:|:---:|:---:|:---:|
 | Debounce & Throttle | ✅ | ✅ | ✅ | ⚠️ Boilerplate |
 | **Memory Safe** (Auto-dispose) | ✅ | ❌ | ⚠️ Manual | ❌ Leaky |
 | **Async & Future Support** | ✅ | ❌ | ✅ | ❌ |
@@ -28,7 +38,7 @@ Unlike simple utility packages, `flutter_debounce_throttle` is engineered for **
 | **State Management Mixin** | ✅ | ❌ | ❌ | ❌ |
 | Dependencies | **0** | 0 | Many | 0 |
 
-**One library. All use cases. Zero compromises.**
+> **One library. All use cases. Zero compromises.**
 
 ---
 

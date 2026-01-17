@@ -1,25 +1,34 @@
 # flutter_debounce_throttle_core
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_core.svg)](https://pub.dev/packages/flutter_debounce_throttle_core)
+[![Pure Dart](https://img.shields.io/badge/pure-Dart-02569B)](https://dart.dev)
 
-> **Pure Dart Event Control — Zero Dependencies**
->
-> Production-ready debounce, throttle, and rate limiting for Dart servers, CLI tools, and any platform.
+## Pure Dart Event Rate Limiting — For Backend, CLI & Beyond
+
+The **zero-dependency foundation** of the [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle) ecosystem. Production-ready debounce, throttle, rate limiting, and async concurrency control for Dart servers, CLI tools, and any platform where Flutter isn't available.
+
+**Perfect for:** Serverpod, Dart Frog, shelf, CLI apps, shared business logic
 
 ```dart
-// Simple, safe, powerful
-final debouncer = Debouncer(duration: 300.ms);
-debouncer(() => search(query));
+// Token Bucket rate limiting for your API
+final limiter = RateLimiter(maxTokens: 100, refillRate: 10, refillInterval: 1.seconds);
+
+if (!limiter.tryAcquire()) {
+  return Response.tooManyRequests(retryAfter: limiter.timeUntilNextToken);
+}
 ```
 
 ---
 
 ## Why This Package?
 
-- **Zero dependencies** — only `meta` package
-- **Server-ready** — no Flutter required
-- **Type-safe** — full generic support
-- **Battle-tested** — 340+ tests
+| Feature | Benefit |
+|---------|---------|
+| **Zero dependencies** | Only `meta` package — minimal footprint |
+| **Server-ready** | No Flutter required, pure Dart |
+| **Token Bucket Rate Limiter** | Enterprise-grade API protection |
+| **4 Concurrency Modes** | `drop`, `replace`, `enqueue`, `keepLatest` |
+| **Battle-tested** | 340+ tests, production-proven |
 
 ---
 
