@@ -167,4 +167,140 @@ void main() {
       );
     });
   });
+
+  group('DebounceResult', () {
+    test('cancelled result has correct properties', () {
+      const result = DebounceResult<int>.cancelled();
+
+      expect(result.isCancelled, true);
+      expect(result.isSuccess, false);
+      expect(result.value, isNull);
+      expect(result.toString(), 'DebounceResult.cancelled');
+    });
+
+    test('success result with value has correct properties', () {
+      const result = DebounceResult<int>.success(42);
+
+      expect(result.isCancelled, false);
+      expect(result.isSuccess, true);
+      expect(result.value, 42);
+      expect(result.toString(), 'DebounceResult.success(42)');
+    });
+
+    test('success result with null value has correct properties', () {
+      const result = DebounceResult<int?>.success(null);
+
+      expect(result.isCancelled, false);
+      expect(result.isSuccess, true);
+      expect(result.value, isNull);
+      expect(result.toString(), 'DebounceResult.success(null)');
+    });
+  });
+
+  group('AsyncDebouncer.callWithResult', () {
+    late AsyncDebouncer debouncer;
+
+    tearDown(() {
+      debouncer.dispose();
+    });
+
+    test('returns success result with value', () async {
+      debouncer = AsyncDebouncer(duration: const Duration(milliseconds: 50));
+
+      final result = await debouncer.callWithResult(() async => 42);
+
+      expect(result.isSuccess, true);
+      expect(result.isCancelled, false);
+      expect(result.value, 42);
+    });
+
+    test('returns success result with null value (not cancelled)', () async {
+      debouncer = AsyncDebouncer(duration: const Duration(milliseconds: 50));
+
+      final result = await debouncer.callWithResult<int?>(() async => null);
+
+      expect(result.isSuccess, true);
+      expect(result.isCancelled, false);
+      expect(result.value, isNull);
+    });
+
+    test('returns cancelled result when superseded', () async {
+      debouncer = AsyncDebouncer(duration: const Duration(milliseconds: 50));
+
+      DebounceResult<int>? result1;
+      DebounceResult<int>? result2;
+
+      debouncer.callWithResult(() async => 1).then((r) => result1 = r);
+      debouncer.callWithResult(() async => 2).then((r) => result2 = r);
+
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      expect(result1!.isCancelled, true);
+      expect(result1!.value, isNull);
+      expect(result2!.isSuccess, true);
+      expect(result2!.value, 2);
+    });
+
+    test('distinguishes cancelled from actual null result', () async {
+      debouncer = AsyncDebouncer(duration: const Duration(milliseconds: 50));
+
+      DebounceResult<String?>? cancelledResult;
+      DebounceResult<String?>? nullResult;
+
+      // First call will be cancelled
+      debouncer.callWithResult<String?>(() async => 'first').then((r) => cancelledResult = r);
+      // Second call returns actual null
+      debouncer.callWithResult<String?>(() async => null).then((r) => nullResult = r);
+
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Cancelled call
+      expect(cancelledResult!.isCancelled, true);
+      expect(cancelledResult!.value, isNull);
+
+      // Actual null result (not cancelled)
+      expect(nullResult!.isCancelled, false);
+      expect(nullResult!.isSuccess, true);
+      expect(nullResult!.value, isNull);
+    });
+
+    test('returns cancelled when cancel() is called', () async {
+      debouncer = AsyncDebouncer(duration: const Duration(milliseconds: 100));
+
+      DebounceResult<int>? result;
+      debouncer.callWithResult(() async => 42).then((r) => result = r);
+
+      await Future.delayed(const Duration(milliseconds: 20));
+      debouncer.cancel();
+
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      expect(result!.isCancelled, true);
+    });
+
+    test('enabled=false bypasses debounce and returns success', () async {
+      debouncer = AsyncDebouncer(
+        duration: const Duration(milliseconds: 100),
+        enabled: false,
+      );
+
+      final result = await debouncer.callWithResult(() async => 42);
+
+      expect(result.isSuccess, true);
+      expect(result.value, 42);
+    });
+
+    test('handles errors and does not return cancelled', () async {
+      debouncer = AsyncDebouncer(duration: const Duration(milliseconds: 50));
+
+      expect(
+        () async {
+          await debouncer.callWithResult(() async {
+            throw Exception('Test error');
+          });
+        },
+        throwsException,
+      );
+    });
+  });
 }

@@ -7,6 +7,51 @@ import 'dart:async';
 import 'config.dart';
 import 'logger.dart';
 
+/// Result wrapper for async debounce operations.
+///
+/// Distinguishes between:
+/// - Cancelled operation: `isCancelled = true`, `value = null`
+/// - Successful null result: `isCancelled = false`, `value = null`
+///
+/// **Example:**
+/// ```dart
+/// final result = await debouncer.callWithResult(() async {
+///   return await api.search(query); // May return null
+/// });
+///
+/// if (result.isCancelled) {
+///   print('Cancelled by newer call');
+///   return;
+/// }
+///
+/// // Safe to use result.value (may be null, but that's the actual result)
+/// updateUI(result.value);
+/// ```
+class DebounceResult<T> {
+  /// Whether this operation was cancelled by a newer call.
+  final bool isCancelled;
+
+  /// The result value. May be null even if not cancelled
+  /// (if the async operation returned null).
+  final T? value;
+
+  const DebounceResult._({required this.isCancelled, this.value});
+
+  /// Creates a cancelled result.
+  const DebounceResult.cancelled() : this._(isCancelled: true, value: null);
+
+  /// Creates a successful result with the given value.
+  const DebounceResult.success(T? value)
+      : this._(isCancelled: false, value: value);
+
+  /// Whether the operation completed successfully (not cancelled).
+  bool get isSuccess => !isCancelled;
+
+  @override
+  String toString() =>
+      isCancelled ? 'DebounceResult.cancelled' : 'DebounceResult.success($value)';
+}
+
 /// Debounce with auto-cancel for async operations (search API, autocomplete).
 ///
 /// **Behavior:** Waits for duration before execution, cancels previous pending calls.
@@ -75,7 +120,7 @@ class AsyncDebouncer with EventLimiterLogging {
 
   Timer? _timer;
   int _latestCallId = 0;
-  Completer<dynamic>? _pendingCompleter;
+  void Function()? _cancelPendingCompleter;
 
   AsyncDebouncer({
     Duration? duration,
@@ -110,12 +155,10 @@ class AsyncDebouncer with EventLimiterLogging {
       }
     }
 
-    // Cancel old timer
+    // Cancel old timer and complete old completer
     _timer?.cancel();
-
-    // Complete old completer to prevent hanging futures
-    if (_pendingCompleter != null && !_pendingCompleter!.isCompleted) {
-      _pendingCompleter!.complete(null);
+    if (_cancelPendingCompleter != null) {
+      _cancelPendingCompleter!();
       debugLog('AsyncDebounce cancelled previous call');
       final cancelTime = DateTime.now().difference(startTime);
       onMetrics?.call(cancelTime, true);
@@ -123,7 +166,13 @@ class AsyncDebouncer with EventLimiterLogging {
 
     final currentCallId = ++_latestCallId;
     final completer = Completer<T?>();
-    _pendingCompleter = completer;
+
+    // Store cancel callback for this completer
+    _cancelPendingCompleter = () {
+      if (!completer.isCompleted) {
+        completer.complete(null);
+      }
+    };
 
     _timer = Timer(duration, () async {
       try {
@@ -155,7 +204,7 @@ class AsyncDebouncer with EventLimiterLogging {
           debugLog('AsyncDebounce error: $e');
           if (resetOnError) {
             debugLog('Resetting AsyncDebouncer state due to error');
-            cancel();
+            _cancelInternal();
           }
           if (!completer.isCompleted) {
             completer.completeError(e, stackTrace);
@@ -166,8 +215,8 @@ class AsyncDebouncer with EventLimiterLogging {
           completer.completeError(e, stackTrace);
         }
       } finally {
-        if (_pendingCompleter == completer) {
-          _pendingCompleter = null;
+        if (_cancelPendingCompleter != null) {
+          _cancelPendingCompleter = null;
         }
       }
     });
@@ -179,14 +228,126 @@ class AsyncDebouncer with EventLimiterLogging {
   @Deprecated('Use call() instead. Will be removed in v2.0.0')
   Future<T?> run<T>(Future<T> Function() action) => call(action);
 
+  /// Executes async action with result wrapper to distinguish cancellation from null.
+  ///
+  /// Unlike [call] which returns `T?` (where null could mean cancelled OR actual null result),
+  /// this returns [DebounceResult] which clearly indicates whether the operation was cancelled.
+  ///
+  /// **Use this when your async operation can legitimately return null.**
+  ///
+  /// ```dart
+  /// final result = await debouncer.callWithResult(() async {
+  ///   return await api.findUser(id); // May return null if not found
+  /// });
+  ///
+  /// if (result.isCancelled) {
+  ///   return; // Cancelled by newer call
+  /// }
+  ///
+  /// final user = result.value; // May be null (user not found), but not cancelled
+  /// showUser(user);
+  /// ```
+  Future<DebounceResult<T>> callWithResult<T>(Future<T> Function() action) async {
+    final startTime = DateTime.now();
+
+    // Skip debounce if disabled
+    if (!enabled) {
+      debugLog('AsyncDebounce bypassed (disabled)');
+      try {
+        final result = await action();
+        final executionTime = DateTime.now().difference(startTime);
+        onMetrics?.call(executionTime, false);
+        return DebounceResult.success(result);
+      } catch (e) {
+        if (resetOnError) {
+          debugLog('Error occurred, state reset');
+        }
+        rethrow;
+      }
+    }
+
+    // Cancel old timer and complete old completer
+    _timer?.cancel();
+    if (_cancelPendingCompleter != null) {
+      _cancelPendingCompleter!();
+      debugLog('AsyncDebounce cancelled previous call');
+      final cancelTime = DateTime.now().difference(startTime);
+      onMetrics?.call(cancelTime, true);
+    }
+
+    final currentCallId = ++_latestCallId;
+    final completer = Completer<DebounceResult<T>>();
+
+    // Store cancel callback for this completer
+    _cancelPendingCompleter = () {
+      if (!completer.isCompleted) {
+        completer.complete(DebounceResult<T>.cancelled());
+      }
+    };
+
+    _timer = Timer(duration, () async {
+      try {
+        // Check if this is still the latest call
+        if (currentCallId != _latestCallId) {
+          if (!completer.isCompleted) {
+            completer.complete(DebounceResult<T>.cancelled());
+            debugLog('AsyncDebounce cancelled during wait');
+          }
+          return;
+        }
+
+        debugLog('AsyncDebounce executing async action');
+        try {
+          final result = await action();
+          // Double-check after await
+          if (currentCallId == _latestCallId && !completer.isCompleted) {
+            final executionTime = DateTime.now().difference(startTime);
+            debugLog(
+              'AsyncDebounce completed in ${executionTime.inMilliseconds}ms',
+            );
+            onMetrics?.call(executionTime, false);
+            completer.complete(DebounceResult.success(result));
+          } else if (!completer.isCompleted) {
+            debugLog('AsyncDebounce cancelled after execution');
+            completer.complete(DebounceResult<T>.cancelled());
+          }
+        } catch (e, stackTrace) {
+          debugLog('AsyncDebounce error: $e');
+          if (resetOnError) {
+            debugLog('Resetting AsyncDebouncer state due to error');
+            _cancelInternal();
+          }
+          if (!completer.isCompleted) {
+            completer.completeError(e, stackTrace);
+          }
+        }
+      } catch (e, stackTrace) {
+        if (!completer.isCompleted) {
+          completer.completeError(e, stackTrace);
+        }
+      } finally {
+        _cancelPendingCompleter = null;
+      }
+    });
+
+    return completer.future;
+  }
+
+  /// Internal cancel without completing the completer (for error handling).
+  void _cancelInternal() {
+    _timer?.cancel();
+    _timer = null;
+    _latestCallId++;
+  }
+
   /// Cancels all pending and in-flight operations.
   void cancel() {
     _timer?.cancel();
     _timer = null;
 
-    if (_pendingCompleter != null && !_pendingCompleter!.isCompleted) {
-      _pendingCompleter!.complete(null);
-      _pendingCompleter = null;
+    if (_cancelPendingCompleter != null) {
+      _cancelPendingCompleter!();
+      _cancelPendingCompleter = null;
     }
 
     _latestCallId++;
