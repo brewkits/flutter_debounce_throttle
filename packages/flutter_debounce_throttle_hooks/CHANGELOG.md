@@ -1,3 +1,14 @@
+## 1.1.1
+
+**Documentation** - Enhanced README for better pub.dev presentation.
+
+- Added badges (tests, license)
+- Added StatefulWidget vs Hooks comparison (15 lines → 1 line)
+- Added complete autocomplete example
+- Emphasized zero-boilerplate benefits
+
+---
+
 ## 1.1.0
 
 **Enterprise Features** - Advanced event limiting capabilities for production workloads.
