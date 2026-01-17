@@ -46,6 +46,135 @@ if (!limiter.tryAcquire()) {
 
 ---
 
+## How It Works — Visualized
+
+### Throttle vs Debounce
+
+#### ➤ Throttle (Rate Limiting)
+Executes **immediately**, then **locks** for the duration.
+
+```
+API Calls: (Call1)    (Call2)    (Call3)              (Call4)
+Time:      |─ 0ms ─────── 100ms ──── 200ms ──── 300ms ──── 400ms ──|
+           ▼                                     ▲
+Execution: [EXECUTE] ····················· [LOCKED/DROP] ······· [EXECUTE]
+           └─────── 300ms cooldown ──────┘
+```
+
+**Use:** Rate limiting, preventing API spam
+
+---
+
+#### ➤ Debounce (Cache Stampede Protection)
+Waits for a **pause** before executing. Use `leading: true` to execute immediately on first call.
+
+```
+Requests:  (Req1)   (Req2)   (Req3)    [Pause]
+Time:      |─ 0ms ── 100ms ── 200ms ────────────── 500ms ──────|
+           ▼                                        ▲
+Execution: [EXECUTE] ····························· [Skip subsequent]
+           (leading: true mode - executes first, ignores rest during cooldown)
+```
+
+**Use:** Cache refresh, database connection pooling
+
+---
+
+### Batch Processing
+
+Reduce database load by batching writes:
+
+```
+Individual Calls:    1  2  3  4  5  6  7  8  9  10 ... 100
+Time:                |──────────── 2 seconds ────────────|
+                                                         ▼
+Batch Execution:                                    [INSERT 100 rows]
+
+Result: 100 individual calls → 1 database operation (100x reduction)
+```
+
+**Use:** Log aggregation, analytics events, bulk inserts
+
+---
+
+### Token Bucket Rate Limiting
+
+Enterprise-grade rate limiting with burst support:
+
+```
+Bucket Capacity: 10 tokens
+Refill Rate: 2 tokens/second
+
+Time:     0s      1s      2s      3s      4s      5s
+          │       │       │       │       │       │
+Tokens:  10 ─────▶ 8 ───▶ 6 ────▶ 8 ───▶ 10 ───▶ 10
+          │  -4   │  -4   │  -2   │  -0   │  -0   │
+Requests: ████    ████    ██      ──      ──      ──
+          (4 OK)  (4 OK)  (2 OK)  (burst capacity preserved)
+```
+
+**Use:** API cost control, preventing DDoS, fair resource allocation
+
+---
+
+### Concurrency Modes (Async)
+
+#### Mode: `drop`
+If busy, new tasks are **ignored**.
+
+```
+Task 1:  [──────── 500ms Job ────────]  ✅ Completes
+Task 2:            ↓ Try to start
+                   [DROPPED ❌]
+```
+
+**Use:** Preventing duplicate background jobs
+
+---
+
+#### Mode: `replace`
+New task **cancels** the old one.
+
+```
+Task 1:  [──────── 500ms Job ──X Cancelled
+Task 2:              ↓ Higher priority job
+                     [──────── 500ms Job ────────]  ✅ Completes
+```
+
+**Use:** Always process latest data, cancel stale computations
+
+---
+
+#### Mode: `enqueue`
+Tasks **queue** and execute in order.
+
+```
+Task 1:  [──────── 500ms ────────]  ✅
+Task 2:            ↓ Queued
+                   [Waiting...]      [──────── 500ms ────────]  ✅
+Task 3:                      ↓ Queued
+                                     [Waiting...]      [──────── 500ms ────────]  ✅
+```
+
+**Use:** Job queues, ordered processing, webhook handling
+
+---
+
+#### Mode: `keepLatest`
+Current task + **one latest** queued task only.
+
+```
+Task 1:  [──────── 500ms ────────]  ✅
+Task 2:            ↓ Queued
+Task 3:                      ↓ Replaces Task 2
+                             [Waiting...]      [──────── 500ms ────────]  ✅
+Result: Task 1 runs, Task 2 dropped, Task 3 runs after Task 1.
+```
+
+**Use:** Data sync, efficient update propagation
+
+---
+
 ## 5-Second Start
 
 ```dart
