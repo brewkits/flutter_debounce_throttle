@@ -116,6 +116,33 @@ if (result != null) {
 }
 ```
 
+#### DebounceResult (v1.1.0)
+
+Use `callWithResult()` when your async operation can return null:
+
+```dart
+// Problem: call() returns T? - can't distinguish "cancelled" from "result is null"
+final user = await debouncer(() async => await api.findUser(id));
+if (user == null) {
+  // Cancelled? Or user not found?
+}
+
+// Solution: callWithResult() returns DebounceResult<T>
+final result = await debouncer.callWithResult(() async => await api.findUser(id));
+
+if (result.isCancelled) {
+  return; // Cancelled by newer call
+}
+
+// result.value may be null (user not found), but we know it wasn't cancelled
+showUser(result.value);
+```
+
+**DebounceResult properties:**
+- `isCancelled` - true if operation was cancelled
+- `isSuccess` - true if operation completed (not cancelled)
+- `value` - the result value (may be null even if successful)
+
 ### AsyncThrottler
 
 ```dart
