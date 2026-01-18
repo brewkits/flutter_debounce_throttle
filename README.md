@@ -350,8 +350,9 @@ We're committed to long-term maintenance and improvement.
 |---------|--------|----------|
 | **v1.0** | ✅ Released | Core debounce/throttle, widgets, mixin |
 | **v1.1** | ✅ Released | RateLimiter, extensions, leading/trailing edge, batch limits |
-| **v1.2** | 🔜 Planned | Retry policies, circuit breaker pattern |
-| **v2.0** | 📋 Roadmap | Web Workers support, isolate-safe controllers |
+| **v2.0** | ✅ Released | Package rename to dart_debounce_throttle, improved documentation |
+| **v2.1** | 🔜 Planned | Retry policies, circuit breaker pattern |
+| **v2.x** | 📋 Roadmap | Web Workers support, isolate-safe controllers |
 
 Have a feature request? [Open an issue](https://github.com/brewkits/flutter_debounce_throttle/issues)
 
