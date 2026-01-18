@@ -1,7 +1,7 @@
 # Workspace configuration for flutter_debounce_throttle monorepo
 #
 # This is not a publishable package. Use the packages in packages/ instead:
-# - flutter_debounce_throttle_core: Pure Dart (no Flutter dependencies)
+# - dart_debounce_throttle: Pure Dart (no Flutter dependencies)
 # - flutter_debounce_throttle: Flutter widgets + mixin
 # - flutter_debounce_throttle_hooks: Flutter Hooks integration
 #
@@ -21,8 +21,8 @@ dependencies:
     sdk: flutter
   flutter_debounce_throttle:
     path: packages/flutter_debounce_throttle
-  flutter_debounce_throttle_core:
-    path: packages/flutter_debounce_throttle_core
+  dart_debounce_throttle:
+    path: packages/dart_debounce_throttle
 
 dev_dependencies:
   flutter_test:

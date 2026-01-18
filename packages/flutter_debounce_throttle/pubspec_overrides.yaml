@@ -2,5 +2,5 @@
 # Use local path dependencies instead of published packages
 
 dependency_overrides:
-  flutter_debounce_throttle_core:
-    path: ../flutter_debounce_throttle_core
+  dart_debounce_throttle:
+    path: ../dart_debounce_throttle

@@ -1,6 +1,6 @@
-// flutter_debounce_throttle_core
+// dart_debounce_throttle
 //
-// Pure Dart core library for debounce and throttle operations.
+// Pure Dart library for debounce and throttle operations.
 // Zero external dependencies - works on Mobile, Web, Desktop, Server, and CLI.
 //
 // ============================================================================

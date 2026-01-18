@@ -36,8 +36,8 @@ dependencies:
     path: ../packages/flutter_debounce_throttle
 
   # Core package for server_demo
-  flutter_debounce_throttle_core:
-    path: ../packages/flutter_debounce_throttle_core
+  dart_debounce_throttle:
+    path: ../packages/dart_debounce_throttle
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
