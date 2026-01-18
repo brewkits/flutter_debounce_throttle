@@ -1,0 +1,21 @@
+name: flutter_debounce_throttle_core
+description: "[DISCONTINUED] Use dart_debounce_throttle instead. This package has been renamed to follow Dart naming conventions."
+version: 1.1.2
+homepage: https://github.com/brewkits/flutter_debounce_throttle
+repository: https://github.com/brewkits/flutter_debounce_throttle
+issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
+
+# Mark as discontinued and point to replacement
+topics:
+  - deprecated
+  - discontinued
+
+environment:
+  sdk: ^3.0.0
+
+# Replaced by dart_debounce_throttle
+dependencies:
+  dart_debounce_throttle: ^2.0.0
+
+dev_dependencies:
+  lints: ^6.0.0
