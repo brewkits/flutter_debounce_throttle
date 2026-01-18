@@ -324,6 +324,7 @@ dependencies:
 
 | | |
 |---|---|
+| [**FAQ**](FAQ.md) | Common questions answered |
 | [**API Reference**](docs/API_REFERENCE.md) | Complete API documentation |
 | [**Best Practices**](docs/BEST_PRACTICES.md) | Patterns & recommendations |
 | [**Migration Guide**](MIGRATION_GUIDE.md) | From easy_debounce, rxdart |
