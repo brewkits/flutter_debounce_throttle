@@ -214,6 +214,7 @@ final asyncDebouncer = useAsyncDebouncer(duration: 300.ms);
 
 <p align="center">
   <a href="https://github.com/brewkits/flutter_debounce_throttle">GitHub</a> ·
+  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/FAQ.md">FAQ</a> ·
   <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/API_REFERENCE.md">API Reference</a>
 </p>
 
