@@ -1,3 +1,44 @@
+## 2.0.0
+
+**BREAKING CHANGE** - Core dependency renamed to follow Dart naming conventions.
+
+### What Changed
+
+The underlying core package has been renamed from `flutter_debounce_throttle_core` to `dart_debounce_throttle`.
+
+### Impact
+
+- If you only use `flutter_debounce_throttle`, update to `^2.0.0` - no code changes needed
+- If you directly import the core package, update your imports (see migration guide below)
+
+### Migration Guide
+
+**If you import from `flutter_debounce_throttle` (most users):**
+
+```yaml
+# Update pubspec.yaml
+dependencies:
+  flutter_debounce_throttle: ^2.0.0  # Update version only
+```
+
+No code changes required - all exports work the same.
+
+**If you directly import core package:**
+
+```dart
+// Before
+import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+
+// After
+import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
+```
+
+### No API Changes
+
+All widgets, controllers, and functionality remain exactly the same.
+
+---
+
 ## 1.1.1
 
 **Documentation** - Enhanced README for better pub.dev presentation.
