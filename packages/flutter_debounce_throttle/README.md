@@ -191,7 +191,7 @@ ConcurrentAsyncThrottledBuilder(
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle: ^1.1.0
+  flutter_debounce_throttle: ^2.0.0
 ```
 
 ---

@@ -169,7 +169,7 @@ class AutocompleteSearch extends HookWidget {
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle_hooks: ^1.1.0
+  flutter_debounce_throttle_hooks: ^2.0.0
   flutter_hooks: ^0.21.0
 ```
 
