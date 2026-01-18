@@ -38,7 +38,7 @@
 // }
 // ```
 
-// library flutter_debounce_throttle_core;
+// library dart_debounce_throttle;
 
 // Configuration
 export 'src/core/config.dart';

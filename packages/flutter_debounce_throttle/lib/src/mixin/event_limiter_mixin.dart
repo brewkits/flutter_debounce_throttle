@@ -1,9 +1,9 @@
 // Mixin for State Management integration (Provider, GetX, Bloc, etc.)
-// Works with flutter_debounce_throttle_core.
+// Works with dart_debounce_throttle.
 
 import 'dart:async';
 
-import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 
 /// Mixin for adding event limiting to Controllers/ViewModels.
 ///

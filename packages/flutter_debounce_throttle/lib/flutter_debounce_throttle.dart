@@ -10,7 +10,7 @@
 //    import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 //
 // 2. Core Only (Pure Dart, Server-side compatible):
-//    import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+//    import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 //
 // 3. Hooks (OPTIONAL - requires flutter_hooks):
 //    import 'package:flutter_debounce_throttle_hooks/flutter_debounce_throttle_hooks.dart';
@@ -60,7 +60,7 @@
 // ```
 
 // Re-export Core (Pure Dart)
-export 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+export 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 
 // Mixin for State Management
 export 'src/mixin/event_limiter_mixin.dart';
