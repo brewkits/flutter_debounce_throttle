@@ -1,3 +1,49 @@
+## 2.0.0
+
+**BREAKING CHANGE** - Package renamed to follow Dart naming conventions.
+
+### What Changed
+
+The package has been renamed from `flutter_debounce_throttle_core` to `dart_debounce_throttle`.
+
+Pure Dart packages should not have the `flutter_` prefix, as this package has zero Flutter dependencies and works in any Dart environment (server, CLI, web, mobile).
+
+### Migration Guide
+
+**1. Update pubspec.yaml:**
+
+```yaml
+# Before
+dependencies:
+  flutter_debounce_throttle_core: ^1.1.0
+
+# After
+dependencies:
+  dart_debounce_throttle: ^2.0.0
+```
+
+**2. Update imports:**
+
+```dart
+// Before
+import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+
+// After
+import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
+```
+
+**3. Run pub get:**
+
+```bash
+dart pub get  # or flutter pub get
+```
+
+### No API Changes
+
+All classes, methods, and functionality remain exactly the same. Only the package name and import path have changed.
+
+---
+
 ## 1.1.1
 
 **Documentation** - Enhanced README for better pub.dev presentation.

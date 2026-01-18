@@ -1,3 +1,30 @@
+## 2.0.0
+
+**BREAKING CHANGE** - Core dependency renamed to follow Dart naming conventions.
+
+### What Changed
+
+The underlying packages have been updated:
+- Core: `flutter_debounce_throttle_core` → `dart_debounce_throttle`
+- Main: `flutter_debounce_throttle` updated to `^2.0.0`
+
+### Migration Guide
+
+Update pubspec.yaml:
+
+```yaml
+dependencies:
+  flutter_debounce_throttle_hooks: ^2.0.0  # Update version only
+```
+
+No code changes required - all hooks work the same.
+
+### No API Changes
+
+All hooks (`useDebouncedCallback`, `useThrottledCallback`, etc.) remain exactly the same.
+
+---
+
 ## 1.1.1
 
 **Documentation** - Enhanced README for better pub.dev presentation.
