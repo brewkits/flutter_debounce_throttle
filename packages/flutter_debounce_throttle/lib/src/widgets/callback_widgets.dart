@@ -1,7 +1,7 @@
 // Flutter widget wrappers for throttle and debounce operations.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 
 /// Throttled callback wrapper. Used by BaseButton. Prefer ThrottledInkWell for tap events.
 class ThrottledCallback extends StatefulWidget {

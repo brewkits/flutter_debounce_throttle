@@ -5,7 +5,7 @@
 
 import 'dart:async';
 
-import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 
 /// Simulates a server-side log batching service
 /// Groups multiple log entries and writes to DB in batches to reduce load

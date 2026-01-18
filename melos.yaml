@@ -25,7 +25,7 @@ scripts:
 
   # Run tests for core only (Pure Dart)
   test:core:
-    run: melos exec --scope="flutter_debounce_throttle_core" -- dart test
+    run: melos exec --scope="dart_debounce_throttle" -- dart test
     description: Run tests for core package only
 
   # Run analysis

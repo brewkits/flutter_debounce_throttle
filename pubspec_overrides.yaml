@@ -2,5 +2,5 @@
 dependency_overrides:
   flutter_debounce_throttle:
     path: packages/flutter_debounce_throttle
-  flutter_debounce_throttle_core:
-    path: packages/flutter_debounce_throttle_core
+  dart_debounce_throttle:
+    path: packages/dart_debounce_throttle
