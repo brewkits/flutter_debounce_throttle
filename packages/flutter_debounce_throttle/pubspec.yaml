@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_debounce_throttle_core: ^1.1.0
+  dart_debounce_throttle: ^1.1.0
 
 dev_dependencies:
   flutter_test:

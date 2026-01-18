@@ -229,7 +229,7 @@ ConcurrentAsyncThrottler(maxQueueSize: 10)
 
 | Package | Use When |
 |---------|----------|
-| [`flutter_debounce_throttle_core`](https://pub.dev/packages/flutter_debounce_throttle_core) | Pure Dart (Server/CLI) |
+| [`dart_debounce_throttle`](https://pub.dev/packages/dart_debounce_throttle) | Pure Dart (Server/CLI) |
 | [`flutter_debounce_throttle_hooks`](https://pub.dev/packages/flutter_debounce_throttle_hooks) | Flutter + Hooks |
 
 ---

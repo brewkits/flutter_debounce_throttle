@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
-/// Integration tests for flutter_debounce_throttle_core
+/// Integration tests for dart_debounce_throttle
 ///
 /// These tests verify that multiple components work together correctly
 /// in real-world scenarios.

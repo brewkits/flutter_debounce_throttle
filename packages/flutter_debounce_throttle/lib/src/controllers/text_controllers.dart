@@ -1,7 +1,7 @@
 // TextField controllers with debounce support.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 
 /// TextField controller with debounce (default 300ms).
 ///

@@ -1,6 +1,6 @@
-# flutter_debounce_throttle_core
+# dart_debounce_throttle
 
-[![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_core.svg)](https://pub.dev/packages/flutter_debounce_throttle_core)
+[![pub package](https://img.shields.io/pub/v/dart_debounce_throttle.svg)](https://pub.dev/packages/dart_debounce_throttle)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-340%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Pure Dart](https://img.shields.io/badge/pure-Dart-02569B)](https://dart.dev)
@@ -285,7 +285,7 @@ processor(() async => await processJob(job));
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle_core: ^1.1.0
+  dart_debounce_throttle: ^1.1.0
 ```
 
 **For:** Serverpod, Dart Frog, shelf, Alfred, CLI apps, shared business logic

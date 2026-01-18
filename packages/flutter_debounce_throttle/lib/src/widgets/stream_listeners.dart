@@ -3,7 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_debounce_throttle_core/flutter_debounce_throttle_core.dart';
+import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 
 /// Safe stream listener with auto-cancel on dispose.
 ///
