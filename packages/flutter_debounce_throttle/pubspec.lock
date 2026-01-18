@@ -41,6 +41,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  dart_debounce_throttle:
+    dependency: "direct main"
+    description:
+      path: "../dart_debounce_throttle"
+      relative: true
+    source: path
+    version: "2.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -54,13 +61,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_debounce_throttle_core:
-    dependency: "direct main"
-    description:
-      path: "../flutter_debounce_throttle_core"
-      relative: true
-    source: path
-    version: "1.1.1"
   flutter_lints:
     dependency: "direct dev"
     description:
