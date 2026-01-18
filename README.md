@@ -295,15 +295,15 @@ See full [Migration Guide](MIGRATION_GUIDE.md) →
 ```yaml
 # Flutter App
 dependencies:
-  flutter_debounce_throttle: ^1.1.0
+  flutter_debounce_throttle: ^2.0.0
 
 # Flutter + Hooks
 dependencies:
-  flutter_debounce_throttle_hooks: ^1.1.0
+  flutter_debounce_throttle_hooks: ^2.0.0
 
 # Pure Dart (Server, CLI)
 dependencies:
-  dart_debounce_throttle: ^1.1.0
+  dart_debounce_throttle: ^2.0.0
 ```
 
 ---

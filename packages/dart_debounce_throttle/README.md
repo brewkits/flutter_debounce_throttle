@@ -285,7 +285,7 @@ processor(() async => await processJob(job));
 
 ```yaml
 dependencies:
-  dart_debounce_throttle: ^1.1.0
+  dart_debounce_throttle: ^2.0.0
 ```
 
 **For:** Serverpod, Dart Frog, shelf, Alfred, CLI apps, shared business logic
