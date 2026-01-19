@@ -165,6 +165,8 @@ class SearchController with ChangeNotifier, EventLimiterMixin {
 }
 ```
 
+> **⚠️ Important:** When using **dynamic IDs** (e.g., `debounce('post_$postId', ...)`), you must manually call `remove(id)` when items are deleted to prevent memory leaks. The mixin does **not** automatically dispose dynamic IDs. For static IDs like `'search'` or `'submit'`, `cancelAll()` in dispose is sufficient.
+
 ---
 
 ## Concurrency Modes

@@ -89,3 +89,4 @@ export 'src/rate_limiter.dart';
 
 // Extensions
 export 'src/extensions.dart';
+export 'src/stream_extensions.dart';
