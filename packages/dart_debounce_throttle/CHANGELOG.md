@@ -1,3 +1,21 @@
+## 2.1.0
+
+**Feature** - Stream extensions for rxdart-style debounce and throttle.
+
+- Add `.debounce()` extension method for streams
+- Add `.throttle()` extension method for streams
+- Support both single-subscription and broadcast streams
+- Zero additional dependencies
+
+**Example:**
+```dart
+searchController.stream
+  .debounce(Duration(milliseconds: 300))
+  .listen((query) => performSearch(query));
+```
+
+---
+
 ## 2.0.0+1
 
 **Fix** - Update repository URL for pub.dev validation.

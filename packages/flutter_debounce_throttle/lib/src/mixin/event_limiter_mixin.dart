@@ -125,6 +125,7 @@ mixin EventLimiterMixin {
       duration:
           duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
     );
+    _checkLimiterCount();
     _debouncers[id]!.call(action);
   }
 
@@ -140,6 +141,7 @@ mixin EventLimiterMixin {
       duration:
           duration ?? DebounceThrottleConfig.config.defaultThrottleDuration,
     );
+    _checkLimiterCount();
     _throttlers[id]!.call(action);
   }
 
@@ -155,6 +157,7 @@ mixin EventLimiterMixin {
       duration:
           duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
     );
+    _checkLimiterCount();
     // ignore: deprecated_member_use_from_same_package
     return _asyncDebouncers[id]!.call(action);
   }
@@ -171,6 +174,7 @@ mixin EventLimiterMixin {
       maxDuration:
           maxDuration ?? DebounceThrottleConfig.config.defaultAsyncTimeout,
     );
+    _checkLimiterCount();
     return _asyncThrottlers[id]!.call(action);
   }
 
@@ -260,5 +264,26 @@ mixin EventLimiterMixin {
       if (t.isLocked) count++;
     }
     return count;
+  }
+
+  /// Internal: Check limiter count and warn if too many instances exist.
+  ///
+  /// Helps detect potential memory leaks from using dynamic IDs without
+  /// calling [remove].
+  void _checkLimiterCount() {
+    final totalCount = _debouncers.length +
+        _throttlers.length +
+        _asyncDebouncers.length +
+        _asyncThrottlers.length;
+
+    if (totalCount > 100) {
+      assert(
+        false,
+        'WARNING: EventLimiterMixin has over 100 limiter instances ($totalCount). '
+        'This may indicate a memory leak. If you are using dynamic IDs (e.g., '
+        '"post_\$postId"), make sure to call remove(id) when items are deleted. '
+        'For static IDs, this warning can be ignored.',
+      );
+    }
   }
 }
