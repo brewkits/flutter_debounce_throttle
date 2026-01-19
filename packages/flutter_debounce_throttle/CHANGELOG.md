@@ -1,3 +1,16 @@
+## 2.1.0
+
+**Enhancement** - Safety improvements and better documentation.
+
+- Add memory leak detection warning when EventLimiterMixin has >100 instances
+- Add prominent documentation warning about manual cleanup for dynamic IDs
+- Update dependency to dart_debounce_throttle ^2.1.0 (adds Stream extensions)
+
+**Important:** When using dynamic IDs with EventLimiterMixin (e.g., `debounce('post_$postId', ...)`),
+you must call `remove(id)` when items are deleted to prevent memory leaks.
+
+---
+
 ## 2.0.0
 
 **BREAKING CHANGE** - Core dependency renamed to follow Dart naming conventions.
