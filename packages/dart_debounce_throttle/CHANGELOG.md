@@ -1,3 +1,12 @@
+## 2.0.0+1
+
+**Fix** - Update repository URL for pub.dev validation.
+
+- Fix repository URL to point to package subdirectory
+- Improves pub.dev score by passing repository validation check
+
+---
+
 ## 2.0.0
 
 **BREAKING CHANGE** - Package renamed to follow Dart naming conventions.
