@@ -83,8 +83,13 @@ class ConcurrentAsyncThrottler {
   final ConcurrencyMode mode;
 
   /// Maximum queue size for enqueue mode.
+  ///
   /// Null means unlimited (default for backward compatibility).
   /// Only applies to [ConcurrencyMode.enqueue].
+  ///
+  /// **Warning:** For network requests or memory-intensive operations,
+  /// always set a reasonable limit (e.g., 10-50) to prevent OOM (Out Of Memory)
+  /// if operations timeout or network is slow.
   final int? maxQueueSize;
 
   /// Strategy to use when [maxQueueSize] is reached in enqueue mode.
