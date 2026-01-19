@@ -209,6 +209,23 @@ debouncer(() => refreshCache());
 | `AsyncThrottler` | Async operations with timeout |
 | `ConcurrentAsyncThrottler` | 4 concurrency modes |
 | `HighFrequencyThrottler` | 60fps events (no Timer overhead) |
+| **Stream Extensions** | rxdart-style `.debounce()` / `.throttle()` |
+
+### Stream Extensions
+
+Apply debounce and throttle directly to streams:
+
+```dart
+// Debounce stream events
+searchController.stream
+  .debounce(Duration(milliseconds: 300))
+  .listen((query) => performSearch(query));
+
+// Throttle stream events
+clickController.stream
+  .throttle(Duration(milliseconds: 500))
+  .listen((event) => handleClick(event));
+```
 
 ---
 
