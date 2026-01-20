@@ -2,7 +2,7 @@
 
 [![pub package](https://img.shields.io/pub/v/dart_debounce_throttle.svg)](https://pub.dev/packages/dart_debounce_throttle)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-340%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
+[![Tests](https://img.shields.io/badge/tests-300%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Pure Dart](https://img.shields.io/badge/pure-Dart-02569B)](https://dart.dev)
 
 ## The Traffic Control System for Dart Backend
@@ -76,10 +76,11 @@ if (!limiter.tryAcquire()) {
 
 ✅ **Zero Dependencies** - Only `meta` (type annotations)
 ✅ **Pure Dart** - Works everywhere: Mobile, Web, Desktop, **Server**, CLI
-✅ **340+ Tests** - Comprehensive coverage, all edge cases
-✅ **Memory Safe** - Auto-dispose, leak detection, mounted checks
+✅ **300+ Tests** - Comprehensive coverage, all edge cases
+✅ **Memory Safe** - Auto-dispose, leak detection, TTL auto-cleanup
 ✅ **Type Safe** - Full generics, no `dynamic`
 ✅ **Production Proven** - Used in real-world apps and backends
+✅ **Error Tracking** - onError callbacks for Crashlytics/Sentry integration
 
 ### 🚀 Unique Features
 
@@ -91,6 +92,8 @@ if (!limiter.tryAcquire()) {
 | **Stream Extensions** | rxdart-style `.debounce()` without the bloat |
 | **Async Cancellation** | Auto-cancel stale requests, prevent memory leaks |
 | **Leading/Trailing Edge** | Lodash-style debounce modes |
+| **Error Handling (v2.2)** | onError callbacks for production error tracking |
+| **TTL Auto-Cleanup (v2.2)** | Prevent memory leaks with automatic cleanup |
 
 ---
 
