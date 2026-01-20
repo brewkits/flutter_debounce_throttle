@@ -4,6 +4,7 @@
 import 'dart:async';
 
 import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
+import 'package:meta/meta.dart';
 
 /// Mixin for adding event limiting to Controllers/ViewModels.
 ///
@@ -11,8 +12,39 @@ import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 /// and even Dart Server controllers.
 ///
 /// **Important:** Use static IDs for limiters. If you use dynamic IDs like
-/// `debounce('post_$postId')`, call [remove] to clean up when the item is
-/// removed, otherwise the internal maps will grow unbounded.
+/// `debounce('post_$postId')`, you have several cleanup options:
+/// 1. Call [remove] manually when items are deleted
+/// 2. Enable auto-cleanup via global config (see [DebounceThrottleConfig])
+/// 3. Call [cleanupInactive] or [cleanupUnused] periodically
+///
+/// **Memory Management with Dynamic IDs:**
+/// ```dart
+/// // Option 1: Enable auto-cleanup globally (recommended for production)
+/// void main() {
+///   DebounceThrottleConfig.init(
+///     limiterAutoCleanupTTL: Duration(minutes: 5),     // Auto-remove after 5min of inactivity
+///     limiterAutoCleanupThreshold: 100,               // Trigger cleanup when >100 limiters
+///   );
+///   runApp(MyApp());
+/// }
+///
+/// // Option 2: Manual cleanup in controller lifecycle
+/// class InfiniteScrollController extends GetxController with EventLimiterMixin {
+///   @override
+///   void onInit() {
+///     super.onInit();
+///     // Periodic cleanup every 5 minutes
+///     Timer.periodic(Duration(minutes: 5), (_) {
+///       cleanupInactive();  // Remove inactive limiters
+///     });
+///   }
+/// }
+///
+/// // Option 3: Explicit removal when items are deleted
+/// void onPostDeleted(String postId) {
+///   remove('like_$postId');  // Clean up specific limiter
+/// }
+/// ```
 ///
 /// **Example with Provider:**
 /// ```dart
@@ -112,6 +144,12 @@ mixin EventLimiterMixin {
   final Map<String, AsyncDebouncer> _asyncDebouncers = {};
   final Map<String, AsyncThrottler> _asyncThrottlers = {};
 
+  // Track last usage time for auto-cleanup
+  final Map<String, DateTime> _debouncersLastUsed = {};
+  final Map<String, DateTime> _throttlersLastUsed = {};
+  final Map<String, DateTime> _asyncDebouncersLastUsed = {};
+  final Map<String, DateTime> _asyncThrottlersLastUsed = {};
+
   /// Debounce a callback by ID.
   ///
   /// Delays execution until no calls for [duration].
@@ -121,11 +159,15 @@ mixin EventLimiterMixin {
     void Function() action, {
     Duration? duration,
   }) {
-    _debouncers[id] ??= Debouncer(
-      duration:
-          duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
-    );
-    _checkLimiterCount();
+    // Only check cleanup when creating new instance (performance optimization)
+    if (!_debouncers.containsKey(id)) {
+      _debouncers[id] = Debouncer(
+        duration:
+            duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
+      );
+      _checkLimiterCount();
+    }
+    _debouncersLastUsed[id] = DateTime.now();
     _debouncers[id]!.call(action);
   }
 
@@ -137,11 +179,15 @@ mixin EventLimiterMixin {
     void Function() action, {
     Duration? duration,
   }) {
-    _throttlers[id] ??= Throttler(
-      duration:
-          duration ?? DebounceThrottleConfig.config.defaultThrottleDuration,
-    );
-    _checkLimiterCount();
+    // Only check cleanup when creating new instance (performance optimization)
+    if (!_throttlers.containsKey(id)) {
+      _throttlers[id] = Throttler(
+        duration:
+            duration ?? DebounceThrottleConfig.config.defaultThrottleDuration,
+      );
+      _checkLimiterCount();
+    }
+    _throttlersLastUsed[id] = DateTime.now();
     _throttlers[id]!.call(action);
   }
 
@@ -153,11 +199,15 @@ mixin EventLimiterMixin {
     Future<T> Function() action, {
     Duration? duration,
   }) {
-    _asyncDebouncers[id] ??= AsyncDebouncer(
-      duration:
-          duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
-    );
-    _checkLimiterCount();
+    // Only check cleanup when creating new instance (performance optimization)
+    if (!_asyncDebouncers.containsKey(id)) {
+      _asyncDebouncers[id] = AsyncDebouncer(
+        duration:
+            duration ?? DebounceThrottleConfig.config.defaultDebounceDuration,
+      );
+      _checkLimiterCount();
+    }
+    _asyncDebouncersLastUsed[id] = DateTime.now();
     // ignore: deprecated_member_use_from_same_package
     return _asyncDebouncers[id]!.call(action);
   }
@@ -170,11 +220,15 @@ mixin EventLimiterMixin {
     Future<void> Function() action, {
     Duration? maxDuration,
   }) {
-    _asyncThrottlers[id] ??= AsyncThrottler(
-      maxDuration:
-          maxDuration ?? DebounceThrottleConfig.config.defaultAsyncTimeout,
-    );
-    _checkLimiterCount();
+    // Only check cleanup when creating new instance (performance optimization)
+    if (!_asyncThrottlers.containsKey(id)) {
+      _asyncThrottlers[id] = AsyncThrottler(
+        maxDuration:
+            maxDuration ?? DebounceThrottleConfig.config.defaultAsyncTimeout,
+      );
+      _checkLimiterCount();
+    }
+    _asyncThrottlersLastUsed[id] = DateTime.now();
     return _asyncThrottlers[id]!.call(action);
   }
 
@@ -204,12 +258,16 @@ mixin EventLimiterMixin {
   void remove(String id) {
     _debouncers[id]?.dispose();
     _debouncers.remove(id);
+    _debouncersLastUsed.remove(id);
     _throttlers[id]?.dispose();
     _throttlers.remove(id);
+    _throttlersLastUsed.remove(id);
     _asyncDebouncers[id]?.dispose();
     _asyncDebouncers.remove(id);
+    _asyncDebouncersLastUsed.remove(id);
     _asyncThrottlers[id]?.dispose();
     _asyncThrottlers.remove(id);
+    _asyncThrottlersLastUsed.remove(id);
   }
 
   /// Alias for [cancel]. Prefer using `cancel()`.
@@ -234,6 +292,10 @@ mixin EventLimiterMixin {
     _throttlers.clear();
     _asyncDebouncers.clear();
     _asyncThrottlers.clear();
+    _debouncersLastUsed.clear();
+    _throttlersLastUsed.clear();
+    _asyncDebouncersLastUsed.clear();
+    _asyncThrottlersLastUsed.clear();
   }
 
   /// Alias for [cancelAll]. Prefer using `cancelAll()`.
@@ -248,7 +310,7 @@ mixin EventLimiterMixin {
         (_asyncThrottlers[id]?.isLocked ?? false);
   }
 
-  /// Get count of active limiters.
+  /// Get count of active limiters (currently pending/locked).
   int get activeLimitersCount {
     int count = 0;
     for (final d in _debouncers.values) {
@@ -266,15 +328,25 @@ mixin EventLimiterMixin {
     return count;
   }
 
-  /// Internal: Check limiter count and warn if too many instances exist.
+  /// Get total count of all limiter instances (active + inactive).
+  ///
+  /// Useful for monitoring memory usage with dynamic IDs.
+  ///
+  /// Example:
+  /// ```dart
+  /// print('Total limiters: ${controller.totalLimitersCount}');
+  /// ```
+  int get totalLimitersCount => _getTotalLimiterCount();
+
+  /// Internal: Check limiter count, auto-cleanup if needed, and warn if too many instances exist.
   ///
   /// Helps detect potential memory leaks from using dynamic IDs without
   /// calling [remove].
   void _checkLimiterCount() {
-    final totalCount = _debouncers.length +
-        _throttlers.length +
-        _asyncDebouncers.length +
-        _asyncThrottlers.length;
+    // Auto-cleanup if TTL is configured
+    _autoCleanupIfNeeded();
+
+    final totalCount = _getTotalLimiterCount();
 
     if (totalCount > 100) {
       assert(
@@ -286,4 +358,199 @@ mixin EventLimiterMixin {
       );
     }
   }
+
+  /// Auto-cleanup limiters that haven't been used within TTL period.
+  ///
+  /// Only runs if TTL is configured and threshold is reached.
+  void _autoCleanupIfNeeded() {
+    // Only run if TTL is configured
+    final ttl = DebounceThrottleConfig.config.limiterAutoCleanupTTL;
+    if (ttl == null) return;
+
+    // Only run if threshold is reached
+    final totalCount = _getTotalLimiterCount();
+    final threshold = DebounceThrottleConfig.config.limiterAutoCleanupThreshold;
+    if (totalCount <= threshold) return;
+
+    // Remove limiters that haven't been used within TTL
+    final now = DateTime.now();
+    _cleanupMapByTTL(_debouncers, _debouncersLastUsed, now, ttl);
+    _cleanupMapByTTL(_throttlers, _throttlersLastUsed, now, ttl);
+    _cleanupMapByTTL(_asyncDebouncers, _asyncDebouncersLastUsed, now, ttl);
+    _cleanupMapByTTL(_asyncThrottlers, _asyncThrottlersLastUsed, now, ttl);
+  }
+
+  void _cleanupMapByTTL<T>(
+    Map<String, T> limiterMap,
+    Map<String, DateTime> timestampMap,
+    DateTime now,
+    Duration ttl,
+  ) {
+    final idsToRemove = <String>[];
+
+    for (final id in limiterMap.keys) {
+      final lastUsed = timestampMap[id];
+      if (lastUsed == null) continue;
+
+      final inactiveDuration = now.difference(lastUsed);
+      if (inactiveDuration > ttl) {
+        idsToRemove.add(id);
+      }
+    }
+
+    for (final id in idsToRemove) {
+      (limiterMap[id] as dynamic)?.dispose();
+      limiterMap.remove(id);
+      timestampMap.remove(id);
+    }
+  }
+
+  /// Remove all inactive limiters (not currently pending/locked).
+  ///
+  /// Useful for periodic cleanup in long-running apps with dynamic IDs.
+  ///
+  /// Returns the number of limiters removed.
+  ///
+  /// Example:
+  /// ```dart
+  /// class MyController extends GetxController with EventLimiterMixin {
+  ///   @override
+  ///   void onInit() {
+  ///     super.onInit();
+  ///     // Cleanup every 5 minutes
+  ///     Timer.periodic(Duration(minutes: 5), (_) {
+  ///       cleanupInactive();
+  ///     });
+  ///   }
+  /// }
+  /// ```
+  int cleanupInactive() {
+    int removed = 0;
+    removed += _cleanupInactiveMap(_debouncers, (d) => !d.isPending);
+    removed += _cleanupInactiveMap(_throttlers, (t) => !t.isPending);
+    removed += _cleanupInactiveMap(_asyncDebouncers, (d) => !d.isPending);
+    removed += _cleanupInactiveMap(_asyncThrottlers, (t) => !t.isLocked);
+    return removed;
+  }
+
+  /// Remove limiters that haven't been used for [inactivityPeriod].
+  ///
+  /// Useful for cleaning up dynamic IDs that are no longer relevant.
+  ///
+  /// Returns the number of limiters removed.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Remove limiters unused for 10 minutes
+  /// controller.cleanupUnused(Duration(minutes: 10));
+  /// ```
+  int cleanupUnused(Duration inactivityPeriod) {
+    final now = DateTime.now();
+    int removed = 0;
+
+    removed += _cleanupUnusedMap(
+        _debouncers, _debouncersLastUsed, now, inactivityPeriod);
+    removed += _cleanupUnusedMap(
+        _throttlers, _throttlersLastUsed, now, inactivityPeriod);
+    removed += _cleanupUnusedMap(
+        _asyncDebouncers, _asyncDebouncersLastUsed, now, inactivityPeriod);
+    removed += _cleanupUnusedMap(
+        _asyncThrottlers, _asyncThrottlersLastUsed, now, inactivityPeriod);
+
+    return removed;
+  }
+
+  int _cleanupInactiveMap<T>(Map<String, T> map, bool Function(T) isInactive) {
+    final idsToRemove = <String>[];
+
+    for (final entry in map.entries) {
+      if (isInactive(entry.value)) {
+        idsToRemove.add(entry.key);
+      }
+    }
+
+    for (final id in idsToRemove) {
+      (map[id] as dynamic)?.dispose();
+      map.remove(id);
+      // Also remove from timestamp maps
+      _debouncersLastUsed.remove(id);
+      _throttlersLastUsed.remove(id);
+      _asyncDebouncersLastUsed.remove(id);
+      _asyncThrottlersLastUsed.remove(id);
+    }
+
+    return idsToRemove.length;
+  }
+
+  int _cleanupUnusedMap<T>(
+    Map<String, T> limiterMap,
+    Map<String, DateTime> timestampMap,
+    DateTime now,
+    Duration inactivityPeriod,
+  ) {
+    final idsToRemove = <String>[];
+
+    for (final id in limiterMap.keys) {
+      final lastUsed = timestampMap[id];
+      if (lastUsed != null) {
+        final inactiveDuration = now.difference(lastUsed);
+        if (inactiveDuration > inactivityPeriod) {
+          idsToRemove.add(id);
+        }
+      }
+    }
+
+    for (final id in idsToRemove) {
+      (limiterMap[id] as dynamic)?.dispose();
+      limiterMap.remove(id);
+      timestampMap.remove(id);
+    }
+
+    return idsToRemove.length;
+  }
+
+  int _getTotalLimiterCount() {
+    return _debouncers.length +
+        _throttlers.length +
+        _asyncDebouncers.length +
+        _asyncThrottlers.length;
+  }
+
+  // =================================================================
+  // Test-only getters (visible for testing)
+  // =================================================================
+
+  /// Visible for testing: Access to internal debouncer map.
+  @visibleForTesting
+  Map<String, Debouncer> get testDebouncers => _debouncers;
+
+  /// Visible for testing: Access to internal throttler map.
+  @visibleForTesting
+  Map<String, Throttler> get testThrottlers => _throttlers;
+
+  /// Visible for testing: Access to internal async debouncer map.
+  @visibleForTesting
+  Map<String, AsyncDebouncer> get testAsyncDebouncers => _asyncDebouncers;
+
+  /// Visible for testing: Access to internal async throttler map.
+  @visibleForTesting
+  Map<String, AsyncThrottler> get testAsyncThrottlers => _asyncThrottlers;
+
+  /// Visible for testing: Access to debouncer timestamp map.
+  @visibleForTesting
+  Map<String, DateTime> get testDebouncersLastUsed => _debouncersLastUsed;
+
+  /// Visible for testing: Access to throttler timestamp map.
+  @visibleForTesting
+  Map<String, DateTime> get testThrottlersLastUsed => _throttlersLastUsed;
+
+  /// Visible for testing: Access to async debouncer timestamp map.
+  @visibleForTesting
+  Map<String, DateTime> get testAsyncDebouncersLastUsed =>
+      _asyncDebouncersLastUsed;
+
+  /// Visible for testing: Access to async throttler timestamp map.
+  @visibleForTesting
+  Map<String, DateTime> get testAsyncThrottlersLastUsed =>
+      _asyncThrottlersLastUsed;
 }

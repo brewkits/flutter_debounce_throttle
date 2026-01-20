@@ -70,6 +70,21 @@ class AsyncThrottler with EventLimiterLogging {
   /// Callback for performance metrics.
   final void Function(Duration executionTime, bool executed)? onMetrics;
 
+  /// Error handler for exceptions thrown in async throttled callbacks.
+  ///
+  /// When provided, errors from callbacks will be caught and passed to this handler.
+  /// The future will still complete with an error if not handled.
+  ///
+  /// Example:
+  /// ```dart
+  /// final throttler = AsyncThrottler(
+  ///   onError: (error, stackTrace) {
+  ///     FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  ///   },
+  /// );
+  /// ```
+  final void Function(Object error, StackTrace stackTrace)? onError;
+
   bool _isLocked = false;
   Timer? _timeoutTimer;
 
@@ -80,6 +95,7 @@ class AsyncThrottler with EventLimiterLogging {
     this.enabled = true,
     this.resetOnError = false,
     this.onMetrics,
+    this.onError,
   }) : maxDuration = maxDuration ?? defaultTimeout;
 
   /// Execute async operation with lock protection.
@@ -93,7 +109,16 @@ class AsyncThrottler with EventLimiterLogging {
         await callback();
         final executionTime = DateTime.now().difference(startTime);
         onMetrics?.call(executionTime, true);
-      } catch (e) {
+      } catch (e, stackTrace) {
+        // Call error handler if provided
+        if (onError != null) {
+          try {
+            onError!(e, stackTrace);
+          } catch (handlerError) {
+            debugLog('Error in onError handler: $handlerError');
+          }
+        }
+
         if (resetOnError) {
           debugLog('Error occurred, resetting lock state');
         }
@@ -125,8 +150,18 @@ class AsyncThrottler with EventLimiterLogging {
       final executionTime = DateTime.now().difference(startTime);
       debugLog('AsyncThrottle completed in ${executionTime.inMilliseconds}ms');
       onMetrics?.call(executionTime, true);
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugLog('AsyncThrottle error: $e');
+
+      // Call error handler if provided
+      if (onError != null) {
+        try {
+          onError!(e, stackTrace);
+        } catch (handlerError) {
+          debugLog('Error in onError handler: $handlerError');
+        }
+      }
+
       if (resetOnError) {
         debugLog('Resetting AsyncThrottler state due to error');
         reset();
