@@ -118,6 +118,21 @@ class AsyncDebouncer with EventLimiterLogging {
   /// Callback for performance metrics.
   final void Function(Duration executionTime, bool cancelled)? onMetrics;
 
+  /// Error handler for exceptions thrown in async debounced callbacks.
+  ///
+  /// When provided, errors from callbacks will be caught and passed to this handler.
+  /// The future will still complete with an error if not handled.
+  ///
+  /// Example:
+  /// ```dart
+  /// final debouncer = AsyncDebouncer(
+  ///   onError: (error, stackTrace) {
+  ///     FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  ///   },
+  /// );
+  /// ```
+  final void Function(Object error, StackTrace stackTrace)? onError;
+
   Timer? _timer;
   int _latestCallId = 0;
   void Function()? _cancelPendingCompleter;
@@ -129,11 +144,36 @@ class AsyncDebouncer with EventLimiterLogging {
     this.enabled = true,
     this.resetOnError = false,
     this.onMetrics,
+    this.onError,
   }) : duration = duration ?? defaultDuration;
 
   /// Executes async action after debounce delay, auto-cancels previous calls.
   ///
-  /// Returns `Future<T?>` where null means the call was cancelled by a newer call.
+  /// ⚠️ **WARNING: Null Ambiguity Issue**
+  ///
+  /// Returns `Future<T?>` where null can mean:
+  /// 1. The call was cancelled by a newer call, OR
+  /// 2. Your async function legitimately returned null
+  ///
+  /// This ambiguity can cause bugs. **Consider using [callWithResult] instead**,
+  /// which returns a `DebounceResult` to distinguish between these cases.
+  ///
+  /// Example:
+  /// ```dart
+  /// // ❌ Ambiguous - is null from cancellation or actual result?
+  /// final result = await debouncer.call(() async => fetchData());
+  /// if (result == null) {
+  ///   // Was it cancelled? Or did fetchData() return null?
+  /// }
+  ///
+  /// // ✅ Clear - use callWithResult instead
+  /// final result = await debouncer.callWithResult(() async => fetchData());
+  /// if (result.isCancelled) {
+  ///   print('Debounce was cancelled');
+  /// } else {
+  ///   print('Got result: ${result.value}');
+  /// }
+  /// ```
   ///
   /// Can be called directly as a function: `debouncer(() async => ...)`
   Future<T?> call<T>(Future<T> Function() action) async {
@@ -202,6 +242,16 @@ class AsyncDebouncer with EventLimiterLogging {
           }
         } catch (e, stackTrace) {
           debugLog('AsyncDebounce error: $e');
+
+          // Call error handler if provided
+          if (onError != null) {
+            try {
+              onError!(e, stackTrace);
+            } catch (handlerError) {
+              debugLog('Error in onError handler: $handlerError');
+            }
+          }
+
           if (resetOnError) {
             debugLog('Resetting AsyncDebouncer state due to error');
             _cancelInternal();
@@ -313,6 +363,16 @@ class AsyncDebouncer with EventLimiterLogging {
           }
         } catch (e, stackTrace) {
           debugLog('AsyncDebounce error: $e');
+
+          // Call error handler if provided
+          if (onError != null) {
+            try {
+              onError!(e, stackTrace);
+            } catch (handlerError) {
+              debugLog('Error in onError handler: $handlerError');
+            }
+          }
+
           if (resetOnError) {
             debugLog('Resetting AsyncDebouncer state due to error');
             _cancelInternal();

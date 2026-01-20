@@ -50,6 +50,8 @@ class DebounceThrottleConfig {
     Duration? defaultDebounceDuration,
     Duration? defaultThrottleDuration,
     Duration? defaultAsyncTimeout,
+    Duration? limiterAutoCleanupTTL,
+    int? limiterAutoCleanupThreshold,
     bool enableDebugLog = false,
     LogLevel logLevel = LogLevel.none,
     LogHandler? logHandler,
@@ -62,6 +64,12 @@ class DebounceThrottleConfig {
     }
     if (defaultAsyncTimeout != null) {
       _config._defaultAsyncTimeout = defaultAsyncTimeout;
+    }
+    if (limiterAutoCleanupTTL != null) {
+      _config._limiterAutoCleanupTTL = limiterAutoCleanupTTL;
+    }
+    if (limiterAutoCleanupThreshold != null) {
+      _config._limiterAutoCleanupThreshold = limiterAutoCleanupThreshold;
     }
 
     // Configure logging
@@ -96,6 +104,8 @@ class EventLimiterConfig {
   Duration _defaultDebounceDuration = const Duration(milliseconds: 300);
   Duration _defaultThrottleDuration = const Duration(milliseconds: 500);
   Duration _defaultAsyncTimeout = const Duration(seconds: 15);
+  Duration? _limiterAutoCleanupTTL;
+  int _limiterAutoCleanupThreshold = 100;
 
   /// Default duration for debounce operations.
   Duration get defaultDebounceDuration => _defaultDebounceDuration;
@@ -106,9 +116,27 @@ class EventLimiterConfig {
   /// Default timeout for async operations.
   Duration get defaultAsyncTimeout => _defaultAsyncTimeout;
 
+  /// Time-to-live for auto-cleanup of inactive limiters in EventLimiterMixin.
+  ///
+  /// When set, limiters that haven't been used for this duration will be
+  /// automatically disposed when the limiter count exceeds [limiterAutoCleanupThreshold].
+  ///
+  /// Default is null (auto-cleanup disabled).
+  Duration? get limiterAutoCleanupTTL => _limiterAutoCleanupTTL;
+
+  /// Threshold for triggering auto-cleanup in EventLimiterMixin.
+  ///
+  /// When the total number of limiters exceeds this threshold, auto-cleanup
+  /// will be triggered (if [limiterAutoCleanupTTL] is set).
+  ///
+  /// Default is 100.
+  int get limiterAutoCleanupThreshold => _limiterAutoCleanupThreshold;
+
   void _reset() {
     _defaultDebounceDuration = const Duration(milliseconds: 300);
     _defaultThrottleDuration = const Duration(milliseconds: 500);
     _defaultAsyncTimeout = const Duration(seconds: 15);
+    _limiterAutoCleanupTTL = null;
+    _limiterAutoCleanupThreshold = 100;
   }
 }

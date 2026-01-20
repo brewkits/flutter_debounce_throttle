@@ -105,6 +105,22 @@ class Throttler extends CallbackController {
   /// Callback for performance metrics.
   final void Function(Duration executionTime, bool executed)? onMetrics;
 
+  /// Error handler for exceptions thrown in throttled callbacks.
+  ///
+  /// When provided, errors from callbacks will be caught and passed to this handler.
+  /// If not provided, errors will be rethrown (default behavior).
+  ///
+  /// Example:
+  /// ```dart
+  /// final throttler = Throttler(
+  ///   onError: (error, stackTrace) {
+  ///     FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  ///     logger.error('Throttle error: $error');
+  ///   },
+  /// );
+  /// ```
+  final void Function(Object error, StackTrace stackTrace)? onError;
+
   Throttler({
     Duration? duration,
     super.debugMode = false,
@@ -112,6 +128,7 @@ class Throttler extends CallbackController {
     this.enabled = true,
     this.resetOnError = false,
     this.onMetrics,
+    this.onError,
   }) : super(duration: duration ?? defaultDuration);
 
   @override
@@ -161,12 +178,25 @@ class Throttler extends CallbackController {
       callback();
       final executionTime = DateTime.now().difference(startTime);
       onMetrics?.call(executionTime, executed);
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (resetOnError) {
         debugLog('Error occurred, resetting throttle state');
         reset();
       }
-      rethrow;
+
+      // Call error handler if provided
+      if (onError != null) {
+        try {
+          onError!(e, stackTrace);
+        } catch (handlerError) {
+          // Error in error handler - log but don't crash
+          debugLog('Error in onError handler: $handlerError');
+        }
+        // Don't rethrow when onError is provided
+      } else {
+        // No error handler - rethrow (original behavior)
+        rethrow;
+      }
     }
   }
 

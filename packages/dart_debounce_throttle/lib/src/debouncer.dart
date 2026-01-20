@@ -63,6 +63,22 @@ class Debouncer extends CallbackController {
   /// Callback for performance metrics.
   final void Function(Duration waitTime, bool cancelled)? onMetrics;
 
+  /// Error handler for exceptions thrown in debounced callbacks.
+  ///
+  /// When provided, errors from callbacks will be caught and passed to this handler
+  /// instead of being silently swallowed. This is crucial for production debugging.
+  ///
+  /// Example:
+  /// ```dart
+  /// final debouncer = Debouncer(
+  ///   onError: (error, stackTrace) {
+  ///     FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  ///     logger.error('Debounce error: $error');
+  ///   },
+  /// );
+  /// ```
+  final void Function(Object error, StackTrace stackTrace)? onError;
+
   /// Execute callback immediately on first call (leading edge).
   /// Default is false (trailing edge only).
   final bool leading;
@@ -83,6 +99,7 @@ class Debouncer extends CallbackController {
     this.enabled = true,
     this.resetOnError = false,
     this.onMetrics,
+    this.onError,
     this.leading = false,
     this.trailing = true,
   })  : assert(
@@ -174,15 +191,27 @@ class Debouncer extends CallbackController {
       callback();
       final totalTime = DateTime.now().difference(callTime);
       onMetrics?.call(totalTime, false);
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (resetOnError) {
         debugLog('Error occurred, cancelling pending debounce');
         cancel();
         _lastCallTime = null;
       }
-      // Don't rethrow - errors in debounced callbacks are swallowed
-      // This is consistent with how Timer callbacks work
-      debugLog('Debounce callback error (swallowed): $e');
+
+      // Call error handler if provided
+      if (onError != null) {
+        try {
+          onError!(e, stackTrace);
+        } catch (handlerError) {
+          // Error in error handler - log but don't crash
+          debugLog('Error in onError handler: $handlerError');
+        }
+      } else {
+        // No error handler - log for debugging
+        // Don't rethrow - errors in debounced callbacks are swallowed
+        // This is consistent with how Timer callbacks work
+        debugLog('Debounce callback error (no handler): $e\n$stackTrace');
+      }
     }
   }
 
