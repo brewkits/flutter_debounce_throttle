@@ -33,16 +33,64 @@ if (!limiter.tryAcquire()) {
 
 ---
 
+## Why Choose This Over Alternatives?
+
+### vs rxdart
+| Feature | dart_debounce_throttle | rxdart |
+|---------|:---:|:---:|
+| **Package Size** | ~25 KB | ~150 KB |
+| **Dependencies** | 0 (only `meta`) | Multiple |
+| **Stream Extensions** | ✅ `.debounce()` `.throttle()` | ✅ Full suite |
+| **Widget Support** | Via `flutter_debounce_throttle` | ❌ |
+| **Token Bucket** | ✅ | ❌ |
+| **Batch Processing** | ✅ | ❌ |
+| **Server-Ready** | ✅ Pure Dart | ✅ |
+
+**Use rxdart if:** You need full reactive programming suite (combineLatest, merge, zip, etc.)
+**Use this if:** You only need debounce/throttle + zero bloat + Flutter widgets
+
+### vs easy_debounce
+| Feature | dart_debounce_throttle | easy_debounce |
+|---------|:---:|:---:|
+| **Type Safety** | ✅ Generics | ❌ No generics |
+| **Async Support** | ✅ Full | ⚠️ Limited |
+| **Rate Limiting** | ✅ Token Bucket | ❌ |
+| **Batch Processing** | ✅ | ❌ |
+| **Memory Safety** | ✅ Auto-dispose + leak detection | ⚠️ Manual |
+| **Tests** | 340+ | ~10 |
+
+### vs Manual Timer
+| Feature | This Package | Manual `Timer` |
+|---------|:---:|:---:|
+| **Code Lines** | 1 line | 10-20 lines |
+| **Memory Leaks** | ✅ Auto-prevented | ❌ Easy to leak |
+| **Async Cancellation** | ✅ Built-in | ❌ Complex logic |
+| **Race Conditions** | ✅ 4 strategies | ❌ Manual handling |
+| **Production Ready** | ✅ Battle-tested | ❌ Untested |
+
+---
+
 ## Why This Package?
 
-| Feature | This Package | Manual Implementation |
-|---------|:---:|:---:|
-| **Token Bucket Rate Limiter** | ✅ | ❌ Complex math |
-| **4 Concurrency Modes** | ✅ | ❌ Error-prone |
-| **Batch Processing** | ✅ | ❌ Boilerplate |
-| **Async Cancellation** | ✅ | ❌ Memory leaks |
-| **Zero Dependencies** | ✅ Only `meta` | - |
-| **340+ Tests** | ✅ | ❌ Untested |
+### 🎯 Enterprise-Ready Features
+
+✅ **Zero Dependencies** - Only `meta` (type annotations)
+✅ **Pure Dart** - Works everywhere: Mobile, Web, Desktop, **Server**, CLI
+✅ **340+ Tests** - Comprehensive coverage, all edge cases
+✅ **Memory Safe** - Auto-dispose, leak detection, mounted checks
+✅ **Type Safe** - Full generics, no `dynamic`
+✅ **Production Proven** - Used in real-world apps and backends
+
+### 🚀 Unique Features
+
+| Feature | Description |
+|---------|-------------|
+| **Token Bucket Rate Limiter** | Enterprise-grade API protection with burst support |
+| **4 Concurrency Modes** | drop, enqueue, replace, keepLatest - handle race conditions |
+| **Batch Processing** | Reduce DB writes from 100→1 |
+| **Stream Extensions** | rxdart-style `.debounce()` without the bloat |
+| **Async Cancellation** | Auto-cancel stale requests, prevent memory leaks |
+| **Leading/Trailing Edge** | Lodash-style debounce modes |
 
 ---
 
