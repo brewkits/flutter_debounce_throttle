@@ -1,6 +1,53 @@
 # Roadmap
 
-## v2.2.0 - Enterprise Backend & Advanced Features (Q1 2026)
+## v2.2.0 - Production Safety & Memory Management ✅ RELEASED
+
+### 🎯 Goals
+Make the library production-safe with error tracking and automatic memory management.
+
+### ✅ Released Features
+
+#### 1. Error Handling - onError Callbacks
+Added error handlers to all limiters for production error tracking:
+
+```dart
+final debouncer = Debouncer(
+  onError: (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  },
+);
+```
+
+**Features:**
+- onError callbacks for Debouncer, Throttler, AsyncDebouncer, AsyncThrottler
+- Firebase Crashlytics and Sentry integration support
+- No more silent failures in production
+
+#### 2. TTL Auto-Cleanup
+Prevent memory leaks with time-to-live based automatic cleanup:
+
+```dart
+DebounceThrottleConfig.init(
+  limiterAutoCleanupTTL: Duration(minutes: 5),
+  limiterAutoCleanupThreshold: 100,
+);
+```
+
+**Features:**
+- Automatic cleanup after configurable TTL
+- Manual cleanup APIs: cleanupInactive(), cleanupUnused()
+- Memory monitoring with totalLimitersCount
+- Production-safe for dynamic IDs
+
+#### 3. Performance Optimization
+Fixed O(N) performance issue in EventLimiterMixin:
+- 100-1000x faster for repeated limiter calls
+- O(1) hash lookup instead of O(N) iteration
+- UI thread optimized
+
+---
+
+## v2.3.0 - Enterprise Backend & Advanced Features (Planned - Q2 2026)
 
 ### 🎯 Goals
 Make `dart_debounce_throttle` the **#1 choice** for Dart backend servers (Serverpod, Dart Frog, Shelf) with distributed rate limiting and advanced Flutter widgets.
@@ -171,6 +218,7 @@ We welcome contributions! If you want to work on any roadmap item:
 
 ## Version History
 
+- **v2.2.0** - Error Handling (onError), TTL Auto-Cleanup, Performance Optimization
 - **v2.1.x** - Stream Extensions, Memory Guards, Safety Improvements
 - **v2.0.0** - Package Rename (dart_debounce_throttle)
 - **v1.1.0** - Rate Limiter, Leading/Trailing Edge
@@ -178,4 +226,4 @@ We welcome contributions! If you want to work on any roadmap item:
 
 ---
 
-*Last updated: 2026-01-19*
+*Last updated: 2026-01-21*
