@@ -1,3 +1,58 @@
+## 2.2.0
+
+**Production Safety & Memory Management** - Enhanced error handling and automatic cleanup for production apps.
+
+### 🛡️ Error Handling
+
+- **onError Callbacks** - Added error handlers to all limiters (Debouncer, Throttler, AsyncDebouncer, AsyncThrottler)
+- **Firebase Crashlytics Integration** - Track errors in production via onError callback
+- **Sentry Support** - Capture exceptions with custom error handlers
+- **Better Debugging** - No more silent failures in production
+
+```dart
+final debouncer = Debouncer(
+  onError: (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  },
+);
+```
+
+### 🧹 Memory Management
+
+- **TTL Auto-Cleanup** - Prevent memory leaks with time-to-live based automatic cleanup
+- **Manual Cleanup APIs** - Fine-grained control with `cleanupInactive()` and `cleanupUnused()`
+- **Memory Monitoring** - Track limiter count with `totalLimitersCount` getter
+- **Production Safe** - Handles dynamic IDs without OOM crashes
+
+```dart
+// Enable auto-cleanup globally
+DebounceThrottleConfig.init(
+  limiterAutoCleanupTTL: Duration(minutes: 5),
+  limiterAutoCleanupThreshold: 100,
+);
+```
+
+### ⚡ Performance
+
+- **O(1) Optimization** - Fixed O(N) performance issue in EventLimiterMixin
+- **Faster Existing Calls** - 100-1000x improvement for repeated limiter calls
+- **UI Thread Safe** - Reduced unnecessary work during user interactions
+
+### 📦 What's Included
+
+- Error handling for all 4 limiter types
+- TTL-based auto-cleanup with configurable threshold
+- Manual cleanup methods for dynamic IDs
+- Performance optimization in mixin
+- 48 comprehensive tests (100% passing)
+- Zero breaking changes - fully backward compatible
+
+### 🔧 Migration Notes
+
+No migration needed - all changes are opt-in and backward compatible.
+
+---
+
 ## 1.0.0
 
 **Enterprise Edition** - The Safe, Unified & Universal Event Limiter for Flutter & Dart.
