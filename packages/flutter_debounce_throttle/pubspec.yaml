@@ -1,6 +1,6 @@
 name: flutter_debounce_throttle
 description: Safe event limiting for Flutter with auto lifecycle management. Debounce, throttle, prevent double-clicks and race conditions.
-version: 2.1.1
+version: 2.2.0
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
