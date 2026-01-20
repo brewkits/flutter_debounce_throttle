@@ -1,3 +1,13 @@
+## 2.1.1
+
+**Documentation** - Align with dart_debounce_throttle v2.1.1 improvements.
+
+- Update dependency to dart_debounce_throttle ^2.1.1
+- Improved documentation and safety warnings
+- See dart_debounce_throttle CHANGELOG for Stream extensions and other improvements
+
+---
+
 ## 2.1.0
 
 **Enhancement** - Safety improvements and better documentation.
