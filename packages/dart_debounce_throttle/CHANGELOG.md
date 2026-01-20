@@ -1,3 +1,15 @@
+## 2.1.1
+
+**Documentation** - Enhanced README and improved safety warnings.
+
+- Add comprehensive comparison vs rxdart, easy_debounce, manual Timer
+- Add "Why Choose This Over Alternatives" section to README
+- Improve documentation for ConcurrentAsyncThrottler maxQueueSize warning
+- Add memory guard test cases
+- Create ROADMAP.md for v2.2.0 features
+
+---
+
 ## 2.1.0
 
 **Feature** - Stream extensions for rxdart-style debounce and throttle.
