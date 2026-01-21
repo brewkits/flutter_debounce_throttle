@@ -1,3 +1,11 @@
+## 2.3.1
+
+**Metadata** - Updated dependency to flutter_debounce_throttle 2.3.1.
+
+- Updated flutter_debounce_throttle dependency to ^2.3.1
+
+---
+
 ## 2.3.0
 
 **Production-Safe Defaults** - Updated to support flutter_debounce_throttle 2.3.0.
