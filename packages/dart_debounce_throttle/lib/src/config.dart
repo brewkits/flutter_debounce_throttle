@@ -104,7 +104,7 @@ class EventLimiterConfig {
   Duration _defaultDebounceDuration = const Duration(milliseconds: 300);
   Duration _defaultThrottleDuration = const Duration(milliseconds: 500);
   Duration _defaultAsyncTimeout = const Duration(seconds: 15);
-  Duration? _limiterAutoCleanupTTL;
+  Duration? _limiterAutoCleanupTTL = const Duration(minutes: 10);
   int _limiterAutoCleanupThreshold = 100;
 
   /// Default duration for debounce operations.
@@ -121,7 +121,8 @@ class EventLimiterConfig {
   /// When set, limiters that haven't been used for this duration will be
   /// automatically disposed when the limiter count exceeds [limiterAutoCleanupThreshold].
   ///
-  /// Default is null (auto-cleanup disabled).
+  /// Default is 10 minutes (auto-cleanup enabled for production safety).
+  /// Set to null via DebounceThrottleConfig.init() to disable auto-cleanup.
   Duration? get limiterAutoCleanupTTL => _limiterAutoCleanupTTL;
 
   /// Threshold for triggering auto-cleanup in EventLimiterMixin.
@@ -136,7 +137,7 @@ class EventLimiterConfig {
     _defaultDebounceDuration = const Duration(milliseconds: 300);
     _defaultThrottleDuration = const Duration(milliseconds: 500);
     _defaultAsyncTimeout = const Duration(seconds: 15);
-    _limiterAutoCleanupTTL = null;
+    _limiterAutoCleanupTTL = const Duration(minutes: 10);
     _limiterAutoCleanupThreshold = 100;
   }
 }

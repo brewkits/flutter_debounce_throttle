@@ -101,7 +101,10 @@ void main() {
       DebounceThrottleConfig.reset();
     });
 
-    test('auto-cleanup does not run when TTL is disabled (default)', () async {
+    test('auto-cleanup can be disabled by setting TTL to null', () async {
+      // Explicitly disable auto-cleanup
+      DebounceThrottleConfig.init(limiterAutoCleanupTTL: null);
+
       final controller = TestController();
 
       // Add 50 limiters
@@ -112,11 +115,49 @@ void main() {
       // Wait a bit (simulating that these are "old")
       await Future.delayed(const Duration(milliseconds: 50));
 
-      // Add another limiter - TTL is disabled so no auto-cleanup should occur
+      // Add another limiter - TTL is null so no auto-cleanup should occur
       controller.debounce('new_item', () {});
 
-      // All limiters should still be there (no auto-cleanup when TTL is disabled)
+      // All limiters should still be there (no auto-cleanup when TTL is null)
       expect(controller.limiterCount, 51);
+
+      controller.cancelAll();
+    });
+
+    test('auto-cleanup is enabled by default with 10-minute TTL', () async {
+      final config = DebounceThrottleConfig.config;
+
+      // Verify default TTL is 10 minutes
+      expect(config.limiterAutoCleanupTTL, isNotNull);
+      expect(config.limiterAutoCleanupTTL, const Duration(minutes: 10));
+      expect(config.limiterAutoCleanupThreshold, 100);
+    });
+
+    test('default auto-cleanup behavior (simulated with shorter TTL)', () async {
+      // Simulate the default behavior but with shorter TTL for test speed
+      DebounceThrottleConfig.init(
+        limiterAutoCleanupTTL: const Duration(milliseconds: 100),
+        limiterAutoCleanupThreshold: 50, // Lower threshold for testing
+      );
+
+      final controller = TestController();
+
+      // Add 60 limiters (exceeds threshold of 50)
+      for (var i = 0; i < 60; i++) {
+        controller.debounce('item_$i', () {});
+      }
+
+      expect(controller.limiterCount, 60);
+
+      // Wait for TTL to expire
+      await Future.delayed(const Duration(milliseconds: 150));
+
+      // Trigger auto-cleanup by adding new limiter
+      controller.debounce('new_item', () {});
+
+      // Old limiters should be auto-removed, only new one remains
+      // This proves the default auto-cleanup mechanism works
+      expect(controller.limiterCount, 1);
 
       controller.cancelAll();
     });

@@ -513,6 +513,34 @@ mixin EventLimiterMixin {
 
 ## Global Configuration
 
+### Memory Management (NEW in v2.3.0)
+
+Auto-cleanup is **enabled by default** to prevent memory leaks:
+
+```dart
+void main() {
+  // Default configuration (v2.3.0+):
+  // - limiterAutoCleanupTTL: Duration(minutes: 10)
+  // - limiterAutoCleanupThreshold: 100
+
+  // Optional: Customize settings
+  DebounceThrottleConfig.init(
+    limiterAutoCleanupTTL: Duration(minutes: 5),    // Faster cleanup
+    limiterAutoCleanupThreshold: 50,                // Lower threshold
+  );
+  runApp(MyApp());
+}
+```
+
+**To disable auto-cleanup** (not recommended):
+```dart
+DebounceThrottleConfig.init(
+  limiterAutoCleanupTTL: null,  // ⚠️ Requires manual cleanup!
+);
+```
+
+### Logging Configuration
+
 ```dart
 void main() {
   DebounceThrottleConfig.init(

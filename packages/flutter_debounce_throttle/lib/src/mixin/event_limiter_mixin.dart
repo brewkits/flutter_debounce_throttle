@@ -11,6 +11,13 @@ import 'package:meta/meta.dart';
 /// Works with any class: ChangeNotifier, GetxController, Cubit, MobX Store,
 /// and even Dart Server controllers.
 ///
+/// **NEW in v2.3.0:** Auto-cleanup is enabled by default with a 10-minute TTL
+/// to prevent memory leaks when using dynamic IDs. Limiters unused for 10+ minutes
+/// are automatically removed when count exceeds 100.
+///
+/// To disable: `DebounceThrottleConfig.init(limiterAutoCleanupTTL: null)`
+/// To customize: `DebounceThrottleConfig.init(limiterAutoCleanupTTL: Duration(minutes: 5))`
+///
 /// **Important:** Use static IDs for limiters. If you use dynamic IDs like
 /// `debounce('post_$postId')`, you have several cleanup options:
 /// 1. Call [remove] manually when items are deleted
@@ -19,11 +26,22 @@ import 'package:meta/meta.dart';
 ///
 /// **Memory Management with Dynamic IDs:**
 /// ```dart
-/// // Option 1: Enable auto-cleanup globally (recommended for production)
+/// // AUTO-CLEANUP IS ENABLED BY DEFAULT (10 minutes TTL, 100 limiter threshold)
+/// // No configuration needed for basic protection!
+///
+/// // Optional: Customize the TTL and threshold
 /// void main() {
 ///   DebounceThrottleConfig.init(
-///     limiterAutoCleanupTTL: Duration(minutes: 5),     // Auto-remove after 5min of inactivity
-///     limiterAutoCleanupThreshold: 100,               // Trigger cleanup when >100 limiters
+///     limiterAutoCleanupTTL: Duration(minutes: 5),     // Faster cleanup
+///     limiterAutoCleanupThreshold: 50,                 // More aggressive threshold
+///   );
+///   runApp(MyApp());
+/// }
+///
+/// // Optional: Disable auto-cleanup entirely (not recommended)
+/// void main() {
+///   DebounceThrottleConfig.init(
+///     limiterAutoCleanupTTL: null,  // Disable (manual cleanup required!)
 ///   );
 ///   runApp(MyApp());
 /// }

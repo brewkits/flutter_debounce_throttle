@@ -48,8 +48,9 @@ class DebounceResult<T> {
   bool get isSuccess => !isCancelled;
 
   @override
-  String toString() =>
-      isCancelled ? 'DebounceResult.cancelled' : 'DebounceResult.success($value)';
+  String toString() => isCancelled
+      ? 'DebounceResult.cancelled'
+      : 'DebounceResult.success($value)';
 }
 
 /// Debounce with auto-cancel for async operations (search API, autocomplete).
@@ -297,7 +298,8 @@ class AsyncDebouncer with EventLimiterLogging {
   /// final user = result.value; // May be null (user not found), but not cancelled
   /// showUser(user);
   /// ```
-  Future<DebounceResult<T>> callWithResult<T>(Future<T> Function() action) async {
+  Future<DebounceResult<T>> callWithResult<T>(
+      Future<T> Function() action) async {
     final startTime = DateTime.now();
 
     // Skip debounce if disabled
