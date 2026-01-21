@@ -347,7 +347,8 @@ void main() {
 
       expect(errorCount, 1);
       expect(executeCount, 1);
-      expect(throttler.isLocked, false, reason: 'Should be unlocked after error');
+      expect(throttler.isLocked, false,
+          reason: 'Should be unlocked after error');
 
       // Should be able to call immediately (was unlocked)
       await throttler.call(() async {

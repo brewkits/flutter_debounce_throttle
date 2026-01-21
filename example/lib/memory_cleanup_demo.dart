@@ -7,10 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
 void main() {
-  // Strategy 1: Enable auto-cleanup globally (RECOMMENDED for production)
+  // AUTO-CLEANUP IS NOW ENABLED BY DEFAULT! (10 minutes, 100 limiters)
+  // This demo customizes the settings for faster demonstration
   DebounceThrottleConfig.init(
-    limiterAutoCleanupTTL: const Duration(seconds: 10), // Auto-remove after 10s of inactivity
-    limiterAutoCleanupThreshold: 50, // Trigger cleanup when >50 limiters
+    limiterAutoCleanupTTL: const Duration(seconds: 10), // Faster for demo (default: 10 minutes)
+    limiterAutoCleanupThreshold: 50, // More aggressive for demo (default: 100)
     enableDebugLog: true, // Enable debug logs to see cleanup in action
   );
 

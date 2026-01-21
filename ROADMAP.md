@@ -47,7 +47,19 @@ Fixed O(N) performance issue in EventLimiterMixin:
 
 ---
 
-## v2.3.0 - Enterprise Backend & Advanced Features (Planned - Q2 2026)
+## v2.3.0 - Production-Safe Defaults ✅ RELEASED
+
+**Goal:** Make auto-cleanup the default to prevent memory leaks in production apps.
+
+### ✅ Released Features
+
+- Auto-cleanup enabled by default (10 minutes TTL)
+- Enhanced memory management documentation
+- Production-safe defaults out of the box
+
+---
+
+## v2.4.0 - Enterprise Backend & Advanced Features (Planned - Q2 2026)
 
 ### 🎯 Goals
 Make `dart_debounce_throttle` the **#1 choice** for Dart backend servers (Serverpod, Dart Frog, Shelf) with distributed rate limiting and advanced Flutter widgets.

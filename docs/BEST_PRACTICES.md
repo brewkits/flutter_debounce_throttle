@@ -232,6 +232,48 @@ void trackEvent(String name) {
 
 ---
 
+## Memory Management
+
+Prevent memory leaks when using EventLimiterMixin with dynamic IDs.
+
+### The Problem
+
+```dart
+// ⚠️ Memory leak pattern:
+class InfiniteScrollController with EventLimiterMixin {
+  void onLike(String postId) {
+    debounce('like_$postId', () => api.like(postId));  // Creates new limiter per post
+  }
+}
+// After scrolling 1000 posts → 1000 limiters in memory → OOM crash
+```
+
+### The Solution: Auto-Cleanup (Enabled by Default in v2.3.0+)
+
+**BEST: Rely on default auto-cleanup (no config needed)**
+```dart
+class SmartController with EventLimiterMixin {
+  void onLike(String postId) {
+    debounce('like_$postId', () => api.like(postId));
+    // ✅ Auto-cleanup removes limiters unused for 10+ minutes
+    // ✅ Triggers when limiter count exceeds 100
+    // ✅ Zero configuration required!
+  }
+}
+```
+
+**ALTERNATIVE: Use static IDs**
+```dart
+class StaticController with EventLimiterMixin {
+  void onLike(String postId) {
+    debounce('like_action', () => api.like(postId));  // Reuses same limiter
+    // ✅ No memory leak possible
+  }
+}
+```
+
+---
+
 ## Common Mistakes
 
 ### DO
