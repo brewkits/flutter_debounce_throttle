@@ -1,6 +1,6 @@
 name: flutter_debounce_throttle
-description: Safe event limiting for Flutter with auto lifecycle management. Debounce, throttle, prevent double-clicks and race conditions.
-version: 2.2.0
+description: Production-ready debounce, throttle, and rate limiting for Flutter. Prevent double-clicks, API spam, race conditions, and memory leaks with auto lifecycle management. Includes widgets, mixins, and hooks.
+version: 2.3.0
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
@@ -11,6 +11,10 @@ topics:
   - rate-limiting
   - async
   - ui
+  - concurrency
+  - event-handling
+  - production
+  - memory-management
 
 environment:
   sdk: ^3.0.0
@@ -19,7 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dart_debounce_throttle: ^2.1.1
+  dart_debounce_throttle: ^2.3.0
+  meta: ^1.16.0
 
 dev_dependencies:
   flutter_test:

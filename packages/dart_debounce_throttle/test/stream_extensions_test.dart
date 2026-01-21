@@ -38,7 +38,7 @@ void main() {
       controller.add(1);
       await Future.delayed(const Duration(milliseconds: 50));
       controller.add(2);
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 40));
       controller.add(3);
 
       await Future.delayed(const Duration(milliseconds: 150));

@@ -6,12 +6,17 @@
 [![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Pure Dart](https://img.shields.io/badge/pure-Dart-02569B)](https://dart.dev)
 
-## The Traffic Control System for Your App Architecture
+## Enterprise-Grade Event Rate Limiter & Throttle Library
+
+> The complete traffic control system for Flutter & Dart.
+> Stop UI glitches, API spam, and race conditions with production-safe debounce, throttle, and rate limiting.
 
 > Stop using manual Timers. They cause memory leaks and crashes.
-> Switch to the standard traffic control system for Flutter & Dart.
+> Switch to the production-grade event rate limiting library for Flutter & Dart.
 
-Production-ready library unifying **debounce, throttle, rate limiting, and async concurrency control** into a single, battle-tested package. Like **ABS brakes** for your app — smooth, safe, and automatic.
+Enterprise-ready library unifying **debounce, throttle, rate limiting, and async concurrency control** into a single, battle-tested package with 360+ tests and 95% coverage.
+
+**Like ABS brakes for your app** — prevents crashes, stops memory leaks, handles edge cases automatically.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -182,6 +187,54 @@ Result:  Task 1 runs, Task 2 is dropped, Task 3 runs after Task 1.
 | Dependencies | **0** | 0 | Many | 0 |
 
 > **One library. All use cases. Zero compromises.**
+
+---
+
+## 🧹 Memory Management (NEW in v2.3.0)
+
+### The Problem: Dynamic IDs Can Leak Memory
+
+```dart
+// ⚠️ This pattern can leak memory:
+class InfiniteScrollController with EventLimiterMixin {
+  void onPostLike(String postId) {
+    debounce('like_$postId', () => api.like(postId));  // New limiter per post!
+  }
+}
+// User scrolls through 1000+ posts → 1000+ limiters → OOM crash
+```
+
+### The Solution: Auto-Cleanup (Enabled by Default)
+
+**v2.3.0+ automatically cleans up unused limiters:**
+- Limiters unused for **10+ minutes** are auto-removed
+- Cleanup triggers when limiter count exceeds **100**
+- **No configuration needed** - works out of the box!
+
+```dart
+// ✅ This is now safe by default:
+class SafeController with EventLimiterMixin {
+  void onPostLike(String postId) {
+    debounce('like_$postId', () => api.like(postId));
+    // Old limiters auto-cleanup after 10 minutes of inactivity
+  }
+}
+```
+
+### Customization (Optional)
+
+```dart
+void main() {
+  // Customize TTL and threshold
+  DebounceThrottleConfig.init(
+    limiterAutoCleanupTTL: Duration(minutes: 5),    // Faster cleanup
+    limiterAutoCleanupThreshold: 50,                // More aggressive
+  );
+  runApp(MyApp());
+}
+```
+
+**Learn more:** [Best Practices - Memory Management](docs/BEST_PRACTICES.md#memory-management)
 
 ---
 
