@@ -1,3 +1,12 @@
+## 2.3.1
+
+**Metadata** - Fixed package description to meet pub.dev requirements.
+
+- Shortened description to 129 characters (within 60-180 limit)
+- Improved pub.dev score compliance
+
+---
+
 ## 2.3.0
 
 **Production-Safe Defaults** - Auto-cleanup enabled by default to prevent memory leaks.
