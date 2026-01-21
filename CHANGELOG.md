@@ -1,3 +1,19 @@
+## 2.3.1
+
+**Metadata Fix** - Fixed package description to meet pub.dev requirements.
+
+### What Changed
+
+- Shortened dart_debounce_throttle description to 129 characters (within 60-180 limit)
+- Updated all package dependencies to ^2.3.1
+- Improved pub.dev score compliance
+
+### No Code Changes
+
+This is a metadata-only release. All functionality remains identical to v2.3.0.
+
+---
+
 ## 2.3.0
 
 **Production-Safe Defaults** - Auto-cleanup enabled by default to prevent memory leaks.
