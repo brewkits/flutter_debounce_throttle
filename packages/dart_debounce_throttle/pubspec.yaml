@@ -10,11 +10,7 @@ topics:
   - throttle
   - rate-limiting
   - async
-  - dart
-  - concurrency
-  - event-handling
   - production
-  - memory-management
 
 environment:
   sdk: ^3.0.0
