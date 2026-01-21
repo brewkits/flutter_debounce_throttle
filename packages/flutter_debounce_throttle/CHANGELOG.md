@@ -1,3 +1,11 @@
+## 2.3.1
+
+**Metadata** - Updated dependency to dart_debounce_throttle 2.3.1.
+
+- Updated dart_debounce_throttle dependency to ^2.3.1
+
+---
+
 ## 2.3.0
 
 **Production-Safe Defaults** - Auto-cleanup enabled by default to prevent memory leaks.
