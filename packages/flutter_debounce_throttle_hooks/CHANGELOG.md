@@ -1,3 +1,19 @@
+## 2.3.0
+
+**Production-Safe Defaults** - Updated to support flutter_debounce_throttle 2.3.0.
+
+### What Changed
+
+- Updated dependency: `flutter_debounce_throttle` to `^2.3.0`
+- All hooks now benefit from auto-cleanup enabled by default
+- Improved memory safety for apps using dynamic IDs with hooks
+
+### No API Changes
+
+All hooks remain exactly the same. This is a dependency update only.
+
+---
+
 ## 2.0.0
 
 **BREAKING CHANGE** - Core dependency renamed to follow Dart naming conventions.
