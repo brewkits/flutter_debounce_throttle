@@ -9,12 +9,8 @@ topics:
   - debounce
   - throttle
   - rate-limiting
-  - async
   - ui
-  - concurrency
-  - event-handling
   - production
-  - memory-management
 
 environment:
   sdk: ^3.0.0
