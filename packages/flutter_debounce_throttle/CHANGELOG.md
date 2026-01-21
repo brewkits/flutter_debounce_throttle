@@ -1,3 +1,28 @@
+## 2.3.0
+
+**Production-Safe Defaults** - Auto-cleanup enabled by default to prevent memory leaks.
+
+- Default `limiterAutoCleanupTTL`: null → Duration(minutes: 10)
+- Memory leaks from dynamic IDs now prevented automatically
+- Enterprise-grade positioning and enhanced documentation
+- Updated dependency to dart_debounce_throttle ^2.3.0
+- Enhanced pub.dev SEO with production-safe keywords
+- Added `meta` dependency for @visibleForTesting annotations
+
+---
+
+## 2.2.0
+
+**Production Safety & Memory Management** - Enhanced error handling and automatic cleanup.
+
+- TTL Auto-Cleanup for EventLimiterMixin
+- Manual cleanup APIs (`cleanupInactive`, `cleanupUnused`)
+- Error handling callbacks (`onError`) for all limiters
+- Performance optimization (O(1) hash lookup)
+- Updated dependency to dart_debounce_throttle ^2.2.0
+
+---
+
 ## 2.1.1
 
 **Documentation** - Align with dart_debounce_throttle v2.1.1 improvements.

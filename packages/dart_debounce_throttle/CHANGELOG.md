@@ -1,3 +1,25 @@
+## 2.3.0
+
+**Production-Safe Defaults** - Auto-cleanup enabled by default to prevent memory leaks.
+
+- Default `limiterAutoCleanupTTL`: null → Duration(minutes: 10)
+- Memory leaks from dynamic IDs now prevented automatically
+- Enterprise-grade positioning and documentation
+- Enhanced pub.dev SEO with production-safe keywords
+
+---
+
+## 2.2.0
+
+**Production Safety & Memory Management** - Enhanced error handling and automatic cleanup.
+
+- TTL Auto-Cleanup for EventLimiterMixin
+- Manual cleanup APIs (`cleanupInactive`, `cleanupUnused`)
+- Error handling callbacks (`onError`) for all limiters
+- Performance optimization (O(1) hash lookup)
+
+---
+
 ## 2.1.1
 
 **Documentation** - Enhanced README and improved safety warnings.

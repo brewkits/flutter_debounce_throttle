@@ -1,3 +1,41 @@
+## 2.3.0
+
+**Production-Safe Defaults** - Auto-cleanup enabled by default to prevent memory leaks.
+
+### 🛡️ Breaking Change (Behavior)
+
+**IMPORTANT:** Auto-cleanup is now **enabled by default** to prevent memory leaks with dynamic IDs.
+
+- **Old behavior:** `limiterAutoCleanupTTL` defaulted to `null` (disabled)
+- **New behavior:** `limiterAutoCleanupTTL` defaults to `Duration(minutes: 10)` (enabled)
+
+**Impact:**
+- ✅ No code changes needed for most apps
+- ✅ Apps using dynamic IDs are now safer by default
+- ✅ Limiters unused for 10+ minutes are auto-removed when count exceeds 100
+- ✅ Actively used limiters are never cleaned up
+
+**Migration:**
+```dart
+// To keep old behavior (disable auto-cleanup):
+DebounceThrottleConfig.init(
+  limiterAutoCleanupTTL: null,  // Explicitly disable
+);
+```
+
+### 📦 What Changed
+
+- Default `limiterAutoCleanupTTL`: `null` → `Duration(minutes: 10)`
+- Updated documentation to reflect new defaults
+- Added tests for default behavior
+- Enhanced examples to show auto-cleanup is enabled by default
+
+### 🎯 Why This Change?
+
+Memory leaks with dynamic IDs can cause production crashes. Making auto-cleanup the default ensures apps are safe by default, following the principle of "secure by default."
+
+---
+
 ## 2.2.0
 
 **Production Safety & Memory Management** - Enhanced error handling and automatic cleanup for production apps.
