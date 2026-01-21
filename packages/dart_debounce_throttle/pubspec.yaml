@@ -1,5 +1,5 @@
 name: dart_debounce_throttle
-description: Enterprise-grade debounce, throttle, and rate limiting for Pure Dart. Production-safe with auto-cleanup, error handling, and zero dependencies. Works everywhere - Mobile, Web, Desktop, Server, CLI.
+description: Production-safe debounce, throttle, and rate limiting for Pure Dart. Auto-cleanup, error handling, and zero dependencies.
 version: 2.3.0
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle/tree/main/packages/dart_debounce_throttle
