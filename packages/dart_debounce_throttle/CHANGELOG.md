@@ -1,3 +1,39 @@
+## 2.4.0
+
+**Enterprise Features** - Distributed Rate Limiting for multi-server environments.
+
+### 🚀 New Features
+
+#### DistributedRateLimiter
+- Async rate limiter for multi-server environments (Redis/Memcached)
+- Token Bucket algorithm with distributed state
+- Perfect for microservices and serverless architectures
+
+```dart
+final limiter = DistributedRateLimiter(
+  key: 'user-$userId',
+  store: RedisRateLimiterStore(redis: redis),
+  maxTokens: 100,
+  refillRate: 10,
+);
+
+if (!await limiter.tryAcquire()) {
+  return Response.tooManyRequests();
+}
+```
+
+### 📦 Added
+- `RateLimiterStore` interfaces (sync + async)
+- `InMemoryRateLimiterStore` implementation
+- `RedisRateLimiterStore` reference implementation
+- `MemcachedRateLimiterStore` reference implementation
+- 35+ tests for distributed rate limiting
+
+### 🔄 Migration
+No breaking changes. All existing code works without modifications.
+
+---
+
 ## 2.3.1
 
 **Metadata** - Fixed package description to meet pub.dev requirements.
