@@ -1,3 +1,17 @@
+## 2.4.1
+
+**Quality Improvements** - Applied dart fix and updated examples.
+
+### 🔧 Fixed
+- Applied dart fix auto-fixes (use_super_parameters, sized_box_for_whitespace)
+- Fixed missing import in gesture_detector_demo.dart
+- Updated example dependencies to use local path
+
+### 📦 Dependencies
+- Updated dependency: `dart_debounce_throttle` to `^2.4.1`
+
+---
+
 ## 2.4.0
 
 **New Widget** - ThrottledGestureDetector for preventing gesture spam.

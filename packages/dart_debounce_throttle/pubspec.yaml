@@ -1,6 +1,6 @@
 name: dart_debounce_throttle
 description: Production-safe debounce, throttle, and rate limiting for Pure Dart. Auto-cleanup, error handling, and distributed support.
-version: 2.4.0
+version: 2.4.1
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle/tree/main/packages/dart_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues

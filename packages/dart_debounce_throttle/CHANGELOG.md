@@ -1,3 +1,16 @@
+## 2.4.1
+
+**Quality & Lint Fixes** - Improved pub.dev score.
+
+### 🔧 Fixed
+- Fixed redundant length check in `RateLimiterState.fromList()` (pub.dev lint)
+- Applied dart fix auto-fixes across codebase
+
+### 📊 Pub.dev Score
+- Fixed lint issues for improved pub points (150/160 → targeting 160/160)
+
+---
+
 ## 2.4.0
 
 **Enterprise Features** - Distributed Rate Limiting for multi-server environments.
