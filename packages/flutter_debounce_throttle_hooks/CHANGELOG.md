@@ -1,3 +1,16 @@
+## 2.4.0
+
+**Dependency Update** - Support for flutter_debounce_throttle 2.4.0.
+
+- Updated `flutter_debounce_throttle` dependency to `^2.4.0`
+- All hooks now benefit from new ThrottledGestureDetector widget
+- Enhanced distributed rate limiting support
+
+### No API Changes
+All hooks remain exactly the same. This is a dependency update only.
+
+---
+
 ## 2.3.1
 
 **Metadata** - Updated dependency to flutter_debounce_throttle 2.3.1.

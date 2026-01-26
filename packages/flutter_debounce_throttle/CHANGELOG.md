@@ -1,3 +1,34 @@
+## 2.4.0
+
+**New Widget** - ThrottledGestureDetector for preventing gesture spam.
+
+### 🚀 New Features
+
+#### ThrottledGestureDetector
+- Drop-in replacement for `GestureDetector` with built-in throttling
+- Supports all 40+ gesture callbacks (tap, long press, pan, scale, drag)
+- Smart dual-throttle: discrete events (500ms) + continuous events (16ms for 60fps)
+- Automatic lifecycle management
+
+```dart
+ThrottledGestureDetector(
+  onTap: () => handleTap(),
+  onLongPress: () => showMenu(),
+  onPanUpdate: (details) => updatePosition(details.delta),
+  child: MyWidget(),
+)
+```
+
+### 📦 Added
+- `ThrottledGestureDetector` widget
+- 16 widget tests for gesture throttling
+- Updated dependency: `dart_debounce_throttle` to `^2.4.0`
+
+### 🔄 Migration
+No breaking changes. All existing code works without modifications.
+
+---
+
 ## 2.3.1
 
 **Metadata** - Updated dependency to dart_debounce_throttle 2.3.1.
