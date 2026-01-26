@@ -19,7 +19,7 @@ void main() {
 }
 
 class MemoryCleanupDemoApp extends StatelessWidget {
-  const MemoryCleanupDemoApp({Key? key}) : super(key: key);
+  const MemoryCleanupDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class MemoryCleanupDemoApp extends StatelessWidget {
 }
 
 class MemoryCleanupDemo extends StatefulWidget {
-  const MemoryCleanupDemo({Key? key}) : super(key: key);
+  const MemoryCleanupDemo({super.key});
 
   @override
   State<MemoryCleanupDemo> createState() => _MemoryCleanupDemoState();
