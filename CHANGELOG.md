@@ -1,3 +1,55 @@
+## 2.4.0
+
+**Enterprise Features** - ThrottledGestureDetector & Distributed Rate Limiting.
+
+### 🚀 New Features
+
+#### ThrottledGestureDetector
+- Drop-in replacement for `GestureDetector` with built-in throttling
+- Supports all 40+ gesture callbacks (tap, long press, pan, scale, drag)
+- Smart dual-throttle: discrete events (500ms) + continuous events (16ms for 60fps)
+- Automatic lifecycle management
+
+```dart
+ThrottledGestureDetector(
+  onTap: () => handleTap(),
+  onPanUpdate: (details) => updatePosition(details.delta),
+  child: MyWidget(),
+)
+```
+
+#### DistributedRateLimiter
+- Async rate limiter for multi-server environments
+- Redis/Memcached support with reference implementations
+- Token Bucket algorithm with distributed state
+- Perfect for microservices and serverless
+
+```dart
+final limiter = DistributedRateLimiter(
+  key: 'user-$userId',
+  store: RedisRateLimiterStore(redis: redis),
+  maxTokens: 100,
+  refillRate: 10,
+);
+
+if (!await limiter.tryAcquire()) {
+  return Response.tooManyRequests();
+}
+```
+
+### 📦 Added
+- `RateLimiterStore` interfaces (sync + async)
+- `InMemoryRateLimiterStore` implementation
+- `RedisRateLimiterStore` reference implementation
+- `MemcachedRateLimiterStore` reference implementation
+- 35+ tests for distributed rate limiting
+- 16 widget tests for `ThrottledGestureDetector`
+
+### 🔄 Migration
+No breaking changes. All existing code works without modifications.
+
+---
+
 ## 2.3.1
 
 **Metadata Fix** - Fixed package description to meet pub.dev requirements.
