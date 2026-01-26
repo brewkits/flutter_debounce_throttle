@@ -21,10 +21,10 @@ packages:
     dependency: transitive
     description:
       name: dart_debounce_throttle
-      sha256: c52309048559fbdc0c3d475c16be32da0870a90522586dc03c169c57d2082522
+      sha256: "5bc6a8633c7bd4990d020502a54d978c891739dc2d4f06324f9009ca61b041cc"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0+1"
+    version: "2.4.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -33,19 +33,10 @@ packages:
   flutter_debounce_throttle:
     dependency: "direct main"
     description:
-      name: flutter_debounce_throttle
-      sha256: c4c3526575a5b8aed80d56fa39e8eea0d6ed88addd73025cab681519e486e26a
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
-  flutter_debounce_throttle_core:
-    dependency: transitive
-    description:
-      name: flutter_debounce_throttle_core
-      sha256: d385e3719458fa55c75e892f34edb9f4dd4d2047cf23886fe566ec0ded45de9b
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.2"
+      path: ".."
+      relative: true
+    source: path
+    version: "2.4.0"
   material_color_utilities:
     dependency: transitive
     description:
@@ -58,10 +49,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: e3641ec5d63ebf0d9b41bd43201a66e3fc79a65db5f61fc181f04cd27aab950c
+      sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
       url: "https://pub.dev"
     source: hosted
-    version: "1.16.0"
+    version: "1.17.0"
   sky_engine:
     dependency: transitive
     description: flutter

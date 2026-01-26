@@ -26,7 +26,7 @@ class RateLimiterState {
       return const RateLimiterState(tokens: 0, lastRefillMicroseconds: 0);
     }
     return RateLimiterState(
-      tokens: data.length > 0 ? data[0].toDouble() : 0,
+      tokens: data[0].toDouble(),
       lastRefillMicroseconds: data.length > 1 ? data[1].toInt() : 0,
     );
   }

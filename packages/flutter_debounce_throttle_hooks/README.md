@@ -2,7 +2,6 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_hooks.svg)](https://pub.dev/packages/flutter_debounce_throttle_hooks)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-50%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 
 ## The Traffic Control System — Hooks Edition
 
@@ -175,31 +174,14 @@ dependencies:
 
 ---
 
-## v1.1.0 Features
-
-```dart
-// Duration extensions work with all hooks
-final debouncer = useDebouncer(duration: 300.ms);
-final throttler = useThrottler(duration: 500.ms);
-
-// Debounced/throttled values
-final debouncedText = useDebouncedValue(text, duration: 300.ms);
-final throttledScroll = useThrottledValue(offset, duration: 16.ms);
-
-// Access to all core features
-final asyncDebouncer = useAsyncDebouncer(duration: 300.ms);
-```
-
----
-
 ## Quality Assurance
 
 | Guarantee | How |
 |-----------|-----|
-| **50+ tests** | Hook-specific test coverage |
-| **Type-safe** | Full generic support |
+| **Type-safe** | Full generic support with 8 production-ready hooks |
 | **Memory-safe** | Auto-cleanup on unmount |
 | **Lifecycle-aware** | No manual dispose needed |
+| **Battle-tested** | Built on flutter_debounce_throttle (340+ tests) |
 
 ---
 
