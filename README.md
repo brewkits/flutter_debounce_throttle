@@ -324,6 +324,142 @@ if (!limiter.tryAcquire()) {
 }
 ```
 
+**Distributed Rate Limiting** (Multi-server rate limits with Redis)
+```dart
+// Setup Redis store
+final redis = await RedisConnection().connect('localhost', 6379);
+final store = RedisRateLimiterStore(redis: redis, keyPrefix: 'api:');
+
+// Rate limit across all server instances
+final limiter = DistributedRateLimiter(
+  key: 'user-${userId}',
+  store: store,
+  maxTokens: 1000,
+  refillRate: 100,  // 100 requests/sec
+  refillInterval: Duration(seconds: 1),
+);
+
+if (!await limiter.tryAcquire()) {
+  return Response.tooManyRequests();
+}
+```
+
+**Throttled Gesture Detector** (Universal gesture throttling)
+```dart
+// Throttle ALL gesture types automatically
+ThrottledGestureDetector(
+  discreteDuration: 500.ms,       // For taps, long press
+  continuousDuration: 16.ms,      // For pan, scale (60fps)
+  onTap: () => handleTap(),
+  onLongPress: () => showMenu(),
+  onPanUpdate: (details) => updatePosition(details.delta),
+  onScaleUpdate: (details) => zoom(details.scale),
+  child: MyWidget(),
+)
+```
+
+---
+
+## 🚀 What's New in v2.4.0
+
+### ThrottledGestureDetector - Universal Gesture Throttling
+
+Finally, a drop-in replacement for `GestureDetector` with built-in throttling! No more manual wrapper logic.
+
+**Key Features:**
+- ✅ **Full GestureDetector API** - All 40+ callbacks supported
+- ✅ **Smart Throttling** - Discrete events (tap, long press) and continuous events (pan, scale) use different throttle strategies
+- ✅ **60fps Smooth** - Continuous gestures throttled at 16ms by default for silky animations
+- ✅ **Zero Config** - Just replace `GestureDetector` with `ThrottledGestureDetector`
+
+**Example:**
+```dart
+// Before: Manual throttling, complex wrapper logic
+GestureDetector(
+  onTap: () => _throttler.call(() => handleTap()),
+  onPanUpdate: (details) => _panThrottler.call(() => updatePosition(details)),
+  child: MyWidget(),
+)
+
+// After: One widget, automatic throttling
+ThrottledGestureDetector(
+  onTap: () => handleTap(),
+  onPanUpdate: (details) => updatePosition(details.delta),
+  child: MyWidget(),
+)
+```
+
+### DistributedRateLimiter - Scale to Multiple Servers
+
+Rate limiting that works across your entire backend cluster. Perfect for microservices and serverless.
+
+**Key Features:**
+- ✅ **Distributed** - Share rate limits across multiple server instances
+- ✅ **Redis/Memcached** - Built-in support with reference implementations
+- ✅ **Custom Stores** - Implement `AsyncRateLimiterStore` for any backend
+- ✅ **Production Ready** - Atomic operations, fail-safe design
+
+**Server-Side Example (Dart Frog / Shelf):**
+```dart
+// Setup once
+final store = RedisRateLimiterStore(
+  redis: await RedisConnection().connect('redis-server', 6379),
+  keyPrefix: 'ratelimit:',
+  ttl: Duration(hours: 1),
+);
+
+// Middleware
+Handler rateLimitMiddleware(Handler handler) {
+  return (context) async {
+    final userId = context.read<User>().id;
+
+    final limiter = DistributedRateLimiter(
+      key: 'user:$userId',
+      store: store,
+      maxTokens: 100,        // Burst capacity
+      refillRate: 10,        // 10 requests/sec sustained
+      refillInterval: Duration(seconds: 1),
+    );
+
+    if (!await limiter.tryAcquire()) {
+      return Response(
+        statusCode: 429,
+        headers: {
+          'Retry-After': (await limiter.timeUntilNextToken).inSeconds.toString(),
+        },
+      );
+    }
+
+    return handler(context);
+  };
+}
+```
+
+**Custom Storage Implementation:**
+```dart
+// Implement for any backend (PostgreSQL, MongoDB, etc)
+class PostgresStore implements AsyncRateLimiterStore {
+  final Database db;
+
+  @override
+  Future<RateLimiterState> fetchState(String key) async {
+    final row = await db.query('SELECT tokens, last_refill FROM rate_limits WHERE key = ?', [key]);
+    return row.isEmpty
+      ? RateLimiterState(tokens: 0, lastRefillMicroseconds: 0)
+      : RateLimiterState.fromList([row['tokens'], row['last_refill']]);
+  }
+
+  @override
+  Future<void> saveState(String key, RateLimiterState state) async {
+    await db.execute(
+      'INSERT INTO rate_limits (key, tokens, last_refill) VALUES (?, ?, ?) '
+      'ON CONFLICT (key) DO UPDATE SET tokens = ?, last_refill = ?',
+      [key, state.tokens, state.lastRefillMicroseconds, state.tokens, state.lastRefillMicroseconds],
+    );
+  }
+}
+```
+
 ---
 
 ## Coming from easy_debounce?
@@ -348,15 +484,15 @@ See full [Migration Guide](MIGRATION_GUIDE.md) →
 ```yaml
 # Flutter App
 dependencies:
-  flutter_debounce_throttle: ^2.0.0
+  flutter_debounce_throttle: ^2.4.0
 
 # Flutter + Hooks
 dependencies:
-  flutter_debounce_throttle_hooks: ^2.0.0
+  flutter_debounce_throttle_hooks: ^2.4.0
 
 # Pure Dart (Server, CLI)
 dependencies:
-  dart_debounce_throttle: ^2.0.0
+  dart_debounce_throttle: ^2.4.0
 ```
 
 ---
@@ -405,8 +541,10 @@ We're committed to long-term maintenance and improvement.
 | **v1.1** | ✅ Released | RateLimiter, extensions, leading/trailing edge, batch limits |
 | **v2.0** | ✅ Released | Package rename to dart_debounce_throttle, improved documentation |
 | **v2.2** | ✅ Released | Error handling (onError callbacks), TTL auto-cleanup, performance optimization |
-| **v2.3** | 🔜 Planned | Retry policies, circuit breaker pattern |
-| **v2.x** | 📋 Roadmap | Web Workers support, isolate-safe controllers |
+| **v2.3** | ✅ Released | Memory leak prevention, auto-cleanup for EventLimiterMixin |
+| **v2.4** | ✅ Released | ThrottledGestureDetector, DistributedRateLimiter with Redis/Memcached support |
+| **v2.5** | 🔜 Planned | Retry policies, circuit breaker pattern |
+| **v3.x** | 📋 Roadmap | Web Workers support, isolate-safe controllers |
 
 Have a feature request? [Open an issue](https://github.com/brewkits/flutter_debounce_throttle/issues)
 

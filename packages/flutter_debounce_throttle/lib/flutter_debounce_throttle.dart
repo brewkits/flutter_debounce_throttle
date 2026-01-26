@@ -68,6 +68,7 @@ export 'src/mixin/event_limiter_mixin.dart';
 // Flutter Widgets
 export 'src/widgets/callback_widgets.dart';
 export 'src/widgets/stream_listeners.dart';
+export 'src/widgets/gesture_detector.dart';
 
 // Flutter Controllers
 export 'src/controllers/text_controllers.dart';
