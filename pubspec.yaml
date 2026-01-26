@@ -24,6 +24,7 @@ dependencies:
   dart_debounce_throttle:
     path: packages/dart_debounce_throttle
 
+  meta: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

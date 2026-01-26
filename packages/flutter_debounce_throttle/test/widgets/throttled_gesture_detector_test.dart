@@ -381,7 +381,7 @@ void main() {
             body: ThrottledGestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {},
-              child: Container(
+              child: SizedBox(
                 width: 200,
                 height: 200,
               ),
