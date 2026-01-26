@@ -1,3 +1,24 @@
+## 2.4.1
+
+**Test Coverage & Documentation** - Added comprehensive tests and cleaned up docs.
+
+### ✅ Added
+- **16 comprehensive tests** covering all 8 hooks
+- Tests for lifecycle management, keys parameter, and hook coexistence
+- 100% hook coverage: useDebouncer, useThrottler, useDebouncedCallback,
+  useThrottledCallback, useDebouncedValue, useThrottledValue,
+  useAsyncDebouncer, useAsyncThrottler
+
+### 📚 Documentation
+- Removed outdated "v1.1.0 Features" section
+- Fixed misleading test count claims
+- Updated Quality Assurance section with accurate information
+
+### 📦 Dependencies
+- Updated dependency: `flutter_debounce_throttle` to `^2.4.1`
+
+---
+
 ## 2.4.0
 
 **Dependency Update** - Support for flutter_debounce_throttle 2.4.0.
