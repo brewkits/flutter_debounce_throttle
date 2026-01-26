@@ -8,4 +8,5 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_debounce_throttle: ^1.0.0
+  flutter_debounce_throttle:
+    path: ../
