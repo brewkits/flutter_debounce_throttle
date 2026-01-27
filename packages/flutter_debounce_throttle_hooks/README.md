@@ -168,9 +168,19 @@ class AutocompleteSearch extends HookWidget {
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle_hooks: ^2.0.0
+  flutter_debounce_throttle_hooks: ^2.4.2
   flutter_hooks: ^0.21.0
 ```
+
+---
+
+## 🆕 What's New in v2.4
+
+**All hooks now benefit from:**
+- ✅ ThrottledGestureDetector widget (120Hz display support)
+- ✅ Distributed rate limiting for server-side Dart
+- ✅ Production-grade error handling and race condition management
+- ✅ 16 comprehensive tests ensuring reliability
 
 ---
 

@@ -306,6 +306,64 @@ print('Available: ${limiter.availableTokens}');
 
 ---
 
+## Distributed Rate Limiting with Redis
+
+For server-side distributed rate limiting across multiple instances, see the Redis integration example:
+
+**📁 [example/server_demo/redis_rate_limiter/](../../../example/server_demo/redis_rate_limiter/)**
+
+The example includes:
+- ✅ Redis store implementation (copy to your project)
+- ✅ Atomic Lua script (eliminates race conditions)
+- ✅ Dart Frog/Shelf middleware examples
+- ✅ PostgreSQL alternative with transactions
+
+**Important**: Redis integration is optional and not included in the core package. You'll need to:
+1. Copy the store implementation to your project
+2. Add `redis: ^4.0.0` to your pubspec.yaml
+3. Use Lua scripts for production systems (avoid race conditions)
+
+### Quick Example
+
+```dart
+// 1. Add Redis to pubspec.yaml
+dependencies:
+  redis: ^4.0.0
+
+// 2. Copy redis_store_example.dart from example/ to your project
+
+// 3. Create distributed rate limiter
+final redisConn = RedisConnection();
+final redis = await redisConn.connect('localhost', 6379);
+
+final store = RedisRateLimiterStore(
+  redis: redis,
+  keyPrefix: 'ratelimit:',
+  ttl: Duration(hours: 1),
+);
+
+final limiter = DistributedRateLimiter(
+  key: 'user-${userId}',
+  store: store,
+  maxTokens: 100,
+  refillRate: 10,
+  refillInterval: Duration(seconds: 1),
+);
+
+// 4. Rate limit across all server instances
+if (await limiter.tryAcquire()) {
+  return await handleRequest();
+} else {
+  return Response.tooManyRequests();
+}
+```
+
+**⚠️ For Mobile Apps**: Do NOT connect Flutter apps directly to Redis (security risk). Use Redis only for server-side Dart Frog, Shelf, or backend microservices.
+
+See the [full Redis integration guide](../../../example/server_demo/redis_rate_limiter/README.md) for production setup with atomic operations.
+
+---
+
 ## Batch Processing
 
 Reduce database load by 100x:
@@ -353,14 +411,38 @@ processor(() async => await processJob(job));
 
 ```yaml
 dependencies:
-  dart_debounce_throttle: ^2.0.0
+  dart_debounce_throttle: ^2.4.2
 ```
 
 **For:** Serverpod, Dart Frog, shelf, Alfred, CLI apps, shared business logic
 
 ---
 
-## v1.1.0 Features
+## 🆕 What's New in v2.4
+
+### ThrottledGestureDetector (Flutter only)
+Drop-in replacement for GestureDetector with built-in throttling:
+```dart
+ThrottledGestureDetector(
+  onTap: () => handleTap(),
+  onPanUpdate: (details) => updatePosition(details),
+  child: MyWidget(),
+)
+```
+
+### Distributed Rate Limiting
+Production-ready Redis integration for multi-server environments:
+```dart
+final limiter = DistributedRateLimiter(
+  key: 'user-$userId',
+  store: RedisRateLimiterStore(redis: redis),
+  maxTokens: 100,
+  refillRate: 10,
+);
+```
+*See `example/server_demo/redis_rate_limiter/` for complete guide*
+
+### Power Features
 
 ```dart
 // Duration extensions
@@ -375,9 +457,16 @@ final throttledFn = myFunction.throttled(500.ms);
 // Leading + trailing edge
 Debouncer(leading: true, trailing: true)
 
-// Overflow strategies
-BatchThrottler(overflowStrategy: BatchOverflowStrategy.dropOldest)
-ConcurrentAsyncThrottler(queueOverflowStrategy: QueueOverflowStrategy.dropNewest)
+// Batch processing
+BatchThrottler(
+  duration: 2.seconds,
+  maxBatchSize: 100,
+  onBatchExecute: (actions) => database.insertBatch(actions),
+)
+
+// Stream extensions
+searchStream.debounce(300.ms).listen((query) => search(query));
+clickStream.throttle(500.ms).listen((event) => handle(event));
 ```
 
 ---

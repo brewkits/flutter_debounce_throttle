@@ -131,6 +131,7 @@ That's it. No setup. No dispose. Auto-cleanup on widget unmount.
 
 | Widget | Use Case |
 |--------|----------|
+| `ThrottledGestureDetector` 🆕 | Full GestureDetector with throttling (tap, pan, scale, drag) |
 | `ThrottledInkWell` | Button with ripple + throttle |
 | `ThrottledBuilder` | Custom throttled widget |
 | `DebouncedBuilder` | Custom debounced widget |
@@ -139,6 +140,27 @@ That's it. No setup. No dispose. Auto-cleanup on widget unmount.
 | `ConcurrentAsyncThrottledBuilder` | 4 concurrency modes |
 | `StreamDebounceListener` | Debounce stream events |
 | `StreamThrottleListener` | Throttle stream events |
+
+### 🆕 ThrottledGestureDetector
+
+Prevent gesture spam with full GestureDetector API support:
+
+```dart
+ThrottledGestureDetector(
+  continuousDuration: ThrottleDuration.ultraSmooth, // 8ms for 120Hz displays
+  onTap: () => handleTap(),
+  onLongPress: () => showMenu(),
+  onPanUpdate: (details) => updatePosition(details),
+  onScaleUpdate: (details) => zoom(details.scale),
+  child: MyWidget(),
+)
+```
+
+**Features:**
+- ✅ All 40+ gesture callbacks supported
+- ✅ Smart dual-throttle: discrete (500ms) + continuous (16ms/60fps)
+- ✅ 120Hz display support with `ThrottleDuration` presets
+- ✅ Automatic cleanup on dispose
 
 ---
 
@@ -193,12 +215,24 @@ ConcurrentAsyncThrottledBuilder(
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle: ^2.0.0
+  flutter_debounce_throttle: ^2.4.2
 ```
 
 ---
 
-## v1.1.0 Features
+## 🆕 What's New in v2.4
+
+### ThrottledGestureDetector
+Drop-in replacement for GestureDetector with built-in throttling and 120Hz display support.
+
+### ThrottleDuration Presets
+```dart
+ThrottleDuration.ultraSmooth    // 8ms  - iPad Pro 120Hz, iPhone 13 Pro+
+ThrottleDuration.standard       // 16ms - 60fps (default)
+ThrottleDuration.conservative   // 32ms - Battery saving, complex animations
+```
+
+### Power Features
 
 ```dart
 // Duration extensions
@@ -212,6 +246,11 @@ RateLimiter(maxTokens: 10, refillRate: 2)
 
 // Queue backpressure control
 ConcurrentAsyncThrottler(maxQueueSize: 10)
+
+// Device-adaptive throttling
+final duration = MediaQuery.of(context).devicePixelRatio >= 3.0
+    ? ThrottleDuration.ultraSmooth
+    : ThrottleDuration.standard;
 ```
 
 ---

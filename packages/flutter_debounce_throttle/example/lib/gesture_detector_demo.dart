@@ -14,6 +14,8 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
   final List<String> _events = [];
   Offset _position = const Offset(100, 100);
   double _scale = 1.0;
+  Duration _continuousDuration = ThrottleDuration.standard; // 16ms (60fps)
+  String _selectedMode = 'Standard (60fps)';
 
   void _addEvent(String event) {
     setState(() {
@@ -21,6 +23,14 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
       if (_events.length > 10) {
         _events.removeLast();
       }
+    });
+  }
+
+  void _setThrottleMode(String mode, Duration duration) {
+    setState(() {
+      _selectedMode = mode;
+      _continuousDuration = duration;
+      _addEvent('Switched to $mode');
     });
   }
 
@@ -55,7 +65,7 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
             child: Center(
               child: ThrottledGestureDetector(
                 discreteDuration: const Duration(milliseconds: 500),
-                continuousDuration: const Duration(milliseconds: 16),
+                continuousDuration: _continuousDuration,
                 onTap: () => _addEvent('Tap'),
                 onLongPress: () => _addEvent('Long Press'),
                 onDoubleTap: () => _addEvent('Double Tap'),
@@ -107,6 +117,59 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
             ),
           ),
 
+          // Throttle Mode Selector
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.amber[50],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Continuous Throttle Mode:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ChoiceChip(
+                      label: const Text('Ultra Smooth (120Hz)'),
+                      selected: _selectedMode == 'Ultra Smooth (120Hz)',
+                      onSelected: (selected) {
+                        if (selected) {
+                          _setThrottleMode('Ultra Smooth (120Hz)', ThrottleDuration.ultraSmooth);
+                        }
+                      },
+                    ),
+                    ChoiceChip(
+                      label: const Text('Standard (60fps)'),
+                      selected: _selectedMode == 'Standard (60fps)',
+                      onSelected: (selected) {
+                        if (selected) {
+                          _setThrottleMode('Standard (60fps)', ThrottleDuration.standard);
+                        }
+                      },
+                    ),
+                    ChoiceChip(
+                      label: const Text('Conservative (30fps)'),
+                      selected: _selectedMode == 'Conservative (30fps)',
+                      onSelected: (selected) {
+                        if (selected) {
+                          _setThrottleMode('Conservative (30fps)', ThrottleDuration.conservative);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Current: $_selectedMode (${_continuousDuration.inMilliseconds}ms)',
+                  style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                ),
+              ],
+            ),
+          ),
+
           // Instructions
           Container(
             padding: const EdgeInsets.all(16),
@@ -119,8 +182,13 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
                 Text('• Tap - Throttled at 500ms'),
                 Text('• Long Press - Throttled at 500ms'),
                 Text('• Double Tap - Throttled at 500ms'),
-                Text('• Drag - Throttled at 16ms (60fps)'),
-                Text('• Pinch to Scale - Throttled at 16ms (60fps)'),
+                Text('• Drag - Dynamic throttle (see mode above)'),
+                Text('• Pinch to Scale - Dynamic throttle (see mode above)'),
+                SizedBox(height: 8),
+                Text(
+                  '💡 Try Ultra Smooth (8ms) on iPad Pro or 120Hz phones!',
+                  style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                ),
               ],
             ),
           ),

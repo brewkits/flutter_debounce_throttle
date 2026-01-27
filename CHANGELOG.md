@@ -1,3 +1,52 @@
+## 2.4.2 - 2026-01-27
+
+**🏆 World-Class Release** - Production-grade distributed rate limiting.
+
+### Highlights
+
+- 🏗️ Redis/Memcached moved to examples (cleaner architecture)
+- 🔒 Race condition documentation + atomic Lua script solution
+- ✨ 120Hz display support for `ThrottledGestureDetector`
+
+### Package Changes
+
+- **dart_debounce_throttle@2.4.2**
+  - Architecture refactoring: Redis → examples
+  - Race condition warnings + atomic operations guide
+  - Zero breaking changes
+
+- **flutter_debounce_throttle@2.4.2**
+  - ThrottleDuration presets (8ms/16ms/32ms)
+  - Enhanced gesture throttling documentation
+  - 120Hz display support guide
+
+- **flutter_debounce_throttle_hooks@2.4.2**
+  - Dependency updates
+
+See individual package CHANGELOGs for details.
+
+---
+
+## 2.4.1 - 2026-01-27
+
+**Quality Improvements** - Lint fixes and test coverage.
+
+### Package Changes
+
+- **dart_debounce_throttle@2.4.1**
+  - Fixed pub.dev lint issues
+  - Applied dart fix auto-fixes
+
+- **flutter_debounce_throttle@2.4.1**
+  - Applied dart fix auto-fixes
+  - Fixed example imports
+
+- **flutter_debounce_throttle_hooks@2.4.1**
+  - Added 16 comprehensive tests
+  - 100% hook coverage
+
+---
+
 ## 2.4.0
 
 **Enterprise Features** - ThrottledGestureDetector & Distributed Rate Limiting.
