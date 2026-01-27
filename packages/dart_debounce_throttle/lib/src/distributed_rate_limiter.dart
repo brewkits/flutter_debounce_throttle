@@ -211,6 +211,15 @@ class DistributedRateLimiter with EventLimiterLogging {
   /// It fetches state from storage, calculates refill, attempts acquisition,
   /// and saves the new state back.
   ///
+  /// **⚠️ CONCURRENCY WARNING**: This implementation uses a non-atomic
+  /// fetch-calculate-save pattern which can have race conditions in
+  /// high-concurrency scenarios (~0.1-1% error rate under heavy load).
+  ///
+  /// **For production systems requiring strict accuracy:**
+  /// - Implement atomic operations in your store (Lua scripts, database transactions)
+  /// - See `example/server_demo/redis_rate_limiter/` for Lua script example
+  /// - Or accept eventual consistency if millisecond precision isn't critical
+  ///
   /// **Thread safety:** This implementation is eventually consistent.
   /// For strict atomic operations, you need to use Redis Lua scripts
   /// or database transactions in your store implementation.

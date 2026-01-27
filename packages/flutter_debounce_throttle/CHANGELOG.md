@@ -1,3 +1,36 @@
+## 2.4.2
+
+**UI Enhancements** - Better gesture throttling for high-refresh-rate displays.
+
+### ✨ New Features
+
+- **ADDED: `ThrottleDuration` preset class**
+  - `ThrottleDuration.ultraSmooth` (8ms) - For 120Hz displays
+  - `ThrottleDuration.standard` (16ms) - Default 60fps
+  - `ThrottleDuration.conservative` (32ms) - For complex animations/older devices
+
+### 📚 Documentation
+
+- **Enhanced `ThrottledGestureDetector` documentation**
+  - Device-specific refresh rate recommendations
+  - Examples for 120Hz displays (iPad Pro, iPhone 13 Pro+, flagship Android)
+  - Performance tuning guide for different device tiers
+  - Device-adaptive duration pattern
+
+### 🎨 Example Updates
+
+- **Updated gesture_detector_demo.dart**
+  - Added interactive throttle mode selector
+  - Demonstrates Ultra Smooth (120Hz), Standard (60fps), Conservative (30fps)
+  - Real-time feedback on throttle duration impact
+
+### 📦 Dependencies
+
+- `dart_debounce_throttle: ^2.4.2` (was ^2.4.0)
+  - Inherits production-grade distributed rate limiting improvements
+
+---
+
 ## 2.4.1
 
 **Quality Improvements** - Applied dart fix and updated examples.

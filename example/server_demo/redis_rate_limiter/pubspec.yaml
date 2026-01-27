@@ -1,0 +1,15 @@
+name: redis_rate_limiter_example
+description: Example of using Redis for distributed rate limiting with dart_debounce_throttle
+version: 1.0.0
+publish_to: none # This is an example, not published
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  dart_debounce_throttle: ^2.4.2
+  redis: ^4.0.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.0

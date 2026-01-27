@@ -1,3 +1,20 @@
+## 2.4.2
+
+**Dependency Update** - Sync with core packages.
+
+### 📦 Dependencies
+
+- `flutter_debounce_throttle: ^2.4.2` (was ^2.4.0)
+  - Inherits all improvements from flutter_debounce_throttle v2.4.2
+  - New ThrottleDuration presets for 120Hz displays
+  - Enhanced gesture throttling documentation
+
+### No API Changes
+
+All hooks remain exactly the same. This is a dependency update only.
+
+---
+
 ## 2.4.1
 
 **Test Coverage & Documentation** - Added comprehensive tests and cleaned up docs.
