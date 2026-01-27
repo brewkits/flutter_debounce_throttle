@@ -69,11 +69,34 @@ Server B: fetch (tokens=10) → compute (9) → save (9)
 Expected: 8, Actual: 9 ❌ Lost update!
 ```
 
-### Solution: Use Lua Scripts
+### Solution: Use AtomicRedisRateLimiter
 
-Redis Lua scripts execute atomically, eliminating race conditions.
+Copy `atomic_redis_limiter.dart` to your project for 100% accurate, race-free rate limiting:
 
-**See: `lua/atomic_rate_limit.lua`** for a production-ready implementation.
+```dart
+final limiter = AtomicRedisRateLimiter(
+  redis: redis,
+  luaScriptPath: 'lua/atomic_rate_limit.lua',
+);
+
+if (await limiter.tryAcquire(
+  key: 'user:123',
+  maxTokens: 100,
+  refillRate: 10,
+  refillInterval: Duration(seconds: 1),
+)) {
+  // Request allowed
+} else {
+  // Rate limited
+}
+```
+
+**Benefits:**
+- ✅ 100% accurate (no lost updates)
+- ✅ Thread-safe across all server instances
+- ✅ Simple API, no fetch-calculate-save logic
+
+**See: `atomic_redis_limiter.dart` + `lua/atomic_rate_limit.lua`** for complete implementation.
 
 #### Using the Lua Script
 
