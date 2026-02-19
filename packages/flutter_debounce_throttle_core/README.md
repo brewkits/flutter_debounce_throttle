@@ -13,7 +13,7 @@ dependencies:
 **New package (active):**
 ```yaml
 dependencies:
-  dart_debounce_throttle: ^2.0.0  # ✅ Use this
+  dart_debounce_throttle: ^2.4.0  # ✅ Use this
 ```
 
 ## Why the rename?
@@ -33,7 +33,7 @@ dependencies:
 
 # After
 dependencies:
-  dart_debounce_throttle: ^2.0.0
+  dart_debounce_throttle: ^2.4.0
 ```
 
 ### 2. Update imports

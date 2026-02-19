@@ -39,6 +39,10 @@ COMPLETION_SUMMARY.md
 MASTER_PLAN_CHECK.md
 MASTER_PLAN_FINAL_REPORT.md
 PUBLISH_CHECKLIST.md
+ROADMAP.md
+
+# Draft content (unpublished)
+docs/blog-post-draft.md
 
 # Example app dependencies
 example/pubspec.lock

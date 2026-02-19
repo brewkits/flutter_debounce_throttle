@@ -1,3 +1,17 @@
+## 2.4.3
+
+**Documentation & Discovery** - Improved pub.dev discoverability and README structure.
+
+### 📚 Documentation
+- Restructured README: 30-Second Start moved to the top for faster onboarding
+- Expanded quick start with async and state management examples
+- Moved competitor comparisons to the end (value-first content)
+- Improved pub.dev `description` — keyword-first for better search ranking
+- Updated `topics`: replaced `production` with `async` for better discoverability
+- Added `## Which Package Should I Use?` section for new users
+
+---
+
 ## 2.4.1
 
 **Quality Improvements** - Applied dart fix and updated examples.

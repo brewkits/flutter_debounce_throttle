@@ -1,3 +1,20 @@
+## 2.4.3
+
+**Documentation & Discovery** - Improved pub.dev discoverability, cleaner READMEs, and release process improvements.
+
+### 📚 What Changed
+- Restructured READMEs: quick start code moved to the top (before comparisons/diagrams)
+- Root README trimmed from 559 lines → ~240 lines
+- Improved pub.dev `description` keywords for better search ranking
+- Updated `topics` on all packages: removed `production`, added searchable terms
+- Added `CONTRIBUTING.md` with release policy (prevents version churn)
+- Added `## Which Package Should I Use?` decision guide in all READMEs
+- Fixed test count badges: flutter `450+`, dart `50+`, root `500+`
+
+### 🔄 No Breaking Changes
+
+---
+
 ## 2.4.0
 
 **Enterprise Features** - ThrottledGestureDetector & Distributed Rate Limiting.

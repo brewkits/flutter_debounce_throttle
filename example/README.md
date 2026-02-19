@@ -93,9 +93,9 @@ Demonstrates all 4 `ConcurrencyMode` options with `ConcurrentAsyncThrottledBuild
 
 ---
 
-### 6. Enterprise Demo (v1.1.0 Features)
+### 6. Enterprise Demo
 
-Showcases all new features in v1.1.0.
+Showcases extensions, rate limiting, leading/trailing edge, and batch processing.
 
 #### 6.1 RateLimiter (Token Bucket)
 
