@@ -1,12 +1,12 @@
 # Migration Guide
 
-Hướng dẫn di chuyển từ các thư viện khác sang `flutter_debounce_throttle`.
+How to migrate from other libraries to `flutter_debounce_throttle`.
 
 ---
 
-## 📦 Từ `easy_debounce`
+## From `easy_debounce`
 
-### Thay đổi API
+### API Changes
 
 #### 1. Basic Debounce
 
@@ -28,7 +28,7 @@ EasyDebounce.cancel('my-debouncer');
 ```dart
 import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
-// Option 1: Sử dụng Mixin (Recommended)
+// Option 1: Mixin (Recommended)
 class MyController with EventLimiterMixin {
   void onSearch() {
     debounce('my-debouncer', () => print('Debounced!'),
@@ -37,12 +37,12 @@ class MyController with EventLimiterMixin {
 
   @override
   void dispose() {
-    cancel('my-debouncer'); // Hoặc cancelAll()
+    cancel('my-debouncer'); // or cancelAll()
     super.dispose();
   }
 }
 
-// Option 2: Sử dụng Debouncer trực tiếp
+// Option 2: Debouncer directly
 final debouncer = Debouncer(duration: Duration(milliseconds: 500));
 debouncer.call(() => print('Debounced!'));
 debouncer.dispose();
@@ -52,13 +52,13 @@ debouncer.dispose();
 
 **easy_debounce:**
 ```dart
-// Không hỗ trợ trực tiếp
+// No direct async support
 EasyDebounce.debounce(
   'search',
   Duration(milliseconds: 500),
   () async {
     final results = await api.search(query);
-    // Xử lý kết quả thủ công
+    // Manual result handling
   },
 );
 ```
@@ -75,7 +75,7 @@ class SearchController with EventLimiterMixin {
     );
 
     if (results != null) {
-      // Xử lý kết quả (null = cancelled)
+      // null means cancelled — stale request discarded automatically
       updateResults(results);
     }
   }
@@ -89,24 +89,24 @@ if (results != null) {
 }
 ```
 
-### Lợi ích khi chuyển
+### Benefits of Switching
 
-| Tính năng | easy_debounce | flutter_debounce_throttle |
-|-----------|---------------|---------------------------|
-| Async support | ❌ | ✅ Auto-cancel |
-| Type safety | ⚠️ String ID | ✅ Generic types |
+| Feature | easy_debounce | flutter_debounce_throttle |
+|---------|---------------|---------------------------|
+| Async support | ❌ | ✅ Auto-cancel stale requests |
+| Type safety | ⚠️ String ID only | ✅ Generic types |
 | Lifecycle safe | ❌ Manual | ✅ Auto dispose |
 | Loading state | ❌ | ✅ Built-in |
 | Throttle support | ❌ | ✅ |
 | Stream support | ❌ | ✅ |
 | Hooks support | ❌ | ✅ |
-| Server-side | ❌ | ✅ Pure Dart Core |
+| Server-side | ❌ | ✅ Pure Dart |
 
 ---
 
-## 📦 Từ Manual `Timer`
+## From Manual `Timer`
 
-### Trước (Manual Timer)
+### Before (Manual Timer)
 
 ```dart
 class SearchWidget extends StatefulWidget {
@@ -118,21 +118,21 @@ class _SearchWidgetState extends State<SearchWidget> {
   Timer? _debounceTimer;
 
   void _onSearchChanged(String query) {
-    // Cancel timer cũ
+    // Cancel previous timer
     _debounceTimer?.cancel();
 
-    // Tạo timer mới
+    // Start new timer
     _debounceTimer = Timer(Duration(milliseconds: 500), () {
-      // BUG POTENTIAL: Không check mounted!
+      // BUG: no mounted check!
       setState(() {
-        // Search logic
+        // search logic
       });
     });
   }
 
   @override
   void dispose() {
-    _debounceTimer?.cancel(); // Dễ quên!
+    _debounceTimer?.cancel(); // Easy to forget!
     super.dispose();
   }
 
@@ -143,7 +143,7 @@ class _SearchWidgetState extends State<SearchWidget> {
 }
 ```
 
-### Sau (flutter_debounce_throttle)
+### After (flutter_debounce_throttle)
 
 #### Option 1: Widget-based (Simplest)
 
@@ -155,14 +155,14 @@ class SearchWidget extends StatelessWidget {
       duration: Duration(milliseconds: 500),
       builder: (context, debounce) => TextField(
         onChanged: (query) => debounce(() {
-          // Tự động check mounted!
-          // Search logic
+          // Mounted check is automatic
+          // search logic
         })?.call(),
       ),
     );
   }
 }
-// Không cần dispose! Tự động xử lý.
+// No dispose needed — handled automatically.
 ```
 
 #### Option 2: Controller-based
@@ -171,33 +171,33 @@ class SearchWidget extends StatelessWidget {
 class SearchController with ChangeNotifier, EventLimiterMixin {
   void onSearch(String query) {
     debounce('search', () {
-      // Search logic
+      // search logic
     }, duration: Duration(milliseconds: 500));
   }
 
   @override
   void dispose() {
-    cancelAll(); // Một dòng clean up tất cả!
+    cancelAll(); // One line cleans up everything
     super.dispose();
   }
 }
 ```
 
-### Lợi ích
+### Problems Solved
 
-| Vấn đề với Manual Timer | flutter_debounce_throttle |
-|--------------------------|---------------------------|
-| Quên cancel → Memory leak | ✅ Auto dispose |
-| Không check mounted → Crash | ✅ Auto mounted check |
+| Manual Timer Problem | flutter_debounce_throttle |
+|----------------------|---------------------------|
+| Forgetting cancel → Memory leak | ✅ Auto dispose |
+| Missing mounted check → Crash | ✅ Auto mounted check |
 | Boilerplate code | ✅ One-liner |
-| Khó test | ✅ Dễ test với Mixin |
-| Không có loading state | ✅ Built-in isLoading |
+| Hard to test | ✅ Easy to test with Mixin |
+| No loading state | ✅ Built-in isLoading |
 
 ---
 
-## 📦 Từ `rxdart` (Transform)
+## From `rxdart`
 
-### Trước (RxDart)
+### Before (rxdart)
 
 ```dart
 import 'package:rxdart/rxdart.dart';
@@ -212,7 +212,7 @@ class SearchBloc {
         .distinct()
         .switchMap((query) => _searchApi(query))
         .handleError((error) {
-          // Error handling
+          // error handling
         });
   }
 
@@ -228,7 +228,7 @@ class SearchBloc {
 }
 ```
 
-### Sau (flutter_debounce_throttle)
+### After (flutter_debounce_throttle)
 
 ```dart
 import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
@@ -239,7 +239,7 @@ class SearchBloc with EventLimiterMixin {
 
   Future<void> search(String query) async {
     isLoading = true;
-    notifyListeners(); // hoặc emit()
+    notifyListeners(); // or emit()
 
     final result = await debounceAsync(
       'search',
@@ -261,17 +261,17 @@ class SearchBloc with EventLimiterMixin {
 }
 ```
 
-### Lưu ý
+### When to Use Each
 
-- **RxDart tốt cho:** Complex stream transformations, reactive programming
-- **flutter_debounce_throttle tốt cho:** UI events, simple debouncing, lifecycle-aware operations
-- **Có thể kết hợp:** Dùng RxDart cho data layer, dùng flutter_debounce_throttle cho UI layer
+- **Use rxdart when:** You need full reactive programming — `combineLatest`, `merge`, `zip`, complex stream transformations.
+- **Use flutter_debounce_throttle when:** You need debounce/throttle for UI events, lifecycle-safe async, or rate limiting without reactive overhead.
+- **Use both:** rxdart for the data layer, flutter_debounce_throttle for the UI layer.
 
 ---
 
-## 📦 Từ Custom Throttle Implementation
+## From Custom Throttle Implementation
 
-### Trước (Custom)
+### Before (Custom)
 
 ```dart
 class ThrottledButton extends StatefulWidget {
@@ -320,12 +320,12 @@ class _ThrottledButtonState extends State<ThrottledButton> {
 }
 ```
 
-### Sau (flutter_debounce_throttle)
+### After (flutter_debounce_throttle)
 
 ```dart
 import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 
-// Option 1: ThrottledInkWell (Built-in)
+// Option 1: ThrottledInkWell (drop-in, 1 line)
 ThrottledInkWell(
   duration: Duration(milliseconds: 500),
   onTap: () => print('Throttled tap!'),
@@ -335,7 +335,7 @@ ThrottledInkWell(
   ),
 )
 
-// Option 2: ThrottledBuilder (More flexible)
+// Option 2: ThrottledBuilder (more flexible)
 ThrottledBuilder(
   duration: Duration(milliseconds: 500),
   builder: (context, throttle) => ElevatedButton(
@@ -347,108 +347,103 @@ ThrottledBuilder(
 
 ---
 
-## 🎯 Checklist Di Chuyển
+## Migration Checklist
 
-### Bước 1: Cài đặt
+### Step 1: Install
+
 ```yaml
 dependencies:
-  flutter_debounce_throttle: ^1.0.0
+  flutter_debounce_throttle: ^2.4.3
 ```
 
-### Bước 2: Import mới
+### Step 2: Update imports
+
 ```dart
-// Xóa
+// Remove
 // import 'package:easy_debounce/easy_debounce.dart';
 
-// Thêm
+// Add
 import 'package:flutter_debounce_throttle/flutter_debounce_throttle.dart';
 ```
 
-### Bước 3: Update code
+### Step 3: Update code
 
-**Nếu dùng trong Controller/ViewModel:**
+**In a Controller / ViewModel:**
 ```dart
 class MyController extends ChangeNotifier
-    with EventLimiterMixin { // Thêm mixin
+    with EventLimiterMixin { // Add mixin
 
   void onAction() {
     debounce('action-id', () {
-      // Logic
+      // logic
     });
   }
 
   @override
   void dispose() {
-    cancelAll(); // Thêm dòng này!
+    cancelAll(); // Add this line
     super.dispose();
   }
 }
 ```
 
-**Nếu dùng trong Widget:**
+**In a Widget:**
 ```dart
-// Replace Timer logic với DebouncedBuilder hoặc ThrottledBuilder
+// Replace Timer logic with DebouncedBuilder or ThrottledBuilder
 ```
 
-### Bước 4: Test
-- ✅ Chạy app, verify không có crash
-- ✅ Test memory leak (navigate back/forth)
-- ✅ Test hot reload
+### Step 4: Verify
+
+- Run the app — no crashes
+- Navigate back and forth — no memory leaks
+- Test hot reload
 
 ---
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
-### Lỗi: "Unhandled Exception: setState() called after dispose()"
+### "setState() called after dispose()"
 
-**Nguyên nhân:** Callback được gọi sau khi widget đã dispose
+**Cause:** Callback fires after widget has been disposed.
 
-**Giải pháp:**
 ```dart
-// BAD
+// Bad
 debouncer.run(() {
-  setState(() {}); // Có thể crash!
+  setState(() {}); // May crash
 });
 
-// GOOD
+// Good
 debouncer.call(() {
-  if (mounted) { // Check mounted
+  if (mounted) {
     setState(() {});
   }
 });
 
-// BEST: Dùng DebouncedBuilder (tự động check)
+// Best: Use DebouncedBuilder (auto-checks mounted)
 DebouncedBuilder(
   builder: (context, debounce) => ...,
 )
 ```
 
-### Lỗi: Memory leak
+### Memory leak with dynamic IDs
 
-**Nguyên nhân:** Quên dispose
+**Cause:** Forgetting to dispose when using dynamic IDs.
 
-**Giải pháp:**
 ```dart
 @override
 void dispose() {
-  cancelAll(); // IMPORTANT!
+  cancelAll(); // Required!
   super.dispose();
 }
 ```
 
 ---
 
-## 📚 Tài liệu thêm
+## Resources
 
 - [API Reference](https://pub.dev/documentation/flutter_debounce_throttle/latest/)
 - [Examples](https://github.com/brewkits/flutter_debounce_throttle/tree/main/example)
 - [GitHub Issues](https://github.com/brewkits/flutter_debounce_throttle/issues)
+- [FAQ](https://github.com/brewkits/flutter_debounce_throttle/blob/main/FAQ.md)
 
----
-
-## 💡 Cần trợ giúp?
-
-Nếu gặp vấn đề trong quá trình migration, vui lòng:
-1. Đọc [README](../README.md) và [Examples](../example)
-2. Tìm trong [Closed Issues](https://github.com/brewkits/flutter_debounce_throttle/issues?q=is%3Aissue+is%3Aclosed)
-3. Tạo [New Issue](https://github.com/brewkits/flutter_debounce_throttle/issues/new) với tag `migration`
+If you run into issues during migration, open a [New Issue](https://github.com/brewkits/flutter_debounce_throttle/issues/new) with the `migration` label.

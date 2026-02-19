@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-500%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
+[![GitHub stars](https://img.shields.io/github/stars/brewkits/flutter_debounce_throttle?style=social)](https://github.com/brewkits/flutter_debounce_throttle/stargazers)
 
 Debounce, throttle, rate limiting, and async concurrency control for Flutter & Dart. Memory-safe, lifecycle-aware, zero external dependencies.
 
@@ -154,15 +155,15 @@ DebounceThrottleConfig.init(
 ```yaml
 # Flutter
 dependencies:
-  flutter_debounce_throttle: ^2.4.0
+  flutter_debounce_throttle: ^2.4.3
 
 # Flutter + Hooks
 dependencies:
-  flutter_debounce_throttle_hooks: ^2.4.0
+  flutter_debounce_throttle_hooks: ^2.4.3
 
 # Pure Dart (Server, CLI)
 dependencies:
-  dart_debounce_throttle: ^2.4.0
+  dart_debounce_throttle: ^2.4.3
 ```
 
 ---
