@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-50%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Pure Dart](https://img.shields.io/badge/pure-Dart-02569B)](https://dart.dev)
+[![GitHub stars](https://img.shields.io/github/stars/brewkits/flutter_debounce_throttle?style=social)](https://github.com/brewkits/flutter_debounce_throttle/stargazers)
 
 ## The Traffic Control System for Dart
 
@@ -204,7 +205,7 @@ ConcurrentAsyncThrottler(queueOverflowStrategy: QueueOverflowStrategy.dropNewest
 
 ```yaml
 dependencies:
-  dart_debounce_throttle: ^2.4.0
+  dart_debounce_throttle: ^2.4.3
 ```
 
 **For:** Serverpod, Dart Frog, shelf, Alfred, CLI apps, shared business logic
@@ -218,7 +219,7 @@ dependencies:
 | **50+ tests** | Comprehensive coverage |
 | **Zero dependencies** | Only `meta` package |
 | **Type-safe** | No `dynamic`, full generics |
-| **Production-proven** | Used in real backends |
+| **Battle-tested** | 50+ unit & integration tests |
 
 ---
 

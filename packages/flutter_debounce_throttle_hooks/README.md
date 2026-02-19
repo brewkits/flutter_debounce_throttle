@@ -2,6 +2,7 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_hooks.svg)](https://pub.dev/packages/flutter_debounce_throttle_hooks)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/brewkits/flutter_debounce_throttle?style=social)](https://github.com/brewkits/flutter_debounce_throttle/stargazers)
 
 ## The Traffic Control System — Hooks Edition
 
@@ -168,7 +169,7 @@ class AutocompleteSearch extends HookWidget {
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle_hooks: ^2.4.0
+  flutter_debounce_throttle_hooks: ^2.4.3
   flutter_hooks: ^0.21.3
 ```
 
