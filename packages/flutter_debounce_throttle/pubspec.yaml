@@ -1,6 +1,6 @@
 name: flutter_debounce_throttle
-description: Debounce and throttle for Flutter. Prevent double-tap, button spam, and memory leaks. Zero dependencies, widgets, async support, and auto-lifecycle management.
-version: 2.4.3
+description: Prevent button spam, debounce search, and fix memory leaks in Flutter. Drop-in widgets, async loading states, auto-lifecycle management. Zero dependencies.
+version: 2.4.4
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dart_debounce_throttle: ^2.4.3
+  dart_debounce_throttle: ^2.4.4
   meta: ^1.16.0
 
 dev_dependencies:

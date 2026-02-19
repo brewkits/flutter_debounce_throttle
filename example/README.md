@@ -172,7 +172,7 @@ example/lib/main.dart
 ├── SearchDemo           # AsyncDebouncedTextController
 ├── ButtonDemo           # AsyncThrottledBuilder
 ├── AdvancedDemo         # ConcurrencyMode comparison
-└── EnterpriseDemo       # v1.1.0 features
+└── EnterpriseDemo       # Rate limiting, extensions, batch processing
     ├── _RateLimiterDemo
     ├── _ExtensionsDemo
     ├── _LeadingTrailingDemo
