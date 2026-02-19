@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-450%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
+[![GitHub stars](https://img.shields.io/github/stars/brewkits/flutter_debounce_throttle?style=social)](https://github.com/brewkits/flutter_debounce_throttle/stargazers)
 
 ## The Traffic Control System for Flutter Apps
 
@@ -191,7 +192,7 @@ final throttledFn = myFunction.throttled(500.ms);
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle: ^2.4.0
+  flutter_debounce_throttle: ^2.4.3
 ```
 
 ---
@@ -234,7 +235,8 @@ dependencies:
   <a href="https://github.com/brewkits/flutter_debounce_throttle">GitHub</a> ·
   <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/FAQ.md">FAQ</a> ·
   <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/API_REFERENCE.md">API Reference</a> ·
-  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/BEST_PRACTICES.md">Best Practices</a>
+  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/BEST_PRACTICES.md">Best Practices</a> ·
+  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/MIGRATION_GUIDE.md">Migration Guide</a>
 </p>
 
 <p align="center">
