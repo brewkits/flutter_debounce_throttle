@@ -1,3 +1,15 @@
+## 2.4.3
+
+**Documentation & Discovery** - Improved pub.dev discoverability and README structure.
+
+### 📚 Documentation
+- Restructured README: 5-Second Start moved to the top for faster onboarding
+- Comparisons vs rxdart/easy_debounce moved to the end (value-first content)
+- Improved pub.dev `description` — keyword-first for better search ranking
+- Updated `topics`: replaced `production` with `dart` for better discoverability
+
+---
+
 ## 2.4.1
 
 **Quality & Lint Fixes** - Improved pub.dev score.

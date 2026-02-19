@@ -168,8 +168,8 @@ class AutocompleteSearch extends HookWidget {
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle_hooks: ^2.0.0
-  flutter_hooks: ^0.21.0
+  flutter_debounce_throttle_hooks: ^2.4.0
+  flutter_hooks: ^0.21.3
 ```
 
 ---
@@ -181,16 +181,17 @@ dependencies:
 | **Type-safe** | Full generic support with 8 production-ready hooks |
 | **Memory-safe** | Auto-cleanup on unmount |
 | **Lifecycle-aware** | No manual dispose needed |
-| **Battle-tested** | Built on flutter_debounce_throttle (340+ tests) |
+| **Battle-tested** | Built on flutter_debounce_throttle (450+ tests) |
 
 ---
 
-## Related Packages
+## Which Package Should I Use?
 
-| Package | Use When |
-|---------|----------|
-| [`flutter_debounce_throttle`](https://pub.dev/packages/flutter_debounce_throttle) | Flutter without hooks |
-| [`dart_debounce_throttle`](https://pub.dev/packages/dart_debounce_throttle) | Pure Dart (Server/CLI) |
+| You are building... | Package |
+|---------------------|---------|
+| Flutter app + `flutter_hooks` | **`flutter_debounce_throttle_hooks`** ← you are here |
+| Flutter app (no hooks) | [`flutter_debounce_throttle`](https://pub.dev/packages/flutter_debounce_throttle) |
+| Dart server / CLI / Serverpod | [`dart_debounce_throttle`](https://pub.dev/packages/dart_debounce_throttle) |
 
 ---
 

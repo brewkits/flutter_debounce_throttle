@@ -1,3 +1,15 @@
+## 2.4.3
+
+**Documentation** - Updated README and dependency alignment.
+
+### 📚 Documentation
+- Updated installation version to `^2.4.0`
+- Updated `flutter_debounce_throttle` test count reference to `450+`
+- Added `## Which Package Should I Use?` section
+- Updated dependency: `flutter_debounce_throttle` to `^2.4.3`
+
+---
+
 ## 2.4.1
 
 **Test Coverage & Documentation** - Added comprehensive tests and cleaned up docs.
