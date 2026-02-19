@@ -205,7 +205,7 @@ ConcurrentAsyncThrottler(queueOverflowStrategy: QueueOverflowStrategy.dropNewest
 
 ```yaml
 dependencies:
-  dart_debounce_throttle: ^2.4.3
+  dart_debounce_throttle: ^2.4.4
 ```
 
 **For:** Serverpod, Dart Frog, shelf, Alfred, CLI apps, shared business logic

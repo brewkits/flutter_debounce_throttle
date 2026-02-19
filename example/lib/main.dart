@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
     SearchDemo(),
     ButtonDemo(),
     AdvancedDemo(),
-    EnterpriseDemo(), // NEW: v1.1.0 features
+    EnterpriseDemo(),
   ];
 
   final List<NavigationDestination> _destinations = const [
@@ -1192,7 +1192,7 @@ class _StatCard extends StatelessWidget {
 }
 
 // ============================================================================
-// ENTERPRISE DEMO - v1.1.0 Features
+// ENTERPRISE DEMO
 // ============================================================================
 class EnterpriseDemo extends StatefulWidget {
   const EnterpriseDemo({super.key});

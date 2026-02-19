@@ -353,7 +353,7 @@ ThrottledBuilder(
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle: ^2.4.3
+  flutter_debounce_throttle: ^2.4.4
 ```
 
 ### Step 2: Update imports
