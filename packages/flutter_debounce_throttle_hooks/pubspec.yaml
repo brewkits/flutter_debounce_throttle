@@ -1,8 +1,6 @@
 name: flutter_debounce_throttle_hooks
-description: >-
-  Flutter Hooks integration for flutter_debounce_throttle.
-  Auto-dispose debounce and throttle controllers with HookWidget.
-version: 2.4.3
+description: Debounce and throttle hooks for Flutter. useDebouncer, useThrottler, useDebouncedValue — auto-dispose with HookWidget. Zero boilerplate.
+version: 2.4.4
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
@@ -22,7 +20,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_hooks: ^0.21.3
-  flutter_debounce_throttle: ^2.4.3
+  flutter_debounce_throttle: ^2.4.4
 
 dev_dependencies:
   flutter_test:

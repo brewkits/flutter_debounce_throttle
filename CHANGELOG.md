@@ -1,3 +1,17 @@
+## 2.4.4
+
+**Polish & SEO** - Improved pub.dev descriptions, cleaned up example app, and roadmap updates.
+
+### What Changed
+- Improved pub.dev `description` on all packages: keyword-first for better search ranking
+- Removed stale `v1.1.0` comments from root example app
+- Updated roadmap language: "Planned" → "Next", "Roadmap" → "Exploring"
+- Bumped all packages to v2.4.4
+
+### No Breaking Changes
+
+---
+
 ## 2.4.3
 
 **Documentation & Discovery** - Improved pub.dev discoverability, cleaner READMEs, and release process improvements.

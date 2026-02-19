@@ -1,3 +1,15 @@
+## 2.4.4
+
+**SEO & Polish** - Improved pub.dev description for better search ranking.
+
+### What Changed
+- Improved `description`: keyword-first — "Debounce and throttle hooks for Flutter..."
+- Updated dependency: `flutter_debounce_throttle` to `^2.4.4`
+
+### No Breaking Changes
+
+---
+
 ## 2.4.3
 
 **Documentation** - Updated README and dependency alignment.

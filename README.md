@@ -155,15 +155,15 @@ DebounceThrottleConfig.init(
 ```yaml
 # Flutter
 dependencies:
-  flutter_debounce_throttle: ^2.4.3
+  flutter_debounce_throttle: ^2.4.4
 
 # Flutter + Hooks
 dependencies:
-  flutter_debounce_throttle_hooks: ^2.4.3
+  flutter_debounce_throttle_hooks: ^2.4.4
 
 # Pure Dart (Server, CLI)
 dependencies:
-  dart_debounce_throttle: ^2.4.3
+  dart_debounce_throttle: ^2.4.4
 ```
 
 ---
@@ -209,8 +209,8 @@ dependencies:
 | v2.2 | ✅ Released | Error handling, TTL auto-cleanup |
 | v2.3 | ✅ Released | Auto-cleanup enabled by default |
 | v2.4 | ✅ Released | ThrottledGestureDetector, DistributedRateLimiter |
-| v2.5 | 🔜 Planned | Retry policies, circuit breaker pattern |
-| v3.x | 📋 Roadmap | Web Workers, isolate-safe controllers |
+| v2.5 | 🔜 Next | Retry policies, circuit breaker pattern |
+| v3.x | 💡 Exploring | Web Workers, isolate-safe controllers |
 
 ---
 

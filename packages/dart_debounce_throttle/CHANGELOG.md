@@ -1,3 +1,15 @@
+## 2.4.4
+
+**SEO & Polish** - Improved pub.dev description for better search ranking.
+
+### What Changed
+- Improved `description`: keyword-first — "Debounce, throttle, and rate limit for Dart servers and CLI..."
+- Replaced unverified "Production-proven" claim with "Battle-tested: 50+ tests"
+
+### No Breaking Changes
+
+---
+
 ## 2.4.3
 
 **Documentation & Discovery** - Improved pub.dev discoverability and README structure.
