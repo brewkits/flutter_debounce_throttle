@@ -1,3 +1,11 @@
+## 2.4.5
+
+- Updated package description emphasizing unique features (Redis, gesture throttling)
+- Changed topics: production → widgets for better categorization
+- Updated dart_debounce_throttle dependency to ^2.4.5
+- Fixed example test imports
+- No API changes
+
 ## 2.4.2
 
 **UI Enhancements** - Better gesture throttling for high-refresh-rate displays.

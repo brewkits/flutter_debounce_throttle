@@ -1,3 +1,10 @@
+## 2.4.5
+
+- Updated package description for better SEO (targets Serverpod, Dart Frog developers)
+- Added topics: server, redis for improved discoverability
+- Synchronized dependency versions across monorepo
+- No API changes
+
 ## 2.4.2
 
 **World Class Release** - Production-grade distributed rate limiting architecture.

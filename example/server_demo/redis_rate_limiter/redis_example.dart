@@ -10,8 +10,6 @@
 // Uncomment these imports when you have Redis package installed:
 // import 'dart:io';
 // import 'package:redis/redis.dart';
-import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
-import 'redis_store_example.dart';
 
 /// Example 1: Basic Redis Rate Limiting (Non-Atomic)
 ///
