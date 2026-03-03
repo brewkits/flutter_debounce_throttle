@@ -1,3 +1,10 @@
+## 2.4.5
+
+- Updated package description for React developers ("React-style hooks")
+- Added topics: hooks, react, functional
+- Updated flutter_debounce_throttle dependency to ^2.4.5
+- No API changes
+
 ## 2.4.2
 
 **Dependency Update** - Sync with core packages.

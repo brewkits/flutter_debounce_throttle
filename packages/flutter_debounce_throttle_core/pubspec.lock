@@ -5,10 +5,10 @@ packages:
     dependency: "direct main"
     description:
       name: dart_debounce_throttle
-      sha256: d101c302cd8928385c55630ff124cb3d75c8387a28bf36b840a5da3d6daa2dcf
+      sha256: fa5aca3c1e96f2b1d7a465e6e0530b491cde5c295043df19e8f1497391e20dce
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.4.4"
   lints:
     dependency: "direct dev"
     description:

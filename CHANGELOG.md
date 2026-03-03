@@ -1,3 +1,43 @@
+## 2.4.5 - 2026-03-03
+
+**📦 Package Optimization** - Improved discoverability and SEO.
+
+### Highlights
+
+- 🔍 **Enhanced pub.dev descriptions** - Better SEO targeting for "easy_debounce alternative", server-side developers
+- 🏷️ **Improved topics** - Added server, redis, widgets for better discoverability
+- 🛠️ **Code cleanup** - Fixed example imports, removed unused imports
+- 📦 **Dependency updates** - Synchronized cross-package dependencies
+
+### Package Changes
+
+- **dart_debounce_throttle@2.4.5**
+  - Updated description to target server-side developers (Serverpod, Dart Frog)
+  - Added topics: server, redis for better search ranking
+  - Fixed flutter_debounce_throttle_core dependency
+
+- **flutter_debounce_throttle@2.4.5**
+  - Updated description emphasizing unique features (gesture throttling, Redis)
+  - Changed topics: production → widgets for clarity
+  - Updated dart_debounce_throttle dependency to ^2.4.5
+
+- **flutter_debounce_throttle_hooks@2.4.5**
+  - Updated description for React developers ("React-style hooks")
+  - Added topics: hooks, react, functional
+  - Updated flutter_debounce_throttle dependency to ^2.4.5
+
+### Improvements
+
+- Fixed relative imports in example tests
+- Removed unused imports in redis_example.dart
+- Better package descriptions for pub.dev search
+
+### No Breaking Changes
+
+This is a metadata-only release. All functionality remains identical to v2.4.2.
+
+---
+
 ## 2.4.2 - 2026-01-27
 
 **🏆 World-Class Release** - Production-grade distributed rate limiting.

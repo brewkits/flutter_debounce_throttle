@@ -1,6 +1,6 @@
 name: dart_debounce_throttle
-description: Production-safe debounce, throttle, and rate limiting for Pure Dart. Auto-cleanup, error handling, and distributed support.
-version: 2.4.2
+description: Pure Dart debounce/throttle for servers (Serverpod, Dart Frog). Distributed Redis rate limiting, batch operations, 360+ tests. Better than easy_debounce.
+version: 2.4.5
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle/tree/main/packages/dart_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
@@ -8,9 +8,9 @@ issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
 topics:
   - debounce
   - throttle
-  - rate-limiting
   - async
-  - production
+  - server
+  - redis
 
 environment:
   sdk: ^3.0.0
