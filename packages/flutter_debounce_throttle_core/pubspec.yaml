@@ -15,7 +15,7 @@ environment:
 
 # Replaced by dart_debounce_throttle
 dependencies:
-  dart_debounce_throttle: ^2.0.0
+  dart_debounce_throttle: ^2.4.5
 
 dev_dependencies:
   lints: ^6.0.0

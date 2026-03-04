@@ -1,31 +1,89 @@
-## 2.4.4
+## 2.4.5 - 2026-03-03
 
-**Polish & SEO** - Improved pub.dev descriptions, cleaned up example app, and roadmap updates.
+**📦 Package Optimization** - Improved discoverability and SEO.
 
-### What Changed
-- Improved pub.dev `description` on all packages: keyword-first for better search ranking
-- Removed stale `v1.1.0` comments from root example app
-- Updated roadmap language: "Planned" → "Next", "Roadmap" → "Exploring"
-- Bumped all packages to v2.4.4
+### Highlights
+
+- 🔍 **Enhanced pub.dev descriptions** - Better SEO targeting for "easy_debounce alternative", server-side developers
+- 🏷️ **Improved topics** - Added server, redis, widgets for better discoverability
+- 🛠️ **Code cleanup** - Fixed example imports, removed unused imports
+- 📦 **Dependency updates** - Synchronized cross-package dependencies
+
+### Package Changes
+
+- **dart_debounce_throttle@2.4.5**
+  - Updated description to target server-side developers (Serverpod, Dart Frog)
+  - Added topics: server, redis for better search ranking
+  - Fixed flutter_debounce_throttle_core dependency
+
+- **flutter_debounce_throttle@2.4.5**
+  - Updated description emphasizing unique features (gesture throttling, Redis)
+  - Changed topics: production → widgets for clarity
+  - Updated dart_debounce_throttle dependency to ^2.4.5
+
+- **flutter_debounce_throttle_hooks@2.4.5**
+  - Updated description for React developers ("React-style hooks")
+  - Added topics: hooks, react, functional
+  - Updated flutter_debounce_throttle dependency to ^2.4.5
+
+### Improvements
+
+- Fixed relative imports in example tests
+- Removed unused imports in redis_example.dart
+- Better package descriptions for pub.dev search
 
 ### No Breaking Changes
 
+This is a metadata-only release. All functionality remains identical to v2.4.2.
+
 ---
 
-## 2.4.3
+## 2.4.2 - 2026-01-27
 
-**Documentation & Discovery** - Improved pub.dev discoverability, cleaner READMEs, and release process improvements.
+**🏆 World-Class Release** - Production-grade distributed rate limiting.
 
-### 📚 What Changed
-- Restructured READMEs: quick start code moved to the top (before comparisons/diagrams)
-- Root README trimmed from 559 lines → ~240 lines
-- Improved pub.dev `description` keywords for better search ranking
-- Updated `topics` on all packages: removed `production`, added searchable terms
-- Added `CONTRIBUTING.md` with release policy (prevents version churn)
-- Added `## Which Package Should I Use?` decision guide in all READMEs
-- Fixed test count badges: flutter `450+`, dart `50+`, root `500+`
+### Highlights
 
-### 🔄 No Breaking Changes
+- 🏗️ Redis/Memcached moved to examples (cleaner architecture)
+- 🔒 Race condition documentation + atomic Lua script solution
+- ✨ 120Hz display support for `ThrottledGestureDetector`
+
+### Package Changes
+
+- **dart_debounce_throttle@2.4.2**
+  - Architecture refactoring: Redis → examples
+  - Race condition warnings + atomic operations guide
+  - Zero breaking changes
+
+- **flutter_debounce_throttle@2.4.2**
+  - ThrottleDuration presets (8ms/16ms/32ms)
+  - Enhanced gesture throttling documentation
+  - 120Hz display support guide
+
+- **flutter_debounce_throttle_hooks@2.4.2**
+  - Dependency updates
+
+See individual package CHANGELOGs for details.
+
+---
+
+## 2.4.1 - 2026-01-27
+
+**Quality Improvements** - Lint fixes and test coverage.
+
+### Package Changes
+
+- **dart_debounce_throttle@2.4.1**
+  - Fixed pub.dev lint issues
+  - Applied dart fix auto-fixes
+
+- **flutter_debounce_throttle@2.4.1**
+  - Applied dart fix auto-fixes
+  - Fixed example imports
+
+- **flutter_debounce_throttle_hooks@2.4.1**
+  - Added 16 comprehensive tests
+  - 100% hook coverage
 
 ---
 

@@ -83,6 +83,36 @@ abstract class RateLimiterStore {
 ///
 /// Use this for Redis, Memcached, databases, or any remote storage.
 ///
+/// **⚠️ RACE CONDITIONS WARNING**
+///
+/// The default implementation pattern (fetch → calculate → save) is NOT atomic
+/// and can lose updates in high-concurrency distributed systems:
+///
+/// ```
+/// Server A: fetch (tokens=10) → compute (9) → save (9)
+/// Server B: fetch (tokens=10) → compute (9) → save (9)
+/// Expected: 8, Actual: 9 ❌ Lost update!
+/// ```
+///
+/// **For production distributed systems, you MUST use atomic operations:**
+///
+/// | Storage | Atomic Solution | Example |
+/// |---------|----------------|---------|
+/// | Redis | Lua scripts | `example/server_demo/redis_rate_limiter/lua/` |
+/// | PostgreSQL | `SELECT FOR UPDATE` | See example in Redis README |
+/// | MongoDB | `findAndModify` | Atomic update operations |
+/// | DynamoDB | Conditional writes | UpdateItem with conditions |
+///
+/// **Trade-offs:**
+/// - **Non-atomic**: Simple, eventual consistency, ~99% accurate under normal load
+/// - **Atomic**: Complex, strong consistency, 100% accurate, slower (~2-5ms overhead)
+///
+/// Choose based on your requirements:
+/// - Internal APIs, rate limiting as soft limit → non-atomic OK
+/// - Payment APIs, strict compliance → atomic required
+///
+/// See examples for implementation patterns.
+///
 /// **Example (Redis store):**
 /// ```dart
 /// class RedisStore implements AsyncRateLimiterStore {

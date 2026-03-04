@@ -1,24 +1,24 @@
-## 2.4.4
+## 2.4.5
 
-**SEO & Polish** - Improved pub.dev description for better search ranking.
+- Updated package description for React developers ("React-style hooks")
+- Added topics: hooks, react, functional
+- Updated flutter_debounce_throttle dependency to ^2.4.5
+- No API changes
 
-### What Changed
-- Improved `description`: keyword-first — "Debounce and throttle hooks for Flutter..."
-- Updated dependency: `flutter_debounce_throttle` to `^2.4.4`
+## 2.4.2
 
-### No Breaking Changes
+**Dependency Update** - Sync with core packages.
 
----
+### 📦 Dependencies
 
-## 2.4.3
+- `flutter_debounce_throttle: ^2.4.2` (was ^2.4.0)
+  - Inherits all improvements from flutter_debounce_throttle v2.4.2
+  - New ThrottleDuration presets for 120Hz displays
+  - Enhanced gesture throttling documentation
 
-**Documentation** - Updated README and dependency alignment.
+### No API Changes
 
-### 📚 Documentation
-- Updated installation version to `^2.4.0`
-- Updated `flutter_debounce_throttle` test count reference to `450+`
-- Added `## Which Package Should I Use?` section
-- Updated dependency: `flutter_debounce_throttle` to `^2.4.3`
+All hooks remain exactly the same. This is a dependency update only.
 
 ---
 

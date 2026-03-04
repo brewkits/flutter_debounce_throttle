@@ -6,6 +6,42 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 
+/// Preset throttle durations for common display refresh rates.
+///
+/// Use these constants for better code readability and device compatibility.
+class ThrottleDuration {
+  /// Ultra smooth - 8ms (~120Hz displays)
+  ///
+  /// Ideal for:
+  /// - iPad Pro with ProMotion (120Hz)
+  /// - Samsung Galaxy S21+ (120Hz)
+  /// - iPhone 13 Pro and newer (120Hz)
+  /// - Premium Android flagships
+  ///
+  /// Use when: Gestures drive complex animations on high-end devices.
+  static const Duration ultraSmooth = Duration(milliseconds: 8);
+
+  /// Standard - 16ms (~60fps)
+  ///
+  /// Default choice for most applications. Works well on all devices.
+  ///
+  /// Use when: General-purpose gesture handling.
+  static const Duration standard = Duration(milliseconds: 16);
+
+  /// Conservative - 32ms (~30fps)
+  ///
+  /// Reduces CPU/GPU load on lower-end devices or complex computations.
+  ///
+  /// Use when:
+  /// - Handling heavy computations in gesture callbacks
+  /// - Supporting older/budget devices
+  /// - Battery optimization is priority
+  static const Duration conservative = Duration(milliseconds: 32);
+
+  // Private constructor to prevent instantiation
+  ThrottleDuration._();
+}
+
 /// Throttled gesture detector with full GestureDetector API support.
 ///
 /// This widget wraps Flutter's [GestureDetector] and automatically throttles
@@ -97,6 +133,38 @@ class ThrottledGestureDetector extends StatefulWidget {
   final Duration discreteDuration;
 
   /// Throttle duration for continuous events (pan, scale, drag).
+  ///
+  /// Controls the sampling rate for movement gestures, balancing smoothness
+  /// and performance.
+  ///
+  /// **Device recommendations:**
+  /// - **16ms (60fps)** - Default, works well for all devices
+  /// - **8ms (120Hz)** - For high-refresh-rate displays (iPad Pro, flagship phones)
+  /// - **32ms (30fps)** - For complex animations or lower-end devices
+  ///
+  /// **Example - Ultra smooth for premium devices:**
+  /// ```dart
+  /// ThrottledGestureDetector(
+  ///   continuousDuration: ThrottleDuration.ultraSmooth, // 8ms
+  ///   onPanUpdate: (details) => animateComplexWidget(details),
+  ///   child: widget,
+  /// )
+  /// ```
+  ///
+  /// **Example - Conservative for compatibility:**
+  /// ```dart
+  /// ThrottledGestureDetector(
+  ///   continuousDuration: ThrottleDuration.conservative, // 32ms
+  ///   onPanUpdate: (details) => heavyComputation(details),
+  ///   child: widget,
+  /// )
+  /// ```
+  ///
+  /// **Example - Device-adaptive:**
+  /// ```dart
+  /// final refreshRate = MediaQuery.of(context).devicePixelRatio >= 3.0 ? 120 : 60;
+  /// final duration = Duration(milliseconds: (1000 / refreshRate).round());
+  /// ```
   ///
   /// Default: 16ms (~60fps) for smooth animations.
   final Duration continuousDuration;

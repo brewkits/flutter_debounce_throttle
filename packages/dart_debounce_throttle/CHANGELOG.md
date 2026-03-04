@@ -1,24 +1,56 @@
-## 2.4.4
+## 2.4.5
 
-**SEO & Polish** - Improved pub.dev description for better search ranking.
+- Updated package description for better SEO (targets Serverpod, Dart Frog developers)
+- Added topics: server, redis for improved discoverability
+- Synchronized dependency versions across monorepo
+- No API changes
 
-### What Changed
-- Improved `description`: keyword-first — "Debounce, throttle, and rate limit for Dart servers and CLI..."
-- Replaced unverified "Production-proven" claim with "Battle-tested: 50+ tests"
+## 2.4.2
 
-### No Breaking Changes
+**World Class Release** - Production-grade distributed rate limiting architecture.
 
----
+### 🏗️ Architecture Refactoring
 
-## 2.4.3
+- **REMOVED: Redis/Memcached stores from core package**
+  - Moved to `example/server_demo/redis_rate_limiter/` as reference implementation
+  - **Rationale**: Optional dependencies should not bloat core package (95% users don't need Redis)
+  - **Impact**: Zero breaking changes (stores were never exported in public API)
+  - **Migration**: Copy implementation from examples if needed
 
-**Documentation & Discovery** - Improved pub.dev discoverability and README structure.
+### 🔒 Production Safety Enhancements
 
-### 📚 Documentation
-- Restructured README: 5-Second Start moved to the top for faster onboarding
-- Comparisons vs rxdart/easy_debounce moved to the end (value-first content)
-- Improved pub.dev `description` — keyword-first for better search ranking
-- Updated `topics`: replaced `production` with `dart` for better discoverability
+- **ADDED: Race condition warnings in distributed rate limiting**
+  - Documented fetch-calculate-save race condition in `AsyncRateLimiterStore`
+  - Added concurrency warnings in `DistributedRateLimiter.tryAcquire()`
+  - Provided trade-off analysis (atomic vs non-atomic operations)
+
+- **ADDED: Atomic operations guide**
+  - Redis Lua script example for 100% accurate rate limiting
+  - PostgreSQL transaction pattern with `SELECT FOR UPDATE`
+  - MongoDB `findAndModify` guidance
+  - Performance impact analysis (~2-5ms overhead)
+
+### 📚 Documentation Improvements
+
+- **Enhanced distributed rate limiting guide**
+  - Clear separation: Redis for servers, NOT for mobile apps
+  - Step-by-step Redis integration tutorial
+  - Dart Frog/Shelf middleware examples
+  - Security best practices (TLS, authentication)
+
+### 🔄 Migration Guide
+
+**If you were using RedisRateLimiterStore:**
+
+1. Copy implementation from `example/server_demo/redis_rate_limiter/redis_store_example.dart`
+2. Add to your pubspec.yaml:
+   ```yaml
+   dependencies:
+     redis: ^4.0.0
+   ```
+3. For production: Use Lua script (see `example/.../lua/atomic_rate_limit.lua`)
+
+**No other breaking changes.**
 
 ---
 
