@@ -1,26 +1,41 @@
-## 2.4.4
+## 2.4.5
 
-**SEO & Polish** - Improved pub.dev description for better search ranking.
+- Updated package description emphasizing unique features (Redis, gesture throttling)
+- Changed topics: production → widgets for better categorization
+- Updated dart_debounce_throttle dependency to ^2.4.5
+- Fixed example test imports
+- No API changes
 
-### What Changed
-- Improved `description`: keyword-first — "Prevent button spam, debounce search, and fix memory leaks in Flutter..."
-- Updated dependency: `dart_debounce_throttle` to `^2.4.4`
+## 2.4.2
 
-### No Breaking Changes
+**UI Enhancements** - Better gesture throttling for high-refresh-rate displays.
 
----
+### ✨ New Features
 
-## 2.4.3
-
-**Documentation & Discovery** - Improved pub.dev discoverability and README structure.
+- **ADDED: `ThrottleDuration` preset class**
+  - `ThrottleDuration.ultraSmooth` (8ms) - For 120Hz displays
+  - `ThrottleDuration.standard` (16ms) - Default 60fps
+  - `ThrottleDuration.conservative` (32ms) - For complex animations/older devices
 
 ### 📚 Documentation
-- Restructured README: 30-Second Start moved to the top for faster onboarding
-- Expanded quick start with async and state management examples
-- Moved competitor comparisons to the end (value-first content)
-- Improved pub.dev `description` — keyword-first for better search ranking
-- Updated `topics`: replaced `production` with `async` for better discoverability
-- Added `## Which Package Should I Use?` section for new users
+
+- **Enhanced `ThrottledGestureDetector` documentation**
+  - Device-specific refresh rate recommendations
+  - Examples for 120Hz displays (iPad Pro, iPhone 13 Pro+, flagship Android)
+  - Performance tuning guide for different device tiers
+  - Device-adaptive duration pattern
+
+### 🎨 Example Updates
+
+- **Updated gesture_detector_demo.dart**
+  - Added interactive throttle mode selector
+  - Demonstrates Ultra Smooth (120Hz), Standard (60fps), Conservative (30fps)
+  - Real-time feedback on throttle duration impact
+
+### 📦 Dependencies
+
+- `dart_debounce_throttle: ^2.4.2` (was ^2.4.0)
+  - Inherits production-grade distributed rate limiting improvements
 
 ---
 

@@ -2,7 +2,6 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_hooks.svg)](https://pub.dev/packages/flutter_debounce_throttle_hooks)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![GitHub stars](https://img.shields.io/github/stars/brewkits/flutter_debounce_throttle?style=social)](https://github.com/brewkits/flutter_debounce_throttle/stargazers)
 
 ## The Traffic Control System — Hooks Edition
 
@@ -169,9 +168,19 @@ class AutocompleteSearch extends HookWidget {
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle_hooks: ^2.4.4
-  flutter_hooks: ^0.21.3
+  flutter_debounce_throttle_hooks: ^2.4.2
+  flutter_hooks: ^0.21.0
 ```
+
+---
+
+## 🆕 What's New in v2.4
+
+**All hooks now benefit from:**
+- ✅ ThrottledGestureDetector widget (120Hz display support)
+- ✅ Distributed rate limiting for server-side Dart
+- ✅ Production-grade error handling and race condition management
+- ✅ 16 comprehensive tests ensuring reliability
 
 ---
 
@@ -182,17 +191,16 @@ dependencies:
 | **Type-safe** | Full generic support with 8 production-ready hooks |
 | **Memory-safe** | Auto-cleanup on unmount |
 | **Lifecycle-aware** | No manual dispose needed |
-| **Battle-tested** | Built on flutter_debounce_throttle (450+ tests) |
+| **Battle-tested** | Built on flutter_debounce_throttle (340+ tests) |
 
 ---
 
-## Which Package Should I Use?
+## Related Packages
 
-| You are building... | Package |
-|---------------------|---------|
-| Flutter app + `flutter_hooks` | **`flutter_debounce_throttle_hooks`** ← you are here |
-| Flutter app (no hooks) | [`flutter_debounce_throttle`](https://pub.dev/packages/flutter_debounce_throttle) |
-| Dart server / CLI / Serverpod | [`dart_debounce_throttle`](https://pub.dev/packages/dart_debounce_throttle) |
+| Package | Use When |
+|---------|----------|
+| [`flutter_debounce_throttle`](https://pub.dev/packages/flutter_debounce_throttle) | Flutter without hooks |
+| [`dart_debounce_throttle`](https://pub.dev/packages/dart_debounce_throttle) | Pure Dart (Server/CLI) |
 
 ---
 

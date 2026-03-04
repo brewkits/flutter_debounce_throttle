@@ -2,120 +2,36 @@
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle.svg)](https://pub.dev/packages/flutter_debounce_throttle)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-450%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
+[![Tests](https://img.shields.io/badge/tests-300%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
-[![GitHub stars](https://img.shields.io/github/stars/brewkits/flutter_debounce_throttle?style=social)](https://github.com/brewkits/flutter_debounce_throttle/stargazers)
 
 ## The Traffic Control System for Flutter Apps
 
-> Stop using manual `Timer`. It causes memory leaks, crashes, and race conditions.
+> Stop using manual Timers. They cause memory leaks and crashes.
 
 **All-in-one package** for debounce, throttle, rate limiting, and async concurrency control. Memory-safe, lifecycle-aware, and works with any state management solution.
 
----
-
-## 30-Second Start
-
-**Anti-Spam Button (1 line):**
 ```dart
-ThrottledInkWell(onTap: () => processPayment(), child: Text('Pay \$99'))
-```
-
-**Debounced Search:**
-```dart
-final debouncer = Debouncer(duration: 300.ms);
-TextField(onChanged: (s) => debouncer(() => search(s)))
-```
-
-**Async with loading state:**
-```dart
-AsyncThrottledBuilder(
-  builder: (context, throttle, isLoading) => ElevatedButton(
-    onPressed: throttle(() async => await submitForm()),
-    child: Text(isLoading ? 'Submitting...' : 'Submit'),
-  ),
+// One widget. Prevents double-tap payment bugs forever.
+ThrottledInkWell(
+  duration: 500.ms,
+  onTap: () => processPayment(),
+  child: Text('Pay \$99'),
 )
 ```
 
-**State management (Provider / Riverpod / GetX / Bloc):**
-```dart
-class SearchController with ChangeNotifier, EventLimiterMixin {
-  void onSearch(String text) {
-    debounce('search', () async {
-      _results = await api.search(text);
-      notifyListeners();
-    });
-  }
-
-  @override
-  void dispose() { cancelAll(); super.dispose(); }
-}
-```
-
-No setup. No dispose boilerplate. Auto-cleanup on widget unmount.
-
 ---
 
-## Widgets
+## Why Not Just Use easy_debounce?
 
-| Widget | Use Case |
-|--------|----------|
-| `ThrottledInkWell` | Button with ripple + throttle — prevent double-tap |
-| `ThrottledBuilder` | Custom throttled widget |
-| `DebouncedBuilder` | Custom debounced widget |
-| `DebouncedQueryBuilder` | Search input with loading state |
-| `AsyncThrottledBuilder` | Async button with loading lock |
-| `ConcurrentAsyncThrottledBuilder` | 4 concurrency modes |
-| `ThrottledGestureDetector` | Drop-in `GestureDetector` replacement |
-| `StreamDebounceListener` | Debounce stream events |
-| `StreamThrottleListener` | Throttle stream events |
-
----
-
-## State Management Mixin
-
-Works with **Provider, Bloc, GetX, Riverpod, MobX** — any `ChangeNotifier`:
-
-```dart
-class SearchController with ChangeNotifier, EventLimiterMixin {
-  List<User> users = [];
-
-  void onSearch(String text) {
-    debounce('search', () async {
-      users = await api.search(text);
-      notifyListeners();
-    });
-  }
-
-  @override
-  void dispose() {
-    cancelAll();  // Clean up all limiters
-    super.dispose();
-  }
-}
-```
-
-> **⚠️ Important:** When using **dynamic IDs** (e.g., `debounce('post_$postId', ...)`), call `remove(id)` when items are deleted. For static IDs like `'search'`, `cancelAll()` in dispose is sufficient.
-
----
-
-## Concurrency Modes
-
-Handle race conditions in async operations with 4 strategies:
-
-| Mode | Behavior | Use Case |
-|------|----------|----------|
-| `drop` | Ignore new while busy | Payment buttons |
-| `replace` | Cancel old, run new | Search autocomplete |
-| `enqueue` | Queue in order | Chat messages |
-| `keepLatest` | Current + last only | Auto-save |
-
-```dart
-ConcurrentAsyncThrottledBuilder(
-  mode: ConcurrencyMode.replace,  // Cancel stale API requests
-  builder: (context, throttle, isLoading, pendingCount) => ...
-)
-```
+| Capability | This Package | easy_debounce | Manual Timer |
+|------------|:---:|:---:|:---:|
+| **Memory Safe** (Auto-dispose) | ✅ | ❌ | ❌ Leaky |
+| **Async & Future Support** | ✅ | ❌ | ❌ |
+| **Race Condition Control** | ✅ 4 modes | ❌ | ❌ |
+| **Ready-to-use Widgets** | ✅ | ❌ | ❌ |
+| **State Management Mixin** | ✅ | ❌ | ❌ |
+| **Loading States Built-in** | ✅ | ❌ | ❌ |
 
 ---
 
@@ -153,7 +69,9 @@ Execution: [WAIT] ····· [RESET] ····· [RESET] ········ [EXECUT
 
 ---
 
-#### ➤ Concurrency: `replace` (Perfect for Search)
+### Concurrency Modes (Async)
+
+#### Mode: `replace` (Perfect for Search)
 New task **cancels** the old one.
 
 ```
@@ -162,15 +80,163 @@ Task 2:              ↓ New search query
                      [──────── 500ms API Call ────────]  ✅ Result shown
 ```
 
+**Use:** Search autocomplete, tab switching
+
 ---
 
-## Extensions & Utilities
+#### Mode: `drop` (Default)
+If busy, new tasks are **ignored**.
+
+```
+Task 1:  [──────── 500ms API Call ────────]  ✅ Completes
+Task 2:            ↓ User taps again
+                   [DROPPED ❌]
+```
+
+**Use:** Payment buttons, preventing double-tap
+
+---
+
+#### Mode: `enqueue`
+Tasks **queue** and run in order.
+
+```
+Task 1:  [──────── 500ms ────────]  ✅
+Task 2:            ↓ Queued
+                   [Waiting...]      [──────── 500ms ────────]  ✅
+```
+
+**Use:** Chat messages, ordered operations
+
+---
+
+## 5-Second Start
+
+**Anti-Spam Button:**
+```dart
+ThrottledInkWell(onTap: () => pay(), child: Text('Pay'))
+```
+
+**Debounced Search:**
+```dart
+final debouncer = Debouncer(duration: 300.ms);
+TextField(onChanged: (s) => debouncer(() => search(s)))
+```
+
+That's it. No setup. No dispose. Auto-cleanup on widget unmount.
+
+---
+
+## Widgets
+
+| Widget | Use Case |
+|--------|----------|
+| `ThrottledGestureDetector` 🆕 | Full GestureDetector with throttling (tap, pan, scale, drag) |
+| `ThrottledInkWell` | Button with ripple + throttle |
+| `ThrottledBuilder` | Custom throttled widget |
+| `DebouncedBuilder` | Custom debounced widget |
+| `DebouncedQueryBuilder` | Search with loading state |
+| `AsyncThrottledBuilder` | Async with lock |
+| `ConcurrentAsyncThrottledBuilder` | 4 concurrency modes |
+| `StreamDebounceListener` | Debounce stream events |
+| `StreamThrottleListener` | Throttle stream events |
+
+### 🆕 ThrottledGestureDetector
+
+Prevent gesture spam with full GestureDetector API support:
 
 ```dart
-// Duration extensions — write durations naturally
+ThrottledGestureDetector(
+  continuousDuration: ThrottleDuration.ultraSmooth, // 8ms for 120Hz displays
+  onTap: () => handleTap(),
+  onLongPress: () => showMenu(),
+  onPanUpdate: (details) => updatePosition(details),
+  onScaleUpdate: (details) => zoom(details.scale),
+  child: MyWidget(),
+)
+```
+
+**Features:**
+- ✅ All 40+ gesture callbacks supported
+- ✅ Smart dual-throttle: discrete (500ms) + continuous (16ms/60fps)
+- ✅ 120Hz display support with `ThrottleDuration` presets
+- ✅ Automatic cleanup on dispose
+
+---
+
+## State Management Mixin
+
+Works with **Provider, Bloc, GetX, Riverpod, MobX** — any `ChangeNotifier`:
+
+```dart
+class SearchController with ChangeNotifier, EventLimiterMixin {
+  List<User> users = [];
+
+  void onSearch(String text) {
+    debounce('search', () async {
+      users = await api.search(text);
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    cancelAll();  // Clean up all limiters
+    super.dispose();
+  }
+}
+```
+
+> **⚠️ Important:** When using **dynamic IDs** (e.g., `debounce('post_$postId', ...)`), you must manually call `remove(id)` when items are deleted to prevent memory leaks. The mixin does **not** automatically dispose dynamic IDs. For static IDs like `'search'` or `'submit'`, `cancelAll()` in dispose is sufficient.
+
+---
+
+## Concurrency Modes
+
+Handle race conditions with 4 strategies:
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `drop` | Ignore new while busy | Payment buttons |
+| `replace` | Cancel old, run new | Search autocomplete |
+| `enqueue` | Queue in order | Chat messages |
+| `keepLatest` | Current + last only | Auto-save |
+
+```dart
+ConcurrentAsyncThrottledBuilder(
+  mode: ConcurrencyMode.replace,  // Cancel stale requests
+  builder: (context, throttle, isLoading, pendingCount) => ...
+)
+```
+
+---
+
+## Installation
+
+```yaml
+dependencies:
+  flutter_debounce_throttle: ^2.4.2
+```
+
+---
+
+## 🆕 What's New in v2.4
+
+### ThrottledGestureDetector
+Drop-in replacement for GestureDetector with built-in throttling and 120Hz display support.
+
+### ThrottleDuration Presets
+```dart
+ThrottleDuration.ultraSmooth    // 8ms  - iPad Pro 120Hz, iPhone 13 Pro+
+ThrottleDuration.standard       // 16ms - 60fps (default)
+ThrottleDuration.conservative   // 32ms - Battery saving, complex animations
+```
+
+### Power Features
+
+```dart
+// Duration extensions
 ThrottledInkWell(duration: 500.ms, ...)
-Debouncer(duration: 300.ms)
-RateLimiter(refillInterval: 1.seconds)
 
 // Leading + trailing edge (like lodash)
 Debouncer(leading: true, trailing: true)
@@ -181,18 +247,10 @@ RateLimiter(maxTokens: 10, refillRate: 2)
 // Queue backpressure control
 ConcurrentAsyncThrottler(maxQueueSize: 10)
 
-// Callback extensions
-final debouncedFn = myFunction.debounced(300.ms);
-final throttledFn = myFunction.throttled(500.ms);
-```
-
----
-
-## Installation
-
-```yaml
-dependencies:
-  flutter_debounce_throttle: ^2.4.4
+// Device-adaptive throttling
+final duration = MediaQuery.of(context).devicePixelRatio >= 3.0
+    ? ThrottleDuration.ultraSmooth
+    : ThrottleDuration.standard;
 ```
 
 ---
@@ -201,33 +259,19 @@ dependencies:
 
 | Guarantee | How |
 |-----------|-----|
-| **450+ tests** | Comprehensive unit & integration tests |
+| **360+ tests** | Comprehensive unit & integration tests |
 | **95% coverage** | All edge cases covered |
 | **Type-safe** | No `dynamic`, full generics |
-| **Memory-safe** | Zero leaks verified with LeakTracker |
+| **Memory-safe** | Zero leaks verified |
 
 ---
 
-## Which Package Should I Use?
+## Related Packages
 
-| You are building... | Package |
-|---------------------|---------|
-| Flutter app (most users) | **`flutter_debounce_throttle`** ← you are here |
-| Flutter app + `flutter_hooks` | [`flutter_debounce_throttle_hooks`](https://pub.dev/packages/flutter_debounce_throttle_hooks) |
-| Dart server / CLI / Serverpod | [`dart_debounce_throttle`](https://pub.dev/packages/dart_debounce_throttle) |
-
----
-
-## Why Not Just Use easy_debounce?
-
-| Capability | This Package | easy_debounce | Manual Timer |
-|------------|:---:|:---:|:---:|
-| **Memory Safe** (Auto-dispose) | ✅ | ❌ | ❌ Leaky |
-| **Async & Future Support** | ✅ | ❌ | ❌ |
-| **Race Condition Control** | ✅ 4 modes | ❌ | ❌ |
-| **Ready-to-use Widgets** | ✅ | ❌ | ❌ |
-| **State Management Mixin** | ✅ | ❌ | ❌ |
-| **Loading States Built-in** | ✅ | ❌ | ❌ |
+| Package | Use When |
+|---------|----------|
+| [`dart_debounce_throttle`](https://pub.dev/packages/dart_debounce_throttle) | Pure Dart (Server/CLI) |
+| [`flutter_debounce_throttle_hooks`](https://pub.dev/packages/flutter_debounce_throttle_hooks) | Flutter + Hooks |
 
 ---
 
@@ -235,8 +279,7 @@ dependencies:
   <a href="https://github.com/brewkits/flutter_debounce_throttle">GitHub</a> ·
   <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/FAQ.md">FAQ</a> ·
   <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/API_REFERENCE.md">API Reference</a> ·
-  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/BEST_PRACTICES.md">Best Practices</a> ·
-  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/MIGRATION_GUIDE.md">Migration Guide</a>
+  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/BEST_PRACTICES.md">Best Practices</a>
 </p>
 
 <p align="center">

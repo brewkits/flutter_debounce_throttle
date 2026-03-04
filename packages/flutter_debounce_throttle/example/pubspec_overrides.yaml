@@ -1,0 +1,6 @@
+# Local development overrides
+# Use local path dependencies instead of published packages
+
+dependency_overrides:
+  dart_debounce_throttle:
+    path: ../../dart_debounce_throttle
