@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API documentation for flutter_debounce_throttle v1.1.0.
+Complete API documentation for flutter_debounce_throttle v2.4.4.
 
 ---
 
@@ -66,7 +66,7 @@ debouncer.cancel();
 debouncer.dispose();
 ```
 
-#### Leading/Trailing Edge (v1.1.0)
+#### Leading/Trailing Edge
 
 ```dart
 // Default: trailing edge only (standard debounce)
@@ -116,7 +116,7 @@ if (result != null) {
 }
 ```
 
-#### DebounceResult (v1.1.0)
+#### DebounceResult
 
 Use `callWithResult()` when your async operation can return null:
 
@@ -185,7 +185,7 @@ throttler.call(() async => await fetchData());
 | `replace` | Cancel current, start new |
 | `keepLatest` | Keep only latest pending |
 
-#### maxQueueSize (v1.1.0)
+#### maxQueueSize
 
 ```dart
 final chatSender = ConcurrentAsyncThrottler(
@@ -235,7 +235,7 @@ batcher(() => save('item3'));
 // After 100ms: executes all 3 actions in batch
 ```
 
-#### maxBatchSize (v1.1.0)
+#### maxBatchSize
 
 ```dart
 final batcher = BatchThrottler(
@@ -446,7 +446,7 @@ class MyWidget extends HookWidget {
 
 ## Extensions
 
-### Duration Extensions (v1.1.0)
+### Duration Extensions
 
 ```dart
 300.ms       // Duration(milliseconds: 300)
@@ -455,7 +455,7 @@ class MyWidget extends HookWidget {
 1.hours      // Duration(hours: 1)
 ```
 
-### Callback Extensions (v1.1.0)
+### Callback Extensions
 
 ```dart
 final search = () => api.search();
