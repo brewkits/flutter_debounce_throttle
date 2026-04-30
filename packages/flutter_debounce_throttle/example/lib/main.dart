@@ -97,8 +97,7 @@ class _AntiSpamTabState extends State<_AntiSpamTab> {
           GestureDetector(
             onTap: _handleTap,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 48, vertical: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 18),
               decoration: BoxDecoration(
                 color: Colors.blue,
                 borderRadius: BorderRadius.circular(14),
@@ -123,16 +122,12 @@ class _AntiSpamTabState extends State<_AntiSpamTab> {
             children: [
               _StatCard(label: 'Taps', value: '$_taps', color: Colors.orange),
               _StatCard(
-                  label: 'Payments',
-                  value: '$_executed',
-                  color: Colors.green),
-              _StatCard(
-                  label: 'Blocked', value: '$blocked', color: Colors.red),
+                  label: 'Payments', value: '$_executed', color: Colors.green),
+              _StatCard(label: 'Blocked', value: '$blocked', color: Colors.red),
             ],
           ),
           const SizedBox(height: 32),
-          _CodeSnippet(
-              'Throttler(duration: 2.seconds)\n'
+          _CodeSnippet('Throttler(duration: 2.seconds)\n'
               '// 1 execution per 2 seconds — rest are dropped'),
         ],
       ),
@@ -167,7 +162,9 @@ class _SearchTabState extends State<_SearchTab> {
               setState(() => _apiCalls++);
               await Future.delayed(const Duration(milliseconds: 600));
               return List.generate(
-                  4, (i) => '${text.isNotEmpty ? text : "flutter"} result ${i + 1}');
+                  4,
+                  (i) =>
+                      '${text.isNotEmpty ? text : "flutter"} result ${i + 1}');
             },
             onResult: (results) {
               if (mounted) setState(() => _results = results);
@@ -175,7 +172,8 @@ class _SearchTabState extends State<_SearchTab> {
             builder: (context, search, isSearching) => TextField(
               onChanged: (text) {
                 setState(() => _totalKeystrokes++);
-                search?.call(text); // search is nullable — called only after debounce
+                search?.call(
+                    text); // search is nullable — called only after debounce
               },
               decoration: InputDecoration(
                 hintText: 'Type to search...',
@@ -224,8 +222,7 @@ class _SearchTabState extends State<_SearchTab> {
                     ),
                   ),
           ),
-          _CodeSnippet(
-              'DebouncedQueryBuilder(\n'
+          _CodeSnippet('DebouncedQueryBuilder(\n'
               '  duration: 500.ms,\n'
               '  onQuery: (text) async => await api.search(text),\n'
               '  onResult: (results) => setState(() => _results = results),\n'
@@ -258,7 +255,8 @@ class _AsyncFormTabState extends State<_AsyncFormTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Async Form Submit', style: Theme.of(context).textTheme.titleLarge),
+          Text('Async Form Submit',
+              style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
           const Text('Duplicate taps are dropped while submitting.',
               style: TextStyle(color: Colors.grey)),
@@ -308,14 +306,14 @@ class _AsyncFormTabState extends State<_AsyncFormTab> {
               _StatCard(
                   label: 'Attempts', value: '$_attempts', color: Colors.orange),
               _StatCard(
-                  label: 'Submitted', value: '$_submitted', color: Colors.green),
-              _StatCard(
-                  label: 'Blocked', value: '$blocked', color: Colors.red),
+                  label: 'Submitted',
+                  value: '$_submitted',
+                  color: Colors.green),
+              _StatCard(label: 'Blocked', value: '$blocked', color: Colors.red),
             ],
           ),
           const SizedBox(height: 32),
-          _CodeSnippet(
-              'ConcurrentAsyncThrottledBuilder(\n'
+          _CodeSnippet('ConcurrentAsyncThrottledBuilder(\n'
               '  mode: ConcurrencyMode.drop,\n'
               '  onPressed: () async => await submitForm(),\n'
               '  builder: (ctx, callback, isLoading, _) =>\n'
@@ -434,8 +432,7 @@ class _ConcurrencyTabState extends State<_ConcurrencyTab> {
                     },
                   ),
           ),
-          _CodeSnippet(
-              'ConcurrentAsyncThrottler(\n'
+          _CodeSnippet('ConcurrentAsyncThrottler(\n'
               '  mode: ConcurrencyMode.replace,\n'
               ')\n'
               '// New search cancels the previous one automatically'),
@@ -477,8 +474,7 @@ class _StatCard extends StatelessWidget {
               style: TextStyle(
                   fontSize: 28, fontWeight: FontWeight.bold, color: color)),
           const SizedBox(height: 2),
-          Text(label,
-              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
     );

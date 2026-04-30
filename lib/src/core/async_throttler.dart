@@ -73,6 +73,7 @@ class AsyncThrottler with EventLimiterLogging {
 
   bool _isLocked = false;
   Timer? _timeoutTimer;
+  int _executionCount = 0;
 
   AsyncThrottler({
     Duration? maxDuration,
@@ -86,6 +87,7 @@ class AsyncThrottler with EventLimiterLogging {
   /// Execute async operation with lock protection.
   Future<void> call(Future<void> Function() callback) async {
     final startTime = DateTime.now();
+    final executionId = ++_executionCount;
 
     // Skip throttle if disabled
     if (!enabled) {
@@ -95,7 +97,7 @@ class AsyncThrottler with EventLimiterLogging {
         final executionTime = DateTime.now().difference(startTime);
         onMetrics?.call(executionTime, true);
       } catch (e) {
-        if (resetOnError) {
+        if (resetOnError && executionId == _executionCount) {
           debugLog('Error occurred, resetting lock state');
         }
         rethrow;
@@ -115,9 +117,12 @@ class AsyncThrottler with EventLimiterLogging {
     if (maxDuration != null) {
       _timeoutTimer?.cancel();
       _timeoutTimer = Timer(maxDuration!, () {
-        debugLog('AsyncThrottle timeout reached, auto-unlocking');
-        _timeoutTimer = null;
-        _isLocked = false;
+        // Only timeout if it's still the same execution
+        if (executionId == _executionCount) {
+          debugLog('AsyncThrottle timeout reached, auto-unlocking');
+          _timeoutTimer = null;
+          _isLocked = false;
+        }
       });
     }
 
@@ -125,17 +130,19 @@ class AsyncThrottler with EventLimiterLogging {
       await callback();
       final executionTime = DateTime.now().difference(startTime);
       debugLog('AsyncThrottle completed in ${executionTime.inMilliseconds}ms');
-      onMetrics?.call(executionTime, true);
+      if (executionId == _executionCount) {
+        onMetrics?.call(executionTime, true);
+      }
     } catch (e) {
       debugLog('AsyncThrottle error: $e');
-      if (resetOnError) {
+      if (resetOnError && executionId == _executionCount) {
         debugLog('Resetting AsyncThrottler state due to error');
         reset();
       }
       rethrow;
     } finally {
-      // Only unlock if timeout hasn't already unlocked
-      if (_timeoutTimer != null) {
+      // Only unlock if timeout hasn't already unlocked AND it's our execution
+      if (executionId == _executionCount && _timeoutTimer != null) {
         _timeoutTimer!.cancel();
         _timeoutTimer = null;
         _isLocked = false;
@@ -155,6 +162,7 @@ class AsyncThrottler with EventLimiterLogging {
 
   /// Reset throttler state, allowing immediate execution.
   void reset() {
+    _executionCount++; // Invalidate current execution
     _timeoutTimer?.cancel();
     _timeoutTimer = null;
     _isLocked = false;
@@ -162,6 +170,7 @@ class AsyncThrottler with EventLimiterLogging {
   }
 
   void dispose() {
+    _executionCount++;
     _timeoutTimer?.cancel();
     _timeoutTimer = null;
     _isLocked = false;

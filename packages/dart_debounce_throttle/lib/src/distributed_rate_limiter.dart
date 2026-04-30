@@ -173,7 +173,8 @@ class DistributedRateLimiter with EventLimiterLogging {
 
     // First time initialization
     if (lastRefillMicros == 0) {
-      debugLog('First access for key "$key", initializing with $maxTokens tokens');
+      debugLog(
+          'First access for key "$key", initializing with $maxTokens tokens');
       return RateLimiterState(
         tokens: maxTokens.toDouble(),
         lastRefillMicroseconds: nowMicros,

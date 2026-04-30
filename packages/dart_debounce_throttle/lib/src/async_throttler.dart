@@ -136,13 +136,17 @@ class AsyncThrottler with EventLimiterLogging {
     _isLocked = true;
     debugLog('AsyncThrottle locked');
 
+    Timer? localTimer;
     if (maxDuration != null) {
       _timeoutTimer?.cancel();
-      _timeoutTimer = Timer(maxDuration!, () {
-        debugLog('AsyncThrottle timeout reached, auto-unlocking');
-        _timeoutTimer = null;
-        _isLocked = false;
+      localTimer = Timer(maxDuration!, () {
+        if (_timeoutTimer == localTimer) {
+          debugLog('AsyncThrottle timeout reached, auto-unlocking');
+          _timeoutTimer = null;
+          _isLocked = false;
+        }
       });
+      _timeoutTimer = localTimer;
     }
 
     try {
@@ -168,8 +172,8 @@ class AsyncThrottler with EventLimiterLogging {
       }
       rethrow;
     } finally {
-      // Only unlock if timeout hasn't already unlocked
-      if (_timeoutTimer != null) {
+      // Only unlock if timeout hasn't already unlocked and we still own the lock
+      if (_timeoutTimer != null && _timeoutTimer == localTimer) {
         _timeoutTimer!.cancel();
         _timeoutTimer = null;
         _isLocked = false;

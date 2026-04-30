@@ -103,7 +103,7 @@ void main() {
     group('debounced()', () {
       test('returns debounced function', () async {
         var callCount = 0;
-        final original = () => callCount++;
+        int original() => callCount++;
         final debounced = original.debounced(50.ms);
 
         // Call multiple times rapidly
@@ -141,10 +141,10 @@ void main() {
         var count1 = 0;
         var count2 = 0;
 
-        final original = () {
+        void original() {
           count1++;
           count2++;
-        };
+        }
 
         final debounced1 = original.debounced(50.ms);
         final debounced2 = original.debounced(50.ms);
@@ -163,7 +163,7 @@ void main() {
     group('throttled()', () {
       test('returns throttled function', () async {
         var callCount = 0;
-        final original = () => callCount++;
+        int original() => callCount++;
         final throttled = original.throttled(50.ms);
 
         // Call multiple times rapidly
@@ -205,8 +205,8 @@ void main() {
         var count1 = 0;
         var count2 = 0;
 
-        final fn1 = () => count1++;
-        final fn2 = () => count2++;
+        int fn1() => count1++;
+        int fn2() => count2++;
 
         final throttled1 = fn1.throttled(100.ms);
         final throttled2 = fn2.throttled(100.ms);
@@ -229,7 +229,7 @@ void main() {
       // Note: The .debounced() extension is for void Function() only
       // For parameterized callbacks, use a closure pattern:
       var lastQuery = '';
-      final debouncedCallback = () => search(lastQuery);
+      void debouncedCallback() => search(lastQuery);
       final debounced = debouncedCallback.debounced(50.ms);
 
       lastQuery = 'a';

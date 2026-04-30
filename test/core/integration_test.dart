@@ -105,7 +105,8 @@ void main() {
         onButtonClick('click2');
         onButtonClick('click3');
 
-        expect(uiFeedback, ['click1']); // Immediate feedback for first (leading edge)
+        expect(uiFeedback,
+            ['click1']); // Immediate feedback for first (leading edge)
 
         await Future.delayed(150.ms);
 
@@ -125,7 +126,6 @@ void main() {
         // - Rate limit to prevent server overload
 
         final uploadedFiles = <String>[];
-        var rateLimitedCount = 0;
 
         final rateLimiter = RateLimiter(
           maxTokens: 5,
@@ -145,8 +145,6 @@ void main() {
             if (rateLimiter.tryAcquire()) {
               await Future.delayed(20.ms); // Simulate upload
               uploadedFiles.add(filename);
-            } else {
-              rateLimitedCount++;
             }
           }).catchError((_) {
             // Queue overflow - file rejected

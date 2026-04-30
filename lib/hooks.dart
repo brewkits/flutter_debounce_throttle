@@ -29,7 +29,7 @@
   'Hooks have moved to flutter_debounce_throttle_hooks package. '
   'Add flutter_debounce_throttle_hooks to pubspec.yaml and import from there.',
 )
-library hooks;
+library;
 
 // Re-export core for convenience (this still works)
 export 'core.dart';

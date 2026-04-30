@@ -133,7 +133,8 @@ void main() {
       expect(config.limiterAutoCleanupThreshold, 100);
     });
 
-    test('default auto-cleanup behavior (simulated with shorter TTL)', () async {
+    test('default auto-cleanup behavior (simulated with shorter TTL)',
+        () async {
       // Simulate the default behavior but with shorter TTL for test speed
       DebounceThrottleConfig.init(
         limiterAutoCleanupTTL: const Duration(milliseconds: 100),

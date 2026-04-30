@@ -108,12 +108,12 @@ void main() {
     test('keyCount tracks number of keys', () {
       expect(store.keyCount, 0);
 
-      store.saveState('key1',
-          const RateLimiterState(tokens: 1, lastRefillMicroseconds: 1));
+      store.saveState(
+          'key1', const RateLimiterState(tokens: 1, lastRefillMicroseconds: 1));
       expect(store.keyCount, 1);
 
-      store.saveState('key2',
-          const RateLimiterState(tokens: 2, lastRefillMicroseconds: 2));
+      store.saveState(
+          'key2', const RateLimiterState(tokens: 2, lastRefillMicroseconds: 2));
       expect(store.keyCount, 2);
 
       store.clearState('key1');
