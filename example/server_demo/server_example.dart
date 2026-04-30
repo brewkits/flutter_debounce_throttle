@@ -80,7 +80,9 @@ class AsyncBatchProcessor {
 
   Future<void> saveRecord(Map<String, dynamic> record) async {
     _pendingRecords.add(record);
-    print('📦 Record queued: ${record['id']} (Total: ${_pendingRecords.length})');
+    print(
+      '📦 Record queued: ${record['id']} (Total: ${_pendingRecords.length})',
+    );
 
     // Group records and save in batch after 500ms
     await _asyncDebouncer.call(() async {
@@ -91,7 +93,9 @@ class AsyncBatchProcessor {
     });
   }
 
-  Future<void> _simulateAsyncDatabaseSave(List<Map<String, dynamic>> records) async {
+  Future<void> _simulateAsyncDatabaseSave(
+    List<Map<String, dynamic>> records,
+  ) async {
     await Future.delayed(const Duration(milliseconds: 100));
     for (final record in records) {
       print('  → Saved: ${record['id']}');
@@ -110,10 +114,7 @@ void main() async {
   print('========================================\n');
 
   // Configure global settings
-  DebounceThrottleConfig.init(
-    enableDebugLog: true,
-    logLevel: LogLevel.debug,
-  );
+  DebounceThrottleConfig.init(enableDebugLog: true, logLevel: LogLevel.debug);
 
   // Demo 1: Log Batching
   print('\n📋 Demo 1: Log Batching Service');

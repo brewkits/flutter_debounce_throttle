@@ -108,6 +108,7 @@ class ConcurrentAsyncThrottler {
     bool enabled = true,
     bool resetOnError = false,
     void Function(Duration executionTime, bool executed)? onMetrics,
+    void Function(Object error, StackTrace stackTrace)? onError,
     this.maxQueueSize,
     this.queueOverflowStrategy = QueueOverflowStrategy.dropNewest,
   }) : _throttler = AsyncThrottler(
@@ -117,6 +118,7 @@ class ConcurrentAsyncThrottler {
           enabled: enabled,
           resetOnError: resetOnError,
           onMetrics: onMetrics,
+          onError: onError,
         );
 
   /// Execute async operation with selected concurrency mode.
@@ -243,17 +245,19 @@ class ConcurrentAsyncThrottler {
       return;
     }
 
-    // Execute immediately if not locked
-    await _throttler.call(callback);
+    try {
+      // Execute immediately if not locked
+      await _throttler.call(callback);
+    } finally {
+      // After execution, check if there's a pending latest call
+      if (_latestCall != null) {
+        final pendingCall = _latestCall!;
+        _latestCall = null;
+        _throttler.debugLog('Executing pending latest call');
 
-    // After execution, check if there's a pending latest call
-    if (_latestCall != null) {
-      final pendingCall = _latestCall!;
-      _latestCall = null;
-      _throttler.debugLog('Executing pending latest call');
-
-      // Recursively call to handle any new latest that arrived during execution
-      await _keepLatestCall(pendingCall);
+        // Recursively call to handle any new latest that arrived during execution
+        await _keepLatestCall(pendingCall);
+      }
     }
   }
 

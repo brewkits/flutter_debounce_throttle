@@ -10,13 +10,15 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        capturedDebouncer = useDebouncer(duration: const Duration(milliseconds: 300));
+        capturedDebouncer =
+            useDebouncer(duration: const Duration(milliseconds: 300));
         return Container();
       }),
     );
 
     expect(capturedDebouncer, isNotNull);
-    expect(capturedDebouncer!.duration, equals(const Duration(milliseconds: 300)));
+    expect(
+        capturedDebouncer!.duration, equals(const Duration(milliseconds: 300)));
 
     // Dispose widget - hooks should auto-dispose
     await tester.pumpWidget(Container());
@@ -28,7 +30,8 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        final debouncer = useDebouncer(duration: const Duration(milliseconds: 100));
+        final debouncer =
+            useDebouncer(duration: const Duration(milliseconds: 100));
 
         // Call multiple times
         debouncer.call(() => callCount++);
@@ -54,13 +57,15 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        capturedThrottler = useThrottler(duration: const Duration(milliseconds: 300));
+        capturedThrottler =
+            useThrottler(duration: const Duration(milliseconds: 300));
         return Container();
       }),
     );
 
     expect(capturedThrottler, isNotNull);
-    expect(capturedThrottler!.duration, equals(const Duration(milliseconds: 300)));
+    expect(
+        capturedThrottler!.duration, equals(const Duration(milliseconds: 300)));
 
     // Dispose widget - hooks should auto-dispose
     await tester.pumpWidget(Container());
@@ -72,7 +77,8 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        final throttler = useThrottler(duration: const Duration(milliseconds: 100));
+        final throttler =
+            useThrottler(duration: const Duration(milliseconds: 100));
 
         // First call executes immediately
         throttler.call(() => callCount++);
@@ -217,13 +223,15 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        capturedDebouncer = useAsyncDebouncer(duration: const Duration(milliseconds: 300));
+        capturedDebouncer =
+            useAsyncDebouncer(duration: const Duration(milliseconds: 300));
         return Container();
       }),
     );
 
     expect(capturedDebouncer, isNotNull);
-    expect(capturedDebouncer!.duration, equals(const Duration(milliseconds: 300)));
+    expect(
+        capturedDebouncer!.duration, equals(const Duration(milliseconds: 300)));
 
     // Dispose widget - hooks should auto-dispose
     await tester.pumpWidget(Container());
@@ -235,7 +243,8 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        final asyncDebouncer = useAsyncDebouncer(duration: const Duration(milliseconds: 100));
+        final asyncDebouncer =
+            useAsyncDebouncer(duration: const Duration(milliseconds: 100));
 
         useEffect(() {
           asyncDebouncer(() async {
@@ -271,13 +280,15 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        capturedThrottler = useAsyncThrottler(maxDuration: const Duration(milliseconds: 300));
+        capturedThrottler =
+            useAsyncThrottler(maxDuration: const Duration(milliseconds: 300));
         return Container();
       }),
     );
 
     expect(capturedThrottler, isNotNull);
-    expect(capturedThrottler!.maxDuration, equals(const Duration(milliseconds: 300)));
+    expect(capturedThrottler!.maxDuration,
+        equals(const Duration(milliseconds: 300)));
 
     // Dispose widget - hooks should auto-dispose
     await tester.pumpWidget(Container());
@@ -289,7 +300,8 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        final asyncThrottler = useAsyncThrottler(maxDuration: const Duration(milliseconds: 100));
+        final asyncThrottler =
+            useAsyncThrottler(maxDuration: const Duration(milliseconds: 100));
 
         useEffect(() {
           asyncThrottler(() async {
@@ -380,10 +392,14 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        final debouncer = useDebouncer(duration: const Duration(milliseconds: 100));
-        final throttler = useThrottler(duration: const Duration(milliseconds: 100));
-        final asyncDebouncer = useAsyncDebouncer(duration: const Duration(milliseconds: 100));
-        final asyncThrottler = useAsyncThrottler(maxDuration: const Duration(milliseconds: 100));
+        final debouncer =
+            useDebouncer(duration: const Duration(milliseconds: 100));
+        final throttler =
+            useThrottler(duration: const Duration(milliseconds: 100));
+        final asyncDebouncer =
+            useAsyncDebouncer(duration: const Duration(milliseconds: 100));
+        final asyncThrottler =
+            useAsyncThrottler(maxDuration: const Duration(milliseconds: 100));
 
         debouncer.call(() => debouncedCallCount++);
         throttler.call(() => throttledCallCount++);
@@ -402,8 +418,7 @@ void main() {
     expect(debouncedCallCount, equals(1));
   });
 
-  testWidgets('hooks persist across rebuilds',
-      (WidgetTester tester) async {
+  testWidgets('hooks persist across rebuilds', (WidgetTester tester) async {
     Debouncer? debouncer1;
     Debouncer? debouncer2;
 

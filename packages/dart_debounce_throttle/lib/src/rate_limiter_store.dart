@@ -72,7 +72,8 @@ abstract class RateLimiterStore {
 
   /// Optional: Clear state for a key (reset to initial state).
   void clearState(String key) {
-    saveState(key, const RateLimiterState(tokens: 0, lastRefillMicroseconds: 0));
+    saveState(
+        key, const RateLimiterState(tokens: 0, lastRefillMicroseconds: 0));
   }
 
   /// Optional: Clear all stored states.

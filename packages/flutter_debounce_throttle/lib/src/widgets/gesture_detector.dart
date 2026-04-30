@@ -394,9 +394,8 @@ class _ThrottledGestureDetectorState extends State<ThrottledGestureDetector> {
 
     // Handle callbacks with parameters (TapDown, TapUp, etc)
     if (callback is Function) {
-      return ((dynamic details) =>
-          _discreteThrottler.call(() => Function.apply(callback, [details])))
-          as T;
+      return ((dynamic details) => _discreteThrottler
+          .call(() => Function.apply(callback, [details]))) as T;
     }
 
     return callback;

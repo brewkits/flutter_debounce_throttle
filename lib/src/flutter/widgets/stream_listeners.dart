@@ -136,8 +136,7 @@ class StreamDebounceListener<T> extends StatefulWidget {
       _StreamDebounceListenerState<T>();
 }
 
-class _StreamDebounceListenerState<T>
-    extends State<StreamDebounceListener<T>> {
+class _StreamDebounceListenerState<T> extends State<StreamDebounceListener<T>> {
   StreamSubscription<T>? _subscription;
   late final Debouncer _debouncer;
   T? _latestData;
@@ -236,8 +235,7 @@ class StreamThrottleListener<T> extends StatefulWidget {
       _StreamThrottleListenerState<T>();
 }
 
-class _StreamThrottleListenerState<T>
-    extends State<StreamThrottleListener<T>> {
+class _StreamThrottleListenerState<T> extends State<StreamThrottleListener<T>> {
   StreamSubscription<T>? _subscription;
   late final Throttler _throttler;
 

@@ -124,7 +124,8 @@ mixin EventLimiterMixin {
     Duration? duration,
   }) {
     _debouncers[id] ??= Debouncer(
-      duration: duration ?? FlutterDebounceThrottle.config.defaultDebounceDuration,
+      duration:
+          duration ?? FlutterDebounceThrottle.config.defaultDebounceDuration,
     );
     _debouncers[id]!.call(action);
   }
@@ -138,7 +139,8 @@ mixin EventLimiterMixin {
     Duration? duration,
   }) {
     _throttlers[id] ??= Throttler(
-      duration: duration ?? FlutterDebounceThrottle.config.defaultThrottleDuration,
+      duration:
+          duration ?? FlutterDebounceThrottle.config.defaultThrottleDuration,
     );
     _throttlers[id]!.call(action);
   }
@@ -152,7 +154,8 @@ mixin EventLimiterMixin {
     Duration? duration,
   }) {
     _asyncDebouncers[id] ??= AsyncDebouncer(
-      duration: duration ?? FlutterDebounceThrottle.config.defaultDebounceDuration,
+      duration:
+          duration ?? FlutterDebounceThrottle.config.defaultDebounceDuration,
     );
     return _asyncDebouncers[id]!.run(action);
   }
@@ -166,7 +169,8 @@ mixin EventLimiterMixin {
     Duration? maxDuration,
   }) {
     _asyncThrottlers[id] ??= AsyncThrottler(
-      maxDuration: maxDuration ?? FlutterDebounceThrottle.config.defaultAsyncTimeout,
+      maxDuration:
+          maxDuration ?? FlutterDebounceThrottle.config.defaultAsyncTimeout,
     );
     return _asyncThrottlers[id]!.call(action);
   }

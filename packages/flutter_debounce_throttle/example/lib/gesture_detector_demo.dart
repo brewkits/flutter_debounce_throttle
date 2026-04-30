@@ -45,7 +45,8 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                ..._events.map((e) => Text(e, style: const TextStyle(fontSize: 12))),
+                ..._events
+                    .map((e) => Text(e, style: const TextStyle(fontSize: 12))),
               ],
             ),
           ),
@@ -63,14 +64,16 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
                   setState(() {
                     _position += details.delta;
                   });
-                  _addEvent('Pan Update (${details.delta.dx.toStringAsFixed(1)}, ${details.delta.dy.toStringAsFixed(1)})');
+                  _addEvent(
+                      'Pan Update (${details.delta.dx.toStringAsFixed(1)}, ${details.delta.dy.toStringAsFixed(1)})');
                 },
                 onScaleUpdate: (details) {
                   setState(() {
                     _scale *= details.scale;
                     _scale = _scale.clamp(0.5, 3.0);
                   });
-                  _addEvent('Scale Update (${details.scale.toStringAsFixed(2)})');
+                  _addEvent(
+                      'Scale Update (${details.scale.toStringAsFixed(2)})');
                 },
                 child: Transform.translate(
                   offset: _position,
@@ -114,7 +117,8 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                Text('Try these gestures:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('Try these gestures:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
                 Text('• Tap - Throttled at 500ms'),
                 Text('• Long Press - Throttled at 500ms'),

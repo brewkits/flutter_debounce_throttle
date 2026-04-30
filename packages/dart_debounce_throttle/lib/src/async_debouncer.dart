@@ -266,7 +266,7 @@ class AsyncDebouncer with EventLimiterLogging {
           completer.completeError(e, stackTrace);
         }
       } finally {
-        if (_cancelPendingCompleter != null) {
+        if (_cancelPendingCompleter != null && currentCallId == _latestCallId) {
           _cancelPendingCompleter = null;
         }
       }
@@ -388,7 +388,9 @@ class AsyncDebouncer with EventLimiterLogging {
           completer.completeError(e, stackTrace);
         }
       } finally {
-        _cancelPendingCompleter = null;
+        if (currentCallId == _latestCallId) {
+          _cancelPendingCompleter = null;
+        }
       }
     });
 

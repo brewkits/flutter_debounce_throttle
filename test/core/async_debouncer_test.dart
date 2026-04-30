@@ -248,9 +248,13 @@ void main() {
       DebounceResult<String?>? nullResult;
 
       // First call will be cancelled
-      debouncer.callWithResult<String?>(() async => 'first').then((r) => cancelledResult = r);
+      debouncer
+          .callWithResult<String?>(() async => 'first')
+          .then((r) => cancelledResult = r);
       // Second call returns actual null
-      debouncer.callWithResult<String?>(() async => null).then((r) => nullResult = r);
+      debouncer
+          .callWithResult<String?>(() async => null)
+          .then((r) => nullResult = r);
 
       await Future.delayed(const Duration(milliseconds: 100));
 
