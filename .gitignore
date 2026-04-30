@@ -33,6 +33,8 @@ migrate_working_dir/
 # AI Assistant files
 .claude/
 *.txt
+GEMINI.md
+CLAUSE.md
 
 # Internal docs (not needed for public release)
 COMPLETION_SUMMARY.md

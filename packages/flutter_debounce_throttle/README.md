@@ -192,7 +192,7 @@ final throttledFn = myFunction.throttled(500.ms);
 
 ```yaml
 dependencies:
-  flutter_debounce_throttle: ^2.4.4
+  flutter_debounce_throttle: ^2.4.6
 ```
 
 ---

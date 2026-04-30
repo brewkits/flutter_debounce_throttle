@@ -1,6 +1,6 @@
 name: flutter_debounce_throttle
 description: Prevent button spam, debounce search, and fix memory leaks in Flutter. Drop-in widgets, async loading states, auto-lifecycle management. Zero dependencies.
-version: 2.4.4
+version: 2.4.6
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues

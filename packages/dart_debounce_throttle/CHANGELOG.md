@@ -1,3 +1,10 @@
+## 2.4.6
+
+- Fix: resolve lock race conditions in `AsyncThrottler` and `AsyncDebouncer`.
+- Improvement: Track execution count to prevent timeout callbacks from unlocking subsequent valid executions.
+- Improvement: Added `coverage` tracking for dev environments.
+- Polish: Internal code formatting and minor documentation cleanup.
+
 ## 2.4.4
 
 **SEO & Polish** - Improved pub.dev description for better search ranking.
