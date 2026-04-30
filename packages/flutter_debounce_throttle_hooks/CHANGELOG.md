@@ -1,3 +1,8 @@
+## 2.4.6
+
+- Fix: Inherit core fixes for async lock race conditions.
+- Polish: Internal code formatting and minor documentation cleanup.
+
 ## 2.4.4
 
 **SEO & Polish** - Improved pub.dev description for better search ranking.

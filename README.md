@@ -155,15 +155,15 @@ DebounceThrottleConfig.init(
 ```yaml
 # Flutter
 dependencies:
-  flutter_debounce_throttle: ^2.4.4
+  flutter_debounce_throttle: ^2.4.6
 
 # Flutter + Hooks
 dependencies:
-  flutter_debounce_throttle_hooks: ^2.4.4
+  flutter_debounce_throttle_hooks: ^2.4.6
 
 # Pure Dart (Server, CLI)
 dependencies:
-  dart_debounce_throttle: ^2.4.4
+  dart_debounce_throttle: ^2.4.6
 ```
 
 ---
