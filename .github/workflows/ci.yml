@@ -2,18 +2,19 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "fix/*", "feat/*" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  # Pure Dart package - flutter_debounce_throttle_core
+  # Pure Dart package - dart_debounce_throttle
   core:
     name: Core Package (Pure Dart)
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/flutter_debounce_throttle_core
+        working-directory: packages/dart_debounce_throttle
 
     steps:
       - uses: actions/checkout@v4
@@ -60,8 +61,8 @@ jobs:
         run: |
           cat > pubspec_overrides.yaml << 'EOF'
           dependency_overrides:
-            flutter_debounce_throttle_core:
-              path: ../flutter_debounce_throttle_core
+            dart_debounce_throttle:
+              path: ../dart_debounce_throttle
           EOF
 
       - name: Install dependencies
@@ -94,8 +95,8 @@ jobs:
         run: |
           cat > pubspec_overrides.yaml << 'EOF'
           dependency_overrides:
-            flutter_debounce_throttle_core:
-              path: ../flutter_debounce_throttle_core
+            dart_debounce_throttle:
+              path: ../dart_debounce_throttle
             flutter_debounce_throttle:
               path: ../flutter_debounce_throttle
           EOF
