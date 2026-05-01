@@ -89,7 +89,7 @@ class DebounceResult<T> {
 ///   });
 ///
 ///   if (result.isCancelled) return; // Safely ignore cancelled calls
-///   
+///
 ///   updateResults(result.value);    // result.value contains the actual data
 /// }
 ///

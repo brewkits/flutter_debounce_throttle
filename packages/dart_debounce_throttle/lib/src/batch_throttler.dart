@@ -68,7 +68,7 @@ enum BatchOverflowStrategy {
 /// ```
 ///
 /// **Data Persistence Pattern (Analytics / Logs):**
-/// To prevent data loss if the app crashes before a batch is flushed, 
+/// To prevent data loss if the app crashes before a batch is flushed,
 /// store your data locally first and use the batcher only to trigger the flush:
 /// ```dart
 /// final uploadBatcher = BatchThrottler(
@@ -81,7 +81,7 @@ enum BatchOverflowStrategy {
 ///     }
 ///   },
 /// );
-/// 
+///
 /// void logEvent(String event) {
 ///   localDb.insertLog(event); // Persist immediately
 ///   uploadBatcher(() {});     // Trigger batch upload schedule
