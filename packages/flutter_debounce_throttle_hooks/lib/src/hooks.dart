@@ -63,6 +63,14 @@ class _DebouncerHookState extends HookState<Debouncer, _DebouncerHook> {
   }
 
   @override
+  void didUpdateHook(_DebouncerHook oldHook) {
+    super.didUpdateHook(oldHook);
+    if (hook.duration != oldHook.duration) {
+      _debouncer.duration = hook.duration ?? Debouncer.defaultDuration;
+    }
+  }
+
+  @override
   Debouncer build(BuildContext context) => _debouncer;
 
   @override
@@ -128,6 +136,14 @@ class _ThrottlerHookState extends HookState<Throttler, _ThrottlerHook> {
       debugMode: hook.debugMode,
       name: hook.name,
     );
+  }
+
+  @override
+  void didUpdateHook(_ThrottlerHook oldHook) {
+    super.didUpdateHook(oldHook);
+    if (hook.duration != oldHook.duration) {
+      _throttler.duration = hook.duration ?? Throttler.defaultDuration;
+    }
   }
 
   @override
@@ -323,6 +339,14 @@ class _AsyncDebouncerHookState
   }
 
   @override
+  void didUpdateHook(_AsyncDebouncerHook oldHook) {
+    super.didUpdateHook(oldHook);
+    if (hook.duration != oldHook.duration) {
+      _debouncer.duration = hook.duration ?? AsyncDebouncer.defaultDuration;
+    }
+  }
+
+  @override
   AsyncDebouncer build(BuildContext context) => _debouncer;
 
   @override
@@ -375,6 +399,15 @@ class _AsyncThrottlerHookState
       debugMode: hook.debugMode,
       name: hook.name,
     );
+  }
+
+  @override
+  void didUpdateHook(_AsyncThrottlerHook oldHook) {
+    super.didUpdateHook(oldHook);
+    if (hook.maxDuration != oldHook.maxDuration) {
+      _throttler.maxDuration =
+          hook.maxDuration ?? AsyncThrottler.defaultTimeout;
+    }
   }
 
   @override

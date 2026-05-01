@@ -53,7 +53,7 @@ class AsyncThrottler with EventLimiterLogging {
       DebounceThrottleConfig.config.defaultAsyncTimeout;
 
   /// Maximum duration before auto-unlock (default 15s for APIs, 60s+ for uploads).
-  final Duration? maxDuration;
+  Duration? maxDuration;
 
   @override
   final bool debugMode;

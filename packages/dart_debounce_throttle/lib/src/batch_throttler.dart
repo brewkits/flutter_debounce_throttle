@@ -59,20 +59,33 @@ enum BatchOverflowStrategy {
 /// final logBatcher = BatchThrottler(
 ///   duration: Duration(seconds: 1),
 ///   onBatchExecute: (actions) async {
-///     final logs = <String>[];
+///     // Execute all captured closures
 ///     for (final action in actions) {
-///       logs.add(action());
+///       action();
 ///     }
-///     await database.insertLogs(logs); // Single DB write
 ///   },
-///   debugMode: true,
-///   name: 'log-batcher',
 /// );
+/// ```
 ///
-/// // 100 log calls → 1 database write
-/// logBatcher(() => 'User logged in');
-/// logBatcher(() => 'Page viewed');
-/// // ...
+/// **Data Persistence Pattern (Analytics / Logs):**
+/// To prevent data loss if the app crashes before a batch is flushed, 
+/// store your data locally first and use the batcher only to trigger the flush:
+/// ```dart
+/// final uploadBatcher = BatchThrottler(
+///   duration: Duration(seconds: 5),
+///   onBatchExecute: (_) async {
+///     final pendingLogs = await localDb.getUnsyncedLogs();
+///     if (pendingLogs.isNotEmpty) {
+///       await api.uploadLogs(pendingLogs);
+///       await localDb.markAsSynced(pendingLogs);
+///     }
+///   },
+/// );
+/// 
+/// void logEvent(String event) {
+///   localDb.insertLog(event); // Persist immediately
+///   uploadBatcher(() {});     // Trigger batch upload schedule
+/// }
 /// ```
 class BatchThrottler with EventLimiterLogging {
   final Duration duration;

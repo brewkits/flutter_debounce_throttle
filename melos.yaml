@@ -1,0 +1,18 @@
+name: flutter_debounce_throttle_workspace
+repository: https://github.com/brewkits/flutter_debounce_throttle
+packages:
+  - packages/*
+
+scripts:
+  test:
+    run: melos exec -- flutter test
+    description: Run tests in all packages
+  test:core:
+    run: melos exec --scope="dart_debounce_throttle" -- dart test
+    description: Run tests for core package only
+  analyze:
+    run: melos exec -- flutter analyze
+    description: Run flutter analyze in all packages
+  get:
+    run: melos exec -- flutter pub get
+    description: Get dependencies for all packages

@@ -436,19 +436,15 @@ class _AsyncDebouncedCallbackBuilderState<T>
         return await widget.onChanged!(text);
       });
 
-      if (result != null) {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
-        if (mounted && widget.onSuccess != null) {
-          widget.onSuccess!(result);
-        }
+      if (result != null && mounted) {
+        setState(() => _isLoading = false);
+        widget.onSuccess?.call(result);
       }
     } catch (error, stackTrace) {
       if (mounted) {
         setState(() => _isLoading = false);
+        widget.onError?.call(error, stackTrace);
       }
-      widget.onError?.call(error, stackTrace);
     }
   }
 
@@ -577,13 +573,13 @@ class _AsyncThrottledCallbackBuilderState
 
       if (mounted) {
         setState(() => _isLoading = false);
+        widget.onSuccess?.call();
       }
-      widget.onSuccess?.call();
     } catch (error, stackTrace) {
       if (mounted) {
         setState(() => _isLoading = false);
+        widget.onError?.call(error, stackTrace);
       }
-      widget.onError?.call(error, stackTrace);
     }
   }
 
@@ -693,16 +689,16 @@ class _ConcurrentAsyncThrottledBuilderState
           _isLoading = _throttler.isLocked;
           _pendingCount = _throttler.pendingCount;
         });
+        widget.onSuccess?.call();
       }
-      widget.onSuccess?.call();
     } catch (error, stackTrace) {
       if (mounted) {
         setState(() {
           _isLoading = _throttler.isLocked;
           _pendingCount = _throttler.pendingCount;
         });
+        widget.onError?.call(error, stackTrace);
       }
-      widget.onError?.call(error, stackTrace);
     }
   }
 
