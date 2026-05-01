@@ -464,8 +464,8 @@ void main() {
       }),
     );
 
-    expect(capturedDebouncer!.duration,
-        equals(const Duration(milliseconds: 100)));
+    expect(
+        capturedDebouncer!.duration, equals(const Duration(milliseconds: 100)));
 
     duration = const Duration(milliseconds: 500);
     await tester.pumpWidget(
@@ -475,8 +475,8 @@ void main() {
       }),
     );
 
-    expect(capturedDebouncer!.duration,
-        equals(const Duration(milliseconds: 500)));
+    expect(
+        capturedDebouncer!.duration, equals(const Duration(milliseconds: 500)));
   });
 
   testWidgets('useThrottler updates duration when property changes',
@@ -491,8 +491,8 @@ void main() {
       }),
     );
 
-    expect(capturedThrottler!.duration,
-        equals(const Duration(milliseconds: 100)));
+    expect(
+        capturedThrottler!.duration, equals(const Duration(milliseconds: 100)));
 
     duration = const Duration(milliseconds: 500);
     await tester.pumpWidget(
@@ -502,8 +502,8 @@ void main() {
       }),
     );
 
-    expect(capturedThrottler!.duration,
-        equals(const Duration(milliseconds: 500)));
+    expect(
+        capturedThrottler!.duration, equals(const Duration(milliseconds: 500)));
   });
 }
 
