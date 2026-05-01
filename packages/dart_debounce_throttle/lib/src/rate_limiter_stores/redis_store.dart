@@ -90,7 +90,10 @@ import '../rate_limiter_store.dart';
 /// - Keys are stored as: `{keyPrefix}{key}` (e.g., "ratelimit:user-123")
 /// - State format: "tokens,lastRefillMicros" (e.g., "9.5,1234567890")
 /// - Optional TTL for auto-expiration (prevents stale keys)
-/// - Thread-safe: Redis operations are atomic
+/// - **Concurrency:** While `DistributedRateLimiter` has an internal process-level lock,
+///   true distributed atomicity across multiple pods/servers requires Lua Scripts on Redis.
+///   For enterprise deployments with strict rate limits, consider executing the entire
+///   fetch-calculate-save cycle inside a single Redis EVAL script.
 class RedisRateLimiterStore implements AsyncRateLimiterStore {
   /// Redis connection/command interface.
   ///

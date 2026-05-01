@@ -107,24 +107,47 @@ ConcurrentAsyncThrottledBuilder(
 
 ### Advanced — Server & Enterprise
 
-```dart
-// Rate limiting (Token Bucket)
-final limiter = RateLimiter(maxTokens: 100, refillRate: 10);
-if (!limiter.tryAcquire()) return Response.tooManyRequests();
+**Distributed Rate Limiting (Redis / Firebase / Supabase)**
+Synchronize rate limits across multiple servers or cloud functions. Ideal for Dart Frog, Serverpod, or Firebase Functions.
 
-// Batch DB writes (1000 calls → 10 DB writes)
-final batcher = BatchThrottler(
-  duration: 2.seconds,
-  maxBatchSize: 100,
-  onBatchExecute: (items) => db.insertBatch(items),
+```dart
+// 1. Initialize your preferred store (e.g., Redis)
+final store = RedisRateLimiterStore(redis: redisClient);
+
+// 2. Create the distributed limiter
+final limiter = DistributedRateLimiter(
+  key: 'user:$userId',
+  store: store,
+  maxTokens: 100,             // Burst capacity
+  refillRate: 10,             // 10 requests per interval
+  refillInterval: 1.seconds,
 );
 
-// Throttle all 40+ gesture types
-ThrottledGestureDetector(
-  onTap: () => handleTap(),
-  onPanUpdate: (d) => updatePosition(d.delta),
-  child: MyWidget(),
-)
+// 3. Use in your middleware or API handler
+if (!await limiter.tryAcquire()) {
+  return Response.tooManyRequests(
+    headers: {'Retry-After': '${(await limiter.timeUntilNextToken).inSeconds}'},
+  );
+}
+```
+
+**Batch Processing & Analytics**
+```dart
+// To prevent data loss on crash, persist locally first:
+final batcher = BatchThrottler(
+  duration: 5.seconds,
+  maxBatchSize: 100,
+  onBatchExecute: (_) async {
+    final pending = await localDb.getUnsynced();
+    await api.uploadBatch(pending);
+    await localDb.markSynced(pending);
+  },
+);
+
+void trackEvent(Event e) {
+  localDb.save(e);  // 1. Immediate local save
+  batcher(() {});   // 2. Trigger batch schedule
+}
 ```
 
 ---

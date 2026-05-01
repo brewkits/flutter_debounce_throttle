@@ -84,23 +84,61 @@ if (limiter.tryAcquire()) {
 
 ---
 
+## Distributed Rate Limiting (Enterprise)
+
+Synchronize your rate limits across multiple servers, pods, or cloud functions using an external data store like Redis or Memcached. Perfect for Dart Frog, Serverpod, or Firebase Functions.
+
+```dart
+import 'package:redis/redis.dart';
+import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
+
+// 1. Setup your external store
+final redis = await RedisConnection().connect('localhost', 6379);
+final store = RedisRateLimiterStore(redis: redis);
+
+// 2. Create the limiter
+final limiter = DistributedRateLimiter(
+  key: 'user:$userId',
+  store: store,
+  maxTokens: 100,             // Burst capacity
+  refillRate: 10,             // 10 requests per interval
+  refillInterval: 1.seconds,
+);
+
+// 3. Use across your distributed system
+if (await limiter.tryAcquire()) {
+  await callExpensiveAPI();
+} else {
+  return Response.tooManyRequests();
+}
+```
+
+---
+
 ## Batch Processing
 
 Reduce database load by 100x:
 
 ```dart
-final batcher = BatchThrottler(
-  duration: 2.seconds,
+final uploadBatcher = BatchThrottler(
+  duration: 5.seconds,
   maxBatchSize: 100,
-  overflowStrategy: BatchOverflowStrategy.flushAndAdd,
-  onBatchExecute: (actions) async {
-    final logs = actions.map((a) => a()).toList();
-    await database.insertBatch(logs);  // 1 DB call instead of 100
+  onBatchExecute: (_) async {
+    final pendingLogs = await db.getUnsyncedLogs();
+    if (pendingLogs.isNotEmpty) {
+      await api.uploadBatch(pendingLogs);  // 1 network call
+      await db.markAsSynced(pendingLogs);
+    }
   },
 );
 
-// Called 1000 times per second — results in ~10 DB writes
-batcher(() => LogEntry(user: userId, action: 'page_view'));
+void trackEvent(String action) {
+  // 1. Immediate local save (prevents data loss on crash)
+  db.insertLog(action); 
+  
+  // 2. Trigger the batch schedule
+  uploadBatcher(() {});
+}
 ```
 
 ---

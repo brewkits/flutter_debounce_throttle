@@ -72,28 +72,25 @@ class DebounceResult<T> {
 /// - Real-time validation: Debounce + async server check
 ///
 /// **IMPORTANT:**
-/// - Returns `Future<T?>`. If cancelled, it returns `null`.
-/// - Always check for null if you need to handle cancellation.
+/// - **Type Safety:** We strongly recommend using `callWithResult` to avoid null-ambiguity,
+///   as standard `call` returns `null` when a debounce is cancelled.
 /// - Call `dispose()` to prevent memory leaks.
 ///
-/// **Example:**
+/// **Example (Recommended Standard):**
 /// ```dart
 /// final debouncer = AsyncDebouncer(
 ///   debugMode: true,
 ///   name: 'search',
-///   onMetrics: (duration, cancelled) {
-///     print('API call took: $duration, cancelled: $cancelled');
-///   },
 /// );
 ///
 /// void onSearch(String text) async {
-///   // Callable class - use like a function
-///   final result = await debouncer(() async {
+///   final result = await debouncer.callWithResult(() async {
 ///     return await searchApi(text);
 ///   });
 ///
-///   if (result == null) return; // Cancelled by newer call
-///   updateResults(result);
+///   if (result.isCancelled) return; // Safely ignore cancelled calls
+///   
+///   updateResults(result.value);    // result.value contains the actual data
 /// }
 ///
 /// // Don't forget to dispose
@@ -104,7 +101,7 @@ class AsyncDebouncer with EventLimiterLogging {
   static Duration get defaultDuration =>
       DebounceThrottleConfig.config.defaultDebounceDuration;
 
-  final Duration duration;
+  Duration duration;
   @override
   final bool debugMode;
   @override

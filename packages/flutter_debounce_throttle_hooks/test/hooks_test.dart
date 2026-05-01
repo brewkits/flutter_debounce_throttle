@@ -451,6 +451,60 @@ void main() {
     expect(debouncer1, isNotNull);
     expect(debouncer2, isNotNull);
   });
+
+  testWidgets('useDebouncer updates duration when property changes',
+      (WidgetTester tester) async {
+    Duration duration = const Duration(milliseconds: 100);
+    Debouncer? capturedDebouncer;
+
+    await tester.pumpWidget(
+      HookBuilder(builder: (context) {
+        capturedDebouncer = useDebouncer(duration: duration);
+        return Container();
+      }),
+    );
+
+    expect(capturedDebouncer!.duration,
+        equals(const Duration(milliseconds: 100)));
+
+    duration = const Duration(milliseconds: 500);
+    await tester.pumpWidget(
+      HookBuilder(builder: (context) {
+        capturedDebouncer = useDebouncer(duration: duration);
+        return Container();
+      }),
+    );
+
+    expect(capturedDebouncer!.duration,
+        equals(const Duration(milliseconds: 500)));
+  });
+
+  testWidgets('useThrottler updates duration when property changes',
+      (WidgetTester tester) async {
+    Duration duration = const Duration(milliseconds: 100);
+    Throttler? capturedThrottler;
+
+    await tester.pumpWidget(
+      HookBuilder(builder: (context) {
+        capturedThrottler = useThrottler(duration: duration);
+        return Container();
+      }),
+    );
+
+    expect(capturedThrottler!.duration,
+        equals(const Duration(milliseconds: 100)));
+
+    duration = const Duration(milliseconds: 500);
+    await tester.pumpWidget(
+      HookBuilder(builder: (context) {
+        capturedThrottler = useThrottler(duration: duration);
+        return Container();
+      }),
+    );
+
+    expect(capturedThrottler!.duration,
+        equals(const Duration(milliseconds: 500)));
+  });
 }
 
 class HookBuilder extends HookWidget {
