@@ -30,6 +30,10 @@ Desktop.ini
 .gpt/
 .copilot/
 .cursor/
+.cursorrules
+.aider*/
+.cline*/
+.bolt/
 *.txt
 MEMORY.md
 *INTERNAL_NOTES.md
@@ -79,6 +83,7 @@ secrets.yaml
 *.tmp
 *.temp
 .buildlog/
+.cache/
 migrate_working_dir/
 
 # ----------------------------------------------------------------------------
