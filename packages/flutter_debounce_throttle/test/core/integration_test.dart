@@ -141,13 +141,12 @@ void main() {
         );
 
         Future<void> uploadFile(String filename) async {
+          // ThrottlerResult.isDropped is true when queue is full.
           await uploadQueue.call(() async {
             if (rateLimiter.tryAcquire()) {
               await Future.delayed(20.ms); // Simulate upload
               uploadedFiles.add(filename);
             }
-          }).catchError((_) {
-            // Queue overflow - file rejected
           });
         }
 

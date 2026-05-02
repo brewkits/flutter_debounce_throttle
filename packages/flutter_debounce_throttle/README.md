@@ -72,9 +72,121 @@ No setup. No dispose boilerplate. Auto-cleanup on widget unmount.
 
 ---
 
+## Architecture Compatibility
+
+`EventLimiterMixin` is designed to be **non-intrusive** — it plugs into any state management pattern without imposing its own structure.
+
+### MVVM (Provider / Riverpod / GetX)
+
+Logic stays in ViewModel. View never touches a Timer.
+
+```dart
+// ✅ ViewModel owns all concurrency logic
+class SearchViewModel extends ChangeNotifier with EventLimiterMixin {
+  List<User> users = [];
+  bool isLoading = false;
+
+  void onSearch(String text) {
+    debounce('search', () async {
+      isLoading = true;
+      notifyListeners();
+
+      final result = await debounceAsync('search-api', () => api.search(text));
+      result?.when(
+        onSuccess: (data) { users = data ?? []; isLoading = false; },
+        onCancelled: () { isLoading = false; },
+      );
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() { cancelAll(); super.dispose(); }
+}
+```
+
+### MVI / BLoC
+
+`when()` maps directly to `emit()` — the compiler rejects missing branches.
+
+```dart
+class SearchBloc extends Bloc<SearchEvent, SearchState> with EventLimiterMixin {
+  SearchBloc() : super(SearchInitial()) {
+    on<SearchQueryChanged>(_onQueryChanged);
+  }
+
+  Future<void> _onQueryChanged(SearchQueryChanged event, Emitter emit) async {
+    final result = await debounceAsync(
+      'search',
+      () => api.search(event.query),
+    );
+
+    // Both branches required — compiler rejects incomplete handling
+    result?.when(
+      onSuccess:   (data) => emit(SearchLoaded(data ?? [])),
+      onCancelled: ()     => emit(SearchIdle()),
+    );
+  }
+
+  @override
+  Future<void> close() { cancelAll(); return super.close(); }
+}
+```
+
+### Micro-Frontend / Modular Architecture
+
+The `dart_debounce_throttle` core is **pure Dart** — zero Flutter dependencies. Each module can import it at the Domain layer without bloating the widget tree or conflicting with other modules' UI frameworks.
+
+```
+┌─────────────────────────────────┐
+│         Shell App               │  ← DebounceThrottleConfig.init() once here
+├─────────────┬───────────────────┤
+│  Feature A  │     Feature B     │  ← Each module uses EventLimiterMixin
+│  (Provider) │     (BLoC)        │     independently, no shared state
+├─────────────┴───────────────────┤
+│     dart_debounce_throttle      │  ← Pure Dart core, safe to share
+│     (Domain / Core layer)       │
+└─────────────────────────────────┘
+```
+
+> **`DebounceThrottleConfig.init()`** is application-level config. Call it once in your Shell app's `main()`. Individual feature modules should not call it.
+
+### Why `mixin` and not `extends`?
+
+In modular apps, your classes often already extend a framework base class. `mixin` lets you add rate-limiting without touching your inheritance tree:
+
+```dart
+// ✅ Works — no inheritance conflict
+class PaymentController extends GetxController with EventLimiterMixin { ... }
+class SearchCubit extends Cubit<SearchState> with EventLimiterMixin { ... }
+class UserService extends BaseService with EventLimiterMixin { ... }
+```
+
+---
+
+## No Silent Failures
+
+Most libraries return `void` — your code continues even when the operation was dropped.
+
+```dart
+// ❌ With void-returning API — silent failure
+await throttler.call(() async => await submitOrder(orderId));
+showSuccessDialog(); // Runs even if the order was NEVER submitted!
+
+// ✅ ThrottlerResult forces you to handle both outcomes
+(await throttler.call(() async => await submitOrder(orderId))).when(
+  onExecuted: () => showSuccessDialog(),
+  onDropped:  () => showError('Server busy — please try again.'),
+);
+```
+
+`when()` requires **both branches**. The Dart compiler rejects code that silently ignores a dropped call.
+
+---
+
 ## State Management Mixin
 
-Works with **Provider, Bloc, GetX, Riverpod, MobX** — any `ChangeNotifier`:
+Works with **Provider, Bloc, GetX, Riverpod, MobX** — any class:
 
 ```dart
 class SearchController with ChangeNotifier, EventLimiterMixin {
@@ -89,13 +201,13 @@ class SearchController with ChangeNotifier, EventLimiterMixin {
 
   @override
   void dispose() {
-    cancelAll();  // Clean up all limiters
+    cancelAll();  // Cancels all timers and async operations
     super.dispose();
   }
 }
 ```
 
-> **⚠️ Important:** When using **dynamic IDs** (e.g., `debounce('post_$postId', ...)`), call `remove(id)` when items are deleted. For static IDs like `'search'`, `cancelAll()` in dispose is sufficient.
+> **⚠️ Dynamic IDs:** When using `debounce('post_$postId', ...)`, call `remove(id)` when items are deleted. For static IDs like `'search'`, `cancelAll()` in dispose is sufficient.
 
 ---
 
@@ -201,10 +313,13 @@ dependencies:
 
 | Guarantee | How |
 |-----------|-----|
-| **450+ tests** | Comprehensive unit & integration tests |
+| **450+ tests** | Unit, integration, stress, system, performance & boundary tests |
 | **95% coverage** | All edge cases covered |
-| **Type-safe** | No `dynamic`, full generics |
+| **Honest API** | `ThrottlerResult` / `DebounceResult` — no silent failures |
+| **Type-safe** | No `dynamic`, no `as`, full generics |
+| **Compile-time safety** | `when()` forces exhaustive handling — compiler rejects incomplete code |
 | **Memory-safe** | Zero leaks verified with LeakTracker |
+| **Architecture-neutral** | `mixin` not `extends` — works with any state management |
 
 ---
 
@@ -222,9 +337,11 @@ dependencies:
 
 | Capability | This Package | easy_debounce | Manual Timer |
 |------------|:---:|:---:|:---:|
+| **No Silent Failures** | ✅ `ThrottlerResult.when()` | ❌ void return | ❌ void return |
 | **Memory Safe** (Auto-dispose) | ✅ | ❌ | ❌ Leaky |
 | **Async & Future Support** | ✅ | ❌ | ❌ |
 | **Race Condition Control** | ✅ 4 modes | ❌ | ❌ |
+| **Architecture Neutral** | ✅ `mixin` — any pattern | ❌ Global static | ❌ |
 | **Ready-to-use Widgets** | ✅ | ❌ | ❌ |
 | **State Management Mixin** | ✅ | ❌ | ❌ |
 | **Loading States Built-in** | ✅ | ❌ | ❌ |

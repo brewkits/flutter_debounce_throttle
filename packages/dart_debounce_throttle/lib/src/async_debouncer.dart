@@ -13,19 +13,23 @@ import 'logger.dart';
 /// - Cancelled operation: `isCancelled = true`, `value = null`
 /// - Successful null result: `isCancelled = false`, `value = null`
 ///
-/// **Example:**
+/// Use [when] for exhaustive handling (both branches required at compile time):
 /// ```dart
 /// final result = await debouncer.callWithResult(() async {
-///   return await api.search(query); // May return null
+///   return await api.search(query);
 /// });
 ///
-/// if (result.isCancelled) {
-///   print('Cancelled by newer call');
-///   return;
-/// }
+/// result.when(
+///   onSuccess: (results) => emit(SearchLoaded(results)),
+///   onCancelled: () {},  // explicitly acknowledge the cancelled branch
+/// );
+/// ```
 ///
-/// // Safe to use result.value (may be null, but that's the actual result)
-/// updateUI(result.value);
+/// Use [whenSuccess] / [whenCancelled] for fluent side-effects:
+/// ```dart
+/// (await debouncer.callWithResult(() => searchApi(query)))
+///   .whenSuccess((data) => setState(() => _results = data))
+///   .whenCancelled(() => setState(() => _loading = false));
 /// ```
 class DebounceResult<T> {
   /// Whether this operation was cancelled by a newer call.
@@ -46,6 +50,44 @@ class DebounceResult<T> {
 
   /// Whether the operation completed successfully (not cancelled).
   bool get isSuccess => !isCancelled;
+
+  /// Exhaustive pattern match — both branches are required by the compiler.
+  ///
+  /// Preferred over `if (result.isCancelled)` because the compiler rejects
+  /// code that silently ignores the cancelled branch.
+  ///
+  /// ```dart
+  /// // In a ViewModel / BLoC handler:
+  /// result.when(
+  ///   onSuccess:   (data) => emit(SearchLoaded(data)),
+  ///   onCancelled: ()     => emit(SearchIdle()),
+  /// );
+  /// ```
+  R when<R>({
+    required R Function(T? value) onSuccess,
+    required R Function() onCancelled,
+  }) =>
+      isCancelled ? onCancelled() : onSuccess(value);
+
+  /// Run [action] with the result value only if the operation succeeded.
+  /// Returns `this` for chaining.
+  ///
+  /// ```dart
+  /// (await debouncer.callWithResult(() => fetchUser(id)))
+  ///   .whenSuccess((user) => _user = user)
+  ///   .whenCancelled(() => _loading = false);
+  /// ```
+  DebounceResult<T> whenSuccess(void Function(T? value) action) {
+    if (isSuccess) action(value);
+    return this;
+  }
+
+  /// Run [action] only if the operation was cancelled by a newer call.
+  /// Returns `this` for chaining.
+  DebounceResult<T> whenCancelled(void Function() action) {
+    if (isCancelled) action();
+    return this;
+  }
 
   @override
   String toString() => isCancelled

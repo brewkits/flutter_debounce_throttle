@@ -29,22 +29,24 @@ void main() {
     test('should warn when limiter count exceeds 100', () {
       final controller = TestController();
 
-      // Should not trigger warning with 100 limiters
+      // Enable warning-level logging so we can observe the warning.
+      EventLimiterLogger.level = LogLevel.warning;
+      final warnings = <String>[];
+      EventLimiterLogger.handler = (level, message, name, _) {
+        if (level == LogLevel.warning) warnings.add(message);
+      };
+
       controller.simulateSpam(100);
       expect(controller.limiterCount, 100);
 
-      // Should trigger warning with 101st limiter (in debug mode)
-      expect(
-        () => controller.debounce('trigger', () {}),
-        throwsA(
-          isA<AssertionError>().having(
-            (e) => e.message,
-            'message',
-            contains('over 100 limiter instances'),
-          ),
-        ),
-      );
+      // 101st limiter should log a warning (no longer throws AssertionError).
+      controller.debounce('trigger', () {});
+      expect(warnings, isNotEmpty);
+      expect(warnings.first, contains('over 100 limiter instances'));
 
+      // Cleanup
+      EventLimiterLogger.level = LogLevel.none;
+      EventLimiterLogger.handler = null;
       controller.cancelAll();
     });
 
@@ -135,30 +137,25 @@ void main() {
 
     test('default auto-cleanup behavior (simulated with shorter TTL)',
         () async {
-      // Simulate the default behavior but with shorter TTL for test speed
       DebounceThrottleConfig.init(
         limiterAutoCleanupTTL: const Duration(milliseconds: 100),
-        limiterAutoCleanupThreshold: 50, // Lower threshold for testing
+        limiterAutoCleanupThreshold: 50,
       );
 
       final controller = TestController();
 
-      // Add 60 limiters (exceeds threshold of 50)
       for (var i = 0; i < 60; i++) {
         controller.debounce('item_$i', () {});
       }
 
       expect(controller.limiterCount, 60);
 
-      // Wait for TTL to expire
+      // Wait for TTL to expire, then manually trigger cleanup.
+      // (Auto-cleanup now runs on a background timer, not on every call.)
       await Future.delayed(const Duration(milliseconds: 150));
+      controller.triggerAutoCleanup();
 
-      // Trigger auto-cleanup by adding new limiter
-      controller.debounce('new_item', () {});
-
-      // Old limiters should be auto-removed, only new one remains
-      // This proves the default auto-cleanup mechanism works
-      expect(controller.limiterCount, 1);
+      expect(controller.limiterCount, 0);
 
       controller.cancelAll();
     });
@@ -171,22 +168,17 @@ void main() {
 
       final controller = TestController();
 
-      // Add 60 limiters (exceeds threshold)
       for (var i = 0; i < 60; i++) {
         controller.debounce('item_$i', () {});
       }
 
       expect(controller.limiterCount, 60);
 
-      // Wait for TTL to expire
       await Future.delayed(const Duration(milliseconds: 150));
+      controller.triggerAutoCleanup();
 
-      // Trigger auto-cleanup by adding new limiter
-      controller.debounce('new_item', () {});
-
-      // Old limiters should be auto-removed, only new one remains
-      expect(controller.limiterCount, 1);
-      expect(controller.timestampCount, 1);
+      expect(controller.limiterCount, 0);
+      expect(controller.timestampCount, 0);
 
       controller.cancelAll();
     });
@@ -199,27 +191,22 @@ void main() {
 
       final controller = TestController();
 
-      // Add 60 limiters
       for (var i = 0; i < 60; i++) {
         controller.debounce('item_$i', () {});
       }
 
-      // Wait a bit
+      // Wait a bit, then refresh 10 limiters.
       await Future.delayed(const Duration(milliseconds: 50));
-
-      // Use some limiters again (refresh timestamps)
       for (var i = 0; i < 10; i++) {
         controller.debounce('item_$i', () {});
       }
 
-      // Wait for initial TTL to expire (but refreshed ones are still valid)
+      // Wait for the original TTL to expire (refreshed ones are still valid).
       await Future.delayed(const Duration(milliseconds: 60));
+      controller.triggerAutoCleanup();
 
-      // Trigger auto-cleanup
-      controller.debounce('trigger', () {});
-
-      // Only recently-used limiters (10) + trigger (1) should remain
-      expect(controller.limiterCount, 11);
+      // 10 recently-used limiters should survive.
+      expect(controller.limiterCount, 10);
 
       controller.cancelAll();
     });
@@ -232,19 +219,15 @@ void main() {
 
       final controller = TestController();
 
-      // Add 50 limiters (below threshold)
+      // 50 limiters — below threshold of 100.
       for (var i = 0; i < 50; i++) {
         controller.debounce('item_$i', () {});
       }
 
-      // Wait for TTL to expire
       await Future.delayed(const Duration(milliseconds: 150));
+      controller.triggerAutoCleanup(); // should be a no-op below threshold
 
-      // Add new limiter (should not trigger cleanup)
-      controller.debounce('new_item', () {});
-
-      // All limiters should still be there (threshold not reached)
-      expect(controller.limiterCount, 51);
+      expect(controller.limiterCount, 50);
 
       controller.cancelAll();
     });
@@ -257,7 +240,6 @@ void main() {
 
       final controller = TestController();
 
-      // Add different types of limiters
       for (var i = 0; i < 10; i++) {
         controller.debounce('debounce_$i', () {});
         controller.throttle('throttle_$i', () {});
@@ -267,14 +249,10 @@ void main() {
 
       expect(controller.limiterCount, 40);
 
-      // Wait for TTL to expire
       await Future.delayed(const Duration(milliseconds: 150));
+      controller.triggerAutoCleanup();
 
-      // Trigger cleanup
-      controller.debounce('trigger', () {});
-
-      // Only trigger should remain
-      expect(controller.limiterCount, 1);
+      expect(controller.limiterCount, 0);
 
       controller.cancelAll();
     });

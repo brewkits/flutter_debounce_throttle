@@ -82,6 +82,7 @@ export 'src/throttle_debouncer.dart';
 export 'src/async_debouncer.dart';
 export 'src/async_throttler.dart';
 export 'src/concurrent_async_throttler.dart';
+export 'src/throttler_result.dart';
 
 // Utilities
 export 'src/batch_throttler.dart';
