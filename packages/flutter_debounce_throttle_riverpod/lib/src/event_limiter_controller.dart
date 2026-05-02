@@ -215,10 +215,18 @@ class EventLimiterController {
   ///
   /// Called automatically when the Riverpod provider is disposed.
   void cancelAll() {
-    _debouncers.values.forEach((d) => d.dispose());
-    _throttlers.values.forEach((t) => t.dispose());
-    _asyncDebouncers.values.forEach((d) => d.dispose());
-    _asyncThrottlers.values.forEach((t) => t.dispose());
+    for (final d in _debouncers.values) {
+      d.dispose();
+    }
+    for (final t in _throttlers.values) {
+      t.dispose();
+    }
+    for (final d in _asyncDebouncers.values) {
+      d.dispose();
+    }
+    for (final t in _asyncThrottlers.values) {
+      t.dispose();
+    }
     _debouncers.clear();
     _throttlers.clear();
     _asyncDebouncers.clear();
