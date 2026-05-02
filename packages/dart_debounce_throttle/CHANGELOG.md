@@ -1,9 +1,53 @@
 ## 2.4.6
 
-- Fix: resolve lock race conditions in `AsyncThrottler` and `AsyncDebouncer`.
-- Improvement: Track execution count to prevent timeout callbacks from unlocking subsequent valid executions.
-- Improvement: Added `coverage` tracking for dev environments.
-- Polish: Internal code formatting and minor documentation cleanup.
+### 🚀 New: Honest API — No Silent Failures
+
+#### `ThrottlerResult` — Know if the operation actually ran
+`ConcurrentAsyncThrottler.call()` now returns `Future<ThrottlerResult>` instead of `Future<void>`.
+This prevents a class of silent-failure bugs where dropped operations appeared to succeed.
+
+```dart
+// ❌ Before: silent failure — showSuccessDialog() fires even if order was never submitted
+await throttler.call(() async => submitOrder(orderId));
+showSuccessDialog();
+
+// ✅ After: exhaustive handling required at compile time
+(await throttler.call(() async => submitOrder(orderId))).when(
+  onExecuted: () => showSuccessDialog(),
+  onDropped:  () => showError('Server busy — please try again.'),
+);
+```
+
+API:
+- `result.when(onExecuted:, onDropped:)` — both branches required; compiler rejects incomplete handling
+- `result.whenExecuted(() => ...)` — fluent side-effect helper, returns `this` for chaining
+- `result.whenDropped(() => ...)` — fluent side-effect helper, returns `this` for chaining
+- `result.isExecuted` / `result.isDropped` — boolean accessors
+
+#### `DebounceResult` — Exhaustive pattern matching (new methods)
+`callWithResult()` existed before; now `DebounceResult` gains `when()` and fluent helpers:
+
+```dart
+(await debouncer.callWithResult(() => searchApi(query)))
+  .whenSuccess((data) => setState(() => _results = data))
+  .whenCancelled(() => setState(() => _loading = false));
+```
+
+- `result.when(onSuccess:, onCancelled:)` — exhaustive match; `onSuccess` receives `T?`
+- `result.whenSuccess((v) => ...)` — runs only if not cancelled
+- `result.whenCancelled(() => ...)` — runs only if cancelled
+
+#### `CancellationToken` support
+`ConcurrentAsyncThrottler.callWithToken()` allows cooperative cancellation of in-flight async work.
+Note: cooperative-only — cancels pending calls immediately; cannot preempt blocking I/O.
+
+### 🔧 Fixed
+- `ConcurrentAsyncThrottler` enqueue overflow: previously threw an unhandled exception on overflow;
+  now resolves with `ThrottlerResult.dropped()` — no more fire-and-forget crashes.
+- `reset()` and `dispose()` now drain all pending completers with `ThrottlerResult.dropped()`
+  instead of leaving awaiting callers permanently suspended.
+- Race conditions in `AsyncThrottler` and `AsyncDebouncer`: execution count tracked to prevent
+  timeout callbacks from unlocking state for subsequent valid executions.
 
 ## 2.4.4
 

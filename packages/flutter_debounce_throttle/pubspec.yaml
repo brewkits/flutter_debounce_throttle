@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dart_debounce_throttle: ^2.4.4
+  dart_debounce_throttle: ^2.4.6
   meta: ^1.16.0
 
 dev_dependencies:

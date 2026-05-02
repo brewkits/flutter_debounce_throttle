@@ -2,7 +2,7 @@
 
 [![pub package](https://img.shields.io/pub/v/dart_debounce_throttle.svg)](https://pub.dev/packages/dart_debounce_throttle)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-50%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
+[![Tests](https://img.shields.io/badge/tests-150%2B%20passed-brightgreen)](https://github.com/brewkits/flutter_debounce_throttle)
 [![Pure Dart](https://img.shields.io/badge/pure-Dart-02569B)](https://dart.dev)
 [![GitHub stars](https://img.shields.io/github/stars/brewkits/flutter_debounce_throttle?style=social)](https://github.com/brewkits/flutter_debounce_throttle/stargazers)
 
@@ -143,6 +143,58 @@ void trackEvent(String action) {
 
 ---
 
+## No Silent Failures — Honest API
+
+Most debounce/throttle libraries let operations silently disappear when dropped or cancelled.
+This library makes the outcome explicit — the compiler forces you to handle it.
+
+#### The Problem with `void`-returning APIs
+
+```dart
+// ❌ With other libraries — silent failure
+await throttler.call(() async => await processPayment(order));
+sendConfirmationEmail(order); // Runs even if payment was NEVER processed!
+```
+
+#### The Solution: `ThrottlerResult` + `when()`
+
+```dart
+// ✅ Honest API — both branches required at compile time
+final result = await throttler.call(() async => await processPayment(order));
+
+result.when(
+  onExecuted: () => sendConfirmationEmail(order),  // Safe: payment ran
+  onDropped:  () => log.warn('Payment dropped — queue full'),
+);
+```
+
+The compiler **rejects** code that ignores `onDropped`. You cannot accidentally forget it.
+
+#### Fluent Side-Effect Style
+
+```dart
+(await debouncer.callWithResult(() => searchApi(query)))
+  .whenSuccess((results) => cache.set(query, results))
+  .whenCancelled(() => metrics.increment('search.cancelled'));
+```
+
+#### `DebounceResult` — Distinguishes Null from Cancelled
+
+```dart
+// ❌ Ambiguous — is null "no result" or "cancelled"?
+final result = await debouncer.call(() async => db.findUser(id));
+if (result == null) { /* no idea why */ }
+
+// ✅ Unambiguous
+final result = await debouncer.callWithResult(() async => db.findUser(id));
+result.when(
+  onSuccess:   (user) => respond(user),   // user may be null (not found) — that's fine
+  onCancelled: ()     => respond(null),   // cancelled by newer call
+);
+```
+
+---
+
 ## Concurrency Modes (Async)
 
 | Mode | Behavior | Use Case |
@@ -159,7 +211,12 @@ final processor = ConcurrentAsyncThrottler(
   queueOverflowStrategy: QueueOverflowStrategy.dropOldest,
 );
 
-processor(() async => await processJob(job));
+// ThrottlerResult tells you what actually happened
+final result = await processor.call(() async => processJob(job));
+result.when(
+  onExecuted: () => log.info('Job processed'),
+  onDropped:  () => log.warn('Job dropped — queue full, retry later'),
+);
 ```
 
 ---
@@ -254,10 +311,11 @@ dependencies:
 
 | Guarantee | How |
 |-----------|-----|
-| **50+ tests** | Comprehensive coverage |
+| **150+ tests** | Unit, integration, stress, performance & boundary tests |
 | **Zero dependencies** | Only `meta` package |
-| **Type-safe** | No `dynamic`, full generics |
-| **Battle-tested** | 50+ unit & integration tests |
+| **Honest API** | `ThrottlerResult` / `DebounceResult` — no silent failures |
+| **Type-safe** | No `dynamic`, no `as`, full generics |
+| **Compile-time safety** | `when()` forces exhaustive handling of dropped/cancelled states |
 
 ---
 
@@ -289,6 +347,7 @@ dependencies:
 | Feature | dart_debounce_throttle | easy_debounce |
 |---------|:---:|:---:|
 | **Type Safety** | ✅ Generics | ❌ No generics |
+| **Honest API** | ✅ `ThrottlerResult` / `DebounceResult` | ❌ Silent void |
 | **Async Support** | ✅ Full | ⚠️ Limited |
 | **Rate Limiting** | ✅ Token Bucket | ❌ |
 | **Batch Processing** | ✅ | ❌ |
@@ -301,7 +360,8 @@ dependencies:
 | **Code Lines** | 1 line | 10-20 lines |
 | **Memory Leaks** | ✅ Auto-prevented | ❌ Easy to leak |
 | **Async Cancellation** | ✅ Built-in | ❌ Complex logic |
-| **Race Conditions** | ✅ 4 strategies | ❌ Manual handling |
+| **Race Conditions** | ✅ 4 strategies + `ThrottlerResult` | ❌ Manual handling |
+| **Silent Failures** | ✅ Impossible — compiler enforces | ❌ Default behavior |
 
 ---
 

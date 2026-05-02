@@ -6,6 +6,9 @@ import 'dart:async';
 import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 import 'package:meta/meta.dart';
 
+// Auto-cleanup runs on a background timer, not synchronously on each call.
+const _kAutoCleanupInterval = Duration(minutes: 1);
+
 /// Mixin for adding event limiting to Controllers/ViewModels.
 ///
 /// Works with any class: ChangeNotifier, GetxController, Cubit, MobX Store,
@@ -168,6 +171,9 @@ mixin EventLimiterMixin {
   final Map<String, DateTime> _asyncDebouncersLastUsed = {};
   final Map<String, DateTime> _asyncThrottlersLastUsed = {};
 
+  // Background timer for periodic auto-cleanup (avoids O(n) on UI thread).
+  Timer? _autoCleanupTimer;
+
   /// Debounce a callback by ID.
   ///
   /// Delays execution until no calls for [duration].
@@ -294,6 +300,8 @@ mixin EventLimiterMixin {
 
   /// Cancel all limiters. Call in dispose/onClose.
   void cancelAll() {
+    _autoCleanupTimer?.cancel();
+    _autoCleanupTimer = null;
     for (final debouncer in _debouncers.values) {
       debouncer.dispose();
     }
@@ -356,46 +364,56 @@ mixin EventLimiterMixin {
   /// ```
   int get totalLimitersCount => _getTotalLimiterCount();
 
-  /// Internal: Check limiter count, auto-cleanup if needed, and warn if too many instances exist.
+  /// Internal: Warn when limiter count is high and start background cleanup timer.
   ///
-  /// Helps detect potential memory leaks from using dynamic IDs without
-  /// calling [remove].
+  /// Cleanup runs on a periodic background timer rather than synchronously
+  /// on every call, avoiding O(n) scans on the UI thread.
   void _checkLimiterCount() {
-    // Auto-cleanup if TTL is configured
-    _autoCleanupIfNeeded();
-
     final totalCount = _getTotalLimiterCount();
 
     if (totalCount > 100) {
-      assert(
-        false,
-        'WARNING: EventLimiterMixin has over 100 limiter instances ($totalCount). '
-        'This may indicate a memory leak. If you are using dynamic IDs (e.g., '
-        '"post_\$postId"), make sure to call remove(id) when items are deleted. '
-        'For static IDs, this warning can be ignored.',
+      EventLimiterLogger.warning(
+        'EventLimiterMixin has over 100 limiter instances ($totalCount). '
+        'This may indicate a memory leak from dynamic IDs (e.g., "post_\$postId"). '
+        'Call remove(id) when items are deleted, or configure limiterAutoCleanupTTL.',
+        name: 'EventLimiterMixin',
       );
     }
+
+    _startAutoCleanupTimerIfNeeded();
+  }
+
+  /// Start the background cleanup timer if TTL is configured and not already running.
+  void _startAutoCleanupTimerIfNeeded() {
+    if (_autoCleanupTimer != null) return;
+    final ttl = DebounceThrottleConfig.config.limiterAutoCleanupTTL;
+    if (ttl == null) return;
+
+    _autoCleanupTimer = Timer.periodic(_kAutoCleanupInterval, (_) {
+      _runAutoCleanup();
+    });
   }
 
   /// Auto-cleanup limiters that haven't been used within TTL period.
   ///
-  /// Only runs if TTL is configured and threshold is reached.
-  void _autoCleanupIfNeeded() {
-    // Only run if TTL is configured
+  /// Runs on a background timer (see [_startAutoCleanupTimerIfNeeded]).
+  void _runAutoCleanup() {
     final ttl = DebounceThrottleConfig.config.limiterAutoCleanupTTL;
     if (ttl == null) return;
 
-    // Only run if threshold is reached
     final totalCount = _getTotalLimiterCount();
     final threshold = DebounceThrottleConfig.config.limiterAutoCleanupThreshold;
     if (totalCount <= threshold) return;
 
-    // Remove limiters that haven't been used within TTL
     final now = DateTime.now();
-    _cleanupMapByTTL(_debouncers, _debouncersLastUsed, now, ttl);
-    _cleanupMapByTTL(_throttlers, _throttlersLastUsed, now, ttl);
-    _cleanupMapByTTL(_asyncDebouncers, _asyncDebouncersLastUsed, now, ttl);
-    _cleanupMapByTTL(_asyncThrottlers, _asyncThrottlersLastUsed, now, ttl);
+    _cleanupMapByTTL(_debouncers, _debouncersLastUsed, now, ttl,
+        (d) => d.dispose());
+    _cleanupMapByTTL(_throttlers, _throttlersLastUsed, now, ttl,
+        (t) => t.dispose());
+    _cleanupMapByTTL(_asyncDebouncers, _asyncDebouncersLastUsed, now, ttl,
+        (d) => d.dispose());
+    _cleanupMapByTTL(_asyncThrottlers, _asyncThrottlersLastUsed, now, ttl,
+        (t) => t.dispose());
   }
 
   void _cleanupMapByTTL<T>(
@@ -403,6 +421,7 @@ mixin EventLimiterMixin {
     Map<String, DateTime> timestampMap,
     DateTime now,
     Duration ttl,
+    void Function(T) disposer,
   ) {
     final idsToRemove = <String>[];
 
@@ -417,7 +436,8 @@ mixin EventLimiterMixin {
     }
 
     for (final id in idsToRemove) {
-      (limiterMap[id] as dynamic)?.dispose();
+      final limiter = limiterMap[id];
+      if (limiter != null) disposer(limiter);
       limiterMap.remove(id);
       timestampMap.remove(id);
     }
@@ -444,10 +464,14 @@ mixin EventLimiterMixin {
   /// ```
   int cleanupInactive() {
     int removed = 0;
-    removed += _cleanupInactiveMap(_debouncers, (d) => !d.isPending);
-    removed += _cleanupInactiveMap(_throttlers, (t) => !t.isPending);
-    removed += _cleanupInactiveMap(_asyncDebouncers, (d) => !d.isPending);
-    removed += _cleanupInactiveMap(_asyncThrottlers, (t) => !t.isLocked);
+    removed += _cleanupInactiveMap(
+        _debouncers, (d) => !d.isPending, (d) => d.dispose());
+    removed += _cleanupInactiveMap(
+        _throttlers, (t) => !t.isPending, (t) => t.dispose());
+    removed += _cleanupInactiveMap(
+        _asyncDebouncers, (d) => !d.isPending, (d) => d.dispose());
+    removed += _cleanupInactiveMap(
+        _asyncThrottlers, (t) => !t.isLocked, (t) => t.dispose());
     return removed;
   }
 
@@ -466,19 +490,23 @@ mixin EventLimiterMixin {
     final now = DateTime.now();
     int removed = 0;
 
-    removed += _cleanupUnusedMap(
-        _debouncers, _debouncersLastUsed, now, inactivityPeriod);
-    removed += _cleanupUnusedMap(
-        _throttlers, _throttlersLastUsed, now, inactivityPeriod);
-    removed += _cleanupUnusedMap(
-        _asyncDebouncers, _asyncDebouncersLastUsed, now, inactivityPeriod);
-    removed += _cleanupUnusedMap(
-        _asyncThrottlers, _asyncThrottlersLastUsed, now, inactivityPeriod);
+    removed += _cleanupUnusedMap(_debouncers, _debouncersLastUsed, now,
+        inactivityPeriod, (d) => d.dispose());
+    removed += _cleanupUnusedMap(_throttlers, _throttlersLastUsed, now,
+        inactivityPeriod, (t) => t.dispose());
+    removed += _cleanupUnusedMap(_asyncDebouncers, _asyncDebouncersLastUsed,
+        now, inactivityPeriod, (d) => d.dispose());
+    removed += _cleanupUnusedMap(_asyncThrottlers, _asyncThrottlersLastUsed,
+        now, inactivityPeriod, (t) => t.dispose());
 
     return removed;
   }
 
-  int _cleanupInactiveMap<T>(Map<String, T> map, bool Function(T) isInactive) {
+  int _cleanupInactiveMap<T>(
+    Map<String, T> map,
+    bool Function(T) isInactive,
+    void Function(T) disposer,
+  ) {
     final idsToRemove = <String>[];
 
     for (final entry in map.entries) {
@@ -488,9 +516,9 @@ mixin EventLimiterMixin {
     }
 
     for (final id in idsToRemove) {
-      (map[id] as dynamic)?.dispose();
+      final limiter = map[id];
+      if (limiter != null) disposer(limiter);
       map.remove(id);
-      // Also remove from timestamp maps
       _debouncersLastUsed.remove(id);
       _throttlersLastUsed.remove(id);
       _asyncDebouncersLastUsed.remove(id);
@@ -505,6 +533,7 @@ mixin EventLimiterMixin {
     Map<String, DateTime> timestampMap,
     DateTime now,
     Duration inactivityPeriod,
+    void Function(T) disposer,
   ) {
     final idsToRemove = <String>[];
 
@@ -519,7 +548,8 @@ mixin EventLimiterMixin {
     }
 
     for (final id in idsToRemove) {
-      (limiterMap[id] as dynamic)?.dispose();
+      final limiter = limiterMap[id];
+      if (limiter != null) disposer(limiter);
       limiterMap.remove(id);
       timestampMap.remove(id);
     }
@@ -537,6 +567,10 @@ mixin EventLimiterMixin {
   // =================================================================
   // Test-only getters (visible for testing)
   // =================================================================
+
+  /// Visible for testing: Manually trigger auto-cleanup (bypasses the periodic timer).
+  @visibleForTesting
+  void triggerAutoCleanup() => _runAutoCleanup();
 
   /// Visible for testing: Access to internal debouncer map.
   @visibleForTesting

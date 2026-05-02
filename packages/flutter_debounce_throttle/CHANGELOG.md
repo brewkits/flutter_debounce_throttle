@@ -1,7 +1,33 @@
 ## 2.4.6
 
-- Fix: Inherit core fixes for async lock race conditions.
-- Polish: Internal code formatting and minor documentation cleanup.
+### 🚀 New: Honest API — No Silent Failures
+
+`EventLimiterMixin.debounceAsync()` and `throttleAsync()` now surface the underlying
+`DebounceResult` / `ThrottlerResult` from the core — making dropped or cancelled operations
+explicit instead of silently swallowed.
+
+```dart
+// MVI / BLoC — compiler rejects if either branch is missing
+final result = await debounceAsync('search', () => api.search(event.query));
+result?.when(
+  onSuccess:   (data) => emit(SearchLoaded(data ?? [])),
+  onCancelled: ()     => emit(SearchIdle()),
+);
+```
+
+### 🔧 Fixed
+
+#### `EventLimiterMixin` — Background auto-cleanup (no more UI-thread stalls)
+- Cleanup was previously synchronous and ran on every new limiter creation (O(n) on the UI thread).
+- Now uses a `Timer.periodic` background timer (1-minute interval) — zero impact during normal usage.
+- Timer starts on first limiter creation; cancelled in `cancelAll()` and `dispose()`.
+
+#### `EventLimiterMixin` — Warning instead of assertion crash
+- Exceeded limiter count (>100) previously called `assert(false)`, crashing debug builds unexpectedly.
+- Now logs a structured warning via `EventLimiterLogger` and triggers background cleanup.
+
+### 📦 Dependencies
+- Updated `dart_debounce_throttle` to `^2.4.6`
 
 ## 2.4.4
 

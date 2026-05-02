@@ -285,22 +285,17 @@ void main() {
           mode: ConcurrencyMode.enqueue,
           maxDuration: const Duration(seconds: 5),
           maxQueueSize: 5,
-          // dropNewest is default - rejected calls will throw
         );
 
-        // Start task to lock
         throttler.call(() async {
           await Future.delayed(const Duration(milliseconds: 200));
         });
 
-        // Try to queue more than limit - catch expected rejections
+        // Dropped calls resolve with ThrottlerResult.dropped() — no catchError needed.
         for (var i = 0; i < 10; i++) {
-          throttler.call(() async {}).catchError((_) {
-            // Expected: some calls rejected due to queue full
-          });
+          throttler.call(() async {});
         }
 
-        // Queue should be capped at maxQueueSize
         expect(throttler.queueSize, lessThanOrEqualTo(5));
 
         throttler.dispose();
@@ -310,7 +305,6 @@ void main() {
     group('QueueOverflowStrategy.dropNewest', () {
       test('rejects new calls when queue is full', () async {
         final results = <int>[];
-        var rejectedCount = 0;
 
         final throttler = ConcurrentAsyncThrottler(
           mode: ConcurrencyMode.enqueue,
@@ -319,35 +313,26 @@ void main() {
           queueOverflowStrategy: QueueOverflowStrategy.dropNewest,
         );
 
-        // Start long task to hold lock
         throttler.call(() async {
           await Future.delayed(const Duration(milliseconds: 100));
           results.add(0);
         });
 
         // Queue 3 items (max)
-        throttler
-            .call(() async => results.add(1))
-            .catchError((_) => rejectedCount++);
-        throttler
-            .call(() async => results.add(2))
-            .catchError((_) => rejectedCount++);
-        throttler
-            .call(() async => results.add(3))
-            .catchError((_) => rejectedCount++);
+        throttler.call(() async => results.add(1));
+        throttler.call(() async => results.add(2));
+        throttler.call(() async => results.add(3));
 
-        // These should be rejected
-        throttler
-            .call(() async => results.add(4))
-            .catchError((_) => rejectedCount++);
-        throttler
-            .call(() async => results.add(5))
-            .catchError((_) => rejectedCount++);
+        // These exceed the limit — result carries the truth.
+        final r4 = await throttler.call(() async => results.add(4));
+        final r5 = await throttler.call(() async => results.add(5));
+
+        expect(r4.isDropped, true);
+        expect(r5.isDropped, true);
 
         await Future.delayed(const Duration(milliseconds: 200));
 
-        expect(results, [0, 1, 2, 3]); // Only first 4 (including initial)
-        expect(rejectedCount, 2); // 2 were rejected
+        expect(results, [0, 1, 2, 3]);
 
         throttler.dispose();
       });
@@ -372,9 +357,8 @@ void main() {
         throttler.call(() async => results.add(1));
         throttler.call(() async => results.add(2));
         throttler.call(() async => results.add(3));
-        throttler
-            .call(() async => results.add(4))
-            .catchError((_) {}); // Rejected
+        // Rejected (queue full) — no catchError needed, resolves as dropped.
+        throttler.call(() async => results.add(4));
 
         await Future.delayed(const Duration(milliseconds: 200));
 
@@ -396,9 +380,9 @@ void main() {
           await Future.delayed(const Duration(milliseconds: 500));
         });
 
-        // Spam calls
+        // Spam calls — excess ones resolve as dropped, no catchError needed.
         for (var i = 0; i < 100; i++) {
-          throttler.call(() async {}).catchError((_) {});
+          throttler.call(() async {});
         }
 
         expect(throttler.queueSize, 5);
@@ -424,13 +408,9 @@ void main() {
           results.add(0);
         });
 
-        // Queue more than limit
-        throttler
-            .call(() async => results.add(1))
-            .catchError((_) {}); // Dropped
-        throttler
-            .call(() async => results.add(2))
-            .catchError((_) {}); // Dropped
+        // Queue more than limit — oldest are evicted (result = dropped).
+        throttler.call(() async => results.add(1)); // Will be dropped
+        throttler.call(() async => results.add(2)); // Will be dropped
         throttler.call(() async => results.add(3));
         throttler.call(() async => results.add(4));
         throttler.call(() async => results.add(5));
@@ -443,9 +423,7 @@ void main() {
         throttler.dispose();
       });
 
-      test('dropped items receive error', () async {
-        var droppedCount = 0;
-
+      test('dropped items resolve with ThrottlerResult.dropped', () async {
         final throttler = ConcurrentAsyncThrottler(
           mode: ConcurrencyMode.enqueue,
           maxDuration: const Duration(seconds: 5),
@@ -453,24 +431,21 @@ void main() {
           queueOverflowStrategy: QueueOverflowStrategy.dropOldest,
         );
 
-        // Lock
         throttler.call(() async {
           await Future.delayed(const Duration(milliseconds: 100));
         });
 
-        // Queue items
-        throttler.call(() async {}).catchError((_) => droppedCount++);
-        throttler.call(() async {}).catchError((_) => droppedCount++);
-        throttler
-            .call(() async {})
-            .catchError((_) => droppedCount++); // Causes drop
-        throttler
-            .call(() async {})
-            .catchError((_) => droppedCount++); // Causes drop
+        // Queue 2 items, then add 2 more that evict the oldest.
+        final f1 = throttler.call(() async {});
+        final f2 = throttler.call(() async {});
+        throttler.call(() async {}); // evicts f1
+        throttler.call(() async {}); // evicts f2
 
-        await Future.delayed(const Duration(milliseconds: 200));
+        final r1 = await f1;
+        final r2 = await f2;
 
-        expect(droppedCount, 2); // First 2 were dropped
+        expect(r1.isDropped, true);
+        expect(r2.isDropped, true);
 
         throttler.dispose();
       });
@@ -491,10 +466,10 @@ void main() {
           results.add(0);
         });
 
-        // Rapidly add 10 items
+        // Rapidly add 10 items (dropped calls complete normally, no error needed).
         for (var i = 1; i <= 10; i++) {
           final value = i;
-          throttler.call(() async => results.add(value)).catchError((_) {});
+          throttler.call(() async => results.add(value));
         }
 
         await Future.delayed(const Duration(milliseconds: 200));
@@ -523,10 +498,10 @@ void main() {
           results.add(0);
         });
 
-        // Add multiple - only last should be kept
+        // Add multiple — only last should be kept, others resolve as dropped.
         for (var i = 1; i <= 5; i++) {
           final value = i;
-          throttler.call(() async => results.add(value)).catchError((_) {});
+          throttler.call(() async => results.add(value));
         }
 
         await Future.delayed(const Duration(milliseconds: 150));
@@ -551,10 +526,10 @@ void main() {
           await Future.delayed(const Duration(milliseconds: 50));
         });
 
-        // Trigger overflow
-        throttler.call(() async {}).catchError((_) {});
-        throttler.call(() async {}).catchError((_) {});
-        throttler.call(() async {}).catchError((_) {}); // Triggers drop
+        // Trigger overflow — excess calls resolve as dropped, no errors thrown.
+        throttler.call(() async {});
+        throttler.call(() async {});
+        throttler.call(() async {}); // Triggers drop
 
         await Future.delayed(const Duration(milliseconds: 100));
 
@@ -574,9 +549,9 @@ void main() {
           await Future.delayed(const Duration(milliseconds: 200));
         });
 
-        throttler.call(() async {}).catchError((_) {});
-        throttler.call(() async {}).catchError((_) {});
-        throttler.call(() async {}).catchError((_) {});
+        throttler.call(() async {});
+        throttler.call(() async {});
+        throttler.call(() async {});
 
         expect(throttler.queueSize, 3);
 
@@ -627,10 +602,11 @@ void main() {
         // Simulate rapid message sending
         Future<void> sendMessage(String msg) async {
           final id = ++messageId;
+          // Dropped messages resolve with ThrottlerResult.dropped() — no error thrown.
           await chatSender.call(() async {
             await Future.delayed(const Duration(milliseconds: 10));
             sentMessages.add('$msg-$id');
-          }).catchError((_) {}); // Ignore dropped messages
+          });
         }
 
         // User spams 20 messages
@@ -662,22 +638,21 @@ void main() {
           queueOverflowStrategy: QueueOverflowStrategy.dropNewest,
         );
 
-        // Simulate burst of 50 requests
-        final futures = <Future>[];
+        // ThrottlerResult tells the caller whether the operation actually ran.
+        final futures = <Future<void>>[];
         for (var i = 0; i < 50; i++) {
           futures.add(
             apiQueue.call(() async {
               await Future.delayed(const Duration(milliseconds: 5));
               processedRequests++;
-            }).catchError((_) {
-              rejectedRequests++;
+            }).then((result) {
+              if (result.isDropped) rejectedRequests++;
             }),
           );
         }
 
         await Future.wait(futures);
 
-        // Should process max 6 (1 active + 5 queued initially)
         expect(processedRequests, lessThanOrEqualTo(10));
         expect(rejectedRequests, greaterThan(40));
 
