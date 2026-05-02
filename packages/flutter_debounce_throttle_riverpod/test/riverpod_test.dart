@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dart_debounce_throttle/dart_debounce_throttle.dart';
 import 'package:flutter_debounce_throttle_riverpod/flutter_debounce_throttle_riverpod.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';

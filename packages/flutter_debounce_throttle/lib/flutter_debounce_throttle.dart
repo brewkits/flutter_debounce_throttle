@@ -30,11 +30,11 @@
 //
 // **Search input with loading:**
 // ```dart
-// AsyncDebouncedCallbackBuilder<List<User>>(
+// DebouncedQueryBuilder<List<User>>(
 //   duration: Duration(milliseconds: 300),
-//   onChanged: (text) async => await searchApi(text),
-//   onSuccess: (results) => setState(() => _results = results),
-//   onError: (e) => showError(e), // Don't forget error handling!
+//   onQuery: (text) async => await searchApi(text),
+//   onResult: (results) => setState(() => _results = results),
+//   onError: (e, s) => showError(e), // Don't forget error handling!
 //   builder: (context, callback, isLoading) => TextField(
 //     onChanged: callback,
 //     decoration: InputDecoration(

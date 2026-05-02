@@ -1,7 +1,7 @@
 /// Riverpod integration for flutter_debounce_throttle.
 ///
 /// Provides [EventLimiterController] — debounce/throttle tied to Riverpod's
-/// [Ref] lifecycle. Zero boilerplate, auto-cleanup on provider dispose.
+/// `Ref` lifecycle. Zero boilerplate, auto-cleanup on provider dispose.
 ///
 /// ```dart
 /// class SearchNotifier extends Notifier<SearchState> {
@@ -20,7 +20,7 @@
 ///   }
 /// }
 /// ```
-library flutter_debounce_throttle_riverpod;
+library;
 
 export 'package:dart_debounce_throttle/dart_debounce_throttle.dart'
     show
