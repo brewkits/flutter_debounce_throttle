@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'async_throttler.dart';
+import 'cancellation_token.dart';
 import 'concurrency_mode.dart';
 import 'throttler.dart';
 
@@ -34,20 +35,6 @@ enum QueueOverflowStrategy {
 ///
 /// **Example:**
 /// ```dart
-/// // Enqueue mode - execute all calls sequentially
-/// final chatSender = ConcurrentAsyncThrottler(
-///   mode: ConcurrencyMode.enqueue,
-///   maxDuration: Duration(seconds: 30),
-///   debugMode: true,
-///   name: 'chat-sender',
-/// );
-///
-/// // User sends 3 messages rapidly
-/// chatSender.call(() async => await api.sendMessage('Hello'));
-/// chatSender.call(() async => await api.sendMessage('World'));
-/// chatSender.call(() async => await api.sendMessage('!'));
-/// // All 3 execute in order, one after another
-///
 /// // Replace mode - cancel old, start new
 /// final searchController = ConcurrentAsyncThrottler(
 ///   mode: ConcurrencyMode.replace,
@@ -55,23 +42,12 @@ enum QueueOverflowStrategy {
 /// );
 ///
 /// // User types "abc" rapidly
-/// searchController.call(() async => await api.search('a')); // Cancelled
-/// searchController.call(() async => await api.search('ab')); // Cancelled
-/// searchController.call(() async => await api.search('abc')); // Executes
-///
-/// // Keep Latest mode - execute current + latest
-/// final autoSaver = ConcurrentAsyncThrottler(
-///   mode: ConcurrencyMode.keepLatest,
-///   maxDuration: Duration(seconds: 30),
-/// );
-///
-/// // User edits 5 times rapidly
-/// autoSaver.call(() async => await api.saveDraft(v1)); // Executes
-/// autoSaver.call(() async => await api.saveDraft(v2)); // Replaced
-/// autoSaver.call(() async => await api.saveDraft(v3)); // Replaced
-/// autoSaver.call(() async => await api.saveDraft(v4)); // Replaced
-/// autoSaver.call(() async => await api.saveDraft(v5)); // Kept, executes after v1
-/// // Only v1 and v5 execute
+/// // Use callWithToken to properly cancel previous requests!
+/// searchController.callWithToken((token) async {
+///   final result = await api.search('abc');
+///   if (token.isCancelled) return; // Abort if newer call arrived
+///   showResult(result);
+/// });
 /// ```
 ///
 /// **Performance:**
@@ -99,6 +75,7 @@ class ConcurrentAsyncThrottler {
   Future<void> Function()? _latestCall;
   bool _isProcessingQueue = false;
   int _latestCallId = 0;
+  CancellationToken? _replaceToken;
 
   ConcurrentAsyncThrottler({
     this.mode = ConcurrencyMode.drop,
@@ -123,18 +100,28 @@ class ConcurrentAsyncThrottler {
 
   /// Execute async operation with selected concurrency mode.
   Future<void> call(Future<void> Function() callback) async {
+    return callWithToken((_) => callback());
+  }
+
+  /// Execute async operation that provides a [CancellationToken].
+  ///
+  /// This is essential for [ConcurrencyMode.replace] to actually stop previous
+  /// tasks from continuing their execution in the background. Check
+  /// `token.isCancelled` periodically or pass it to APIs like Dio.
+  Future<void> callWithToken(
+      Future<void> Function(CancellationToken token) callback) async {
     switch (mode) {
       case ConcurrencyMode.drop:
-        return _throttler.call(callback);
+        return _throttler.call(() => callback(CancellationToken()));
 
       case ConcurrencyMode.enqueue:
-        return _enqueueCall(callback);
+        return _enqueueCall(() => callback(CancellationToken()));
 
       case ConcurrencyMode.replace:
         return _replaceCall(callback);
 
       case ConcurrencyMode.keepLatest:
-        return _keepLatestCall(callback);
+        return _keepLatestCall(() => callback(CancellationToken()));
     }
   }
 
@@ -208,9 +195,14 @@ class ConcurrentAsyncThrottler {
   }
 
   /// Replace mode: Cancel current execution and start new one.
-  Future<void> _replaceCall(Future<void> Function() callback) async {
+  Future<void> _replaceCall(Future<void> Function(CancellationToken) callback) async {
     final currentCallId = ++_latestCallId;
     _throttler.debugLog('Replace mode: new call ID $currentCallId');
+
+    // Cancel previous token
+    _replaceToken?.cancel();
+    _replaceToken = CancellationToken();
+    final token = _replaceToken!;
 
     // Reset to allow new call immediately
     _throttler.reset();
@@ -218,17 +210,21 @@ class ConcurrentAsyncThrottler {
     // Execute with ID check wrapper
     await _throttler.call(() async {
       // Check if still valid before executing callback
-      if (currentCallId != _latestCallId) {
+      if (currentCallId != _latestCallId || token.isCancelled) {
         _throttler.debugLog(
           'Replace mode: call $currentCallId cancelled before execution',
         );
         return;
       }
 
-      await callback();
+      try {
+        await callback(token);
+      } on CancellationException {
+        _throttler.debugLog('Replace mode: call $currentCallId aborted via CancellationException');
+      }
 
       // Check again after execution
-      if (currentCallId != _latestCallId) {
+      if (currentCallId != _latestCallId || token.isCancelled) {
         _throttler.debugLog(
           'Replace mode: call $currentCallId result ignored (replaced during execution)',
         );
@@ -305,6 +301,8 @@ class ConcurrentAsyncThrottler {
     _latestCall = null;
     _isProcessingQueue = false;
     _latestCallId++;
+    _replaceToken?.cancel();
+    _replaceToken = null;
     _throttler.debugLog('ConcurrentAsyncThrottler reset (mode: ${mode.name})');
   }
 
@@ -314,6 +312,8 @@ class ConcurrentAsyncThrottler {
     _queue.clear();
     _latestCall = null;
     _isProcessingQueue = false;
+    _replaceToken?.cancel();
+    _replaceToken = null;
   }
 }
 
