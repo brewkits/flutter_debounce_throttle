@@ -28,7 +28,7 @@
 // **Async Debounce (search autocomplete):**
 // ```dart
 // final asyncDebouncer = AsyncDebouncer(duration: Duration(milliseconds: 300));
-// final result = await asyncDebouncer.run(() async => await searchApi(query));
+// final result = await asyncDebouncer.call(() async => await searchApi(query));
 // if (result == null) return; // Cancelled by newer call
 // updateResults(result);
 // ```
@@ -85,6 +85,7 @@ export 'src/concurrent_async_throttler.dart';
 
 // Utilities
 export 'src/batch_throttler.dart';
+export 'src/cancellation_token.dart';
 export 'src/rate_limiter.dart';
 export 'src/rate_limiter_store.dart';
 export 'src/distributed_rate_limiter.dart';
