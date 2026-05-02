@@ -1,6 +1,0 @@
-# Local development overrides
-dependency_overrides:
-  flutter_debounce_throttle:
-    path: packages/flutter_debounce_throttle
-  dart_debounce_throttle:
-    path: packages/dart_debounce_throttle
