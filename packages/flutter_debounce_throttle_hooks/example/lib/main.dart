@@ -132,8 +132,7 @@ class _SearchTab extends HookWidget {
                   label: 'API Calls',
                   value: '${apiCalls.value}',
                   color: Colors.blue),
-              _StatCard(
-                  label: 'Saved', value: '$saved', color: Colors.green),
+              _StatCard(label: 'Saved', value: '$saved', color: Colors.green),
             ],
           ),
           const SizedBox(height: 12),
@@ -213,8 +212,7 @@ class _SubmitTab extends HookWidget {
             onTap: onTap,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
               decoration: BoxDecoration(
                 color: isSubmitting.value ? Colors.grey : Colors.teal,
                 borderRadius: BorderRadius.circular(16),
@@ -270,7 +268,8 @@ class _SubmitTab extends HookWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _StatCard(label: 'Taps', value: '${taps.value}', color: Colors.orange),
+              _StatCard(
+                  label: 'Taps', value: '${taps.value}', color: Colors.orange),
               _StatCard(
                   label: 'Payments',
                   value: '${submitted.value}',
@@ -374,8 +373,8 @@ class _AsyncTab extends HookWidget {
           if (lastResult.value.isNotEmpty)
             Card(
               child: ListTile(
-                leading: const Icon(Icons.check_circle_outline,
-                    color: Colors.green),
+                leading:
+                    const Icon(Icons.check_circle_outline, color: Colors.green),
                 title: Text(lastResult.value),
                 subtitle: const Text('Last successful result'),
               ),
@@ -535,8 +534,7 @@ class _StatCard extends StatelessWidget {
                 fontSize: 26, fontWeight: FontWeight.bold, color: color),
           ),
           const SizedBox(height: 2),
-          Text(label,
-              style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
         ],
       ),
     );
@@ -557,8 +555,8 @@ class _CodeSnippet extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[850] : Colors.grey[100],
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-            color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
+        border:
+            Border.all(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
       ),
       child: Text(
         code,

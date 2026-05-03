@@ -33,8 +33,9 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 150));
 
       expect(sideEffectResults.length, 1);
-      expect(sideEffectResults, [2], reason: 'First task was successfully cancelled');
-      
+      expect(sideEffectResults, [2],
+          reason: 'First task was successfully cancelled');
+
       throttler.dispose();
     });
 
@@ -63,7 +64,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 150));
 
       expect(sideEffectResults, [2]);
-      
+
       throttler.dispose();
     });
   });

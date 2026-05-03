@@ -261,8 +261,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 200));
     });
 
-    test('sequential searches (with gap) each complete successfully',
-        () async {
+    test('sequential searches (with gap) each complete successfully', () async {
       final vm = _SearchViewModel();
 
       unawaited(vm.onSearch('first'));
@@ -669,8 +668,7 @@ void main() {
 
     test('multiple controllers disposed concurrently: no cross-contamination',
         () async {
-      final controllers =
-          List.generate(10, (_) => _MultiKeyController());
+      final controllers = List.generate(10, (_) => _MultiKeyController());
 
       for (final c in controllers) {
         for (var i = 0; i < 5; i++) {

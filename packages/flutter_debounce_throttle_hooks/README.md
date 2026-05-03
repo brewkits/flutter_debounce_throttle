@@ -15,7 +15,7 @@ All the power of [flutter_debounce_throttle](https://pub.dev/packages/flutter_de
 ```dart
 class SearchWidget extends HookWidget {
   Widget build(BuildContext context) {
-    // One line. Auto-cleanup on unmount. Zero boilerplate.
+    // ✅ One line. Auto-cleanup on unmount. Zero boilerplate.
     final debouncedSearch = useDebouncedCallback<String>(
       (text) => api.search(text),
       duration: 300.ms,
@@ -30,35 +30,12 @@ class SearchWidget extends HookWidget {
 
 ## Why Hooks?
 
-| With StatefulWidget | With Hooks |
-|---------------------|------------|
-| `late Debouncer _debouncer;` | - |
-| `@override initState() { ... }` | - |
-| `@override dispose() { _debouncer.dispose(); }` | - |
-| 15+ lines of boilerplate | **1 line** |
-
-```dart
-// StatefulWidget way (15+ lines)
-class _SearchState extends State<Search> {
-  late Debouncer _debouncer;
-
-  @override
-  void initState() {
-    super.initState();
-    _debouncer = Debouncer(duration: Duration(ms: 300));
-  }
-
-  @override
-  void dispose() {
-    _debouncer.dispose();
-    super.dispose();
-  }
-  // ...
-}
-
-// Hooks way (1 line)
-final debouncer = useDebouncer(duration: 300.ms);
-```
+| Capability | StatefulWidget | Hooks Edition |
+|------------|:---:|:---:|
+| Memory Safe (Auto-dispose) | ✅ (Manual) | ✅ **Automatic** |
+| Async Support | ✅ | ✅ |
+| Boilerplate Lines | 15+ | **1** |
+| Logic Reuse | ❌ Difficult | ✅ **High** |
 
 ---
 
@@ -82,117 +59,24 @@ final throttledSubmit = useThrottledCallback(
 ElevatedButton(onPressed: throttledSubmit, child: Text('Submit'))
 ```
 
-**Debounced Value:**
-```dart
-final searchText = useState('');
-final debouncedText = useDebouncedValue(searchText.value, duration: 300.ms);
-
-useEffect(() {
-  if (debouncedText.isNotEmpty) api.search(debouncedText);
-  return null;
-}, [debouncedText]);
-```
-
----
-
-## Available Hooks
-
-| Hook | Returns | Use Case |
-|------|---------|----------|
-| `useDebouncedCallback<T>` | `void Function(T)` | Search input, form validation |
-| `useThrottledCallback` | `VoidCallback` | Button spam prevention |
-| `useDebouncedValue<T>` | `T` | Reactive debounced value |
-| `useThrottledValue<T>` | `T` | Reactive throttled value |
-| `useDebouncer` | `Debouncer` | Direct controller access |
-| `useThrottler` | `Throttler` | Direct controller access |
-| `useAsyncDebouncer` | `AsyncDebouncer` | Async with auto-cancel |
-| `useAsyncThrottler` | `AsyncThrottler` | Async with lock |
-
----
-
-## Complete Example
-
-```dart
-class AutocompleteSearch extends HookWidget {
-  @override
-  Widget build(BuildContext context) {
-    final results = useState<List<String>>([]);
-    final isLoading = useState(false);
-
-    // Auto-dispose on unmount. No cleanup needed.
-    final asyncDebouncer = useAsyncDebouncer(duration: 300.ms);
-
-    Future<void> handleSearch(String text) async {
-      if (text.isEmpty) {
-        results.value = [];
-        return;
-      }
-
-      isLoading.value = true;
-
-      // Old requests are automatically cancelled
-      final result = await asyncDebouncer(() async {
-        return await api.search(text);
-      });
-
-      if (result != null) {
-        results.value = result;
-      }
-      isLoading.value = false;
-    }
-
-    return Column(
-      children: [
-        TextField(
-          onChanged: handleSearch,
-          decoration: InputDecoration(
-            suffixIcon: isLoading.value
-                ? CircularProgressIndicator()
-                : Icon(Icons.search),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: results.value.length,
-            itemBuilder: (_, i) => ListTile(
-              title: Text(results.value[i]),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-```
-
----
-
-## Installation
-
-```yaml
-dependencies:
-  flutter_debounce_throttle_hooks: ^2.4.6
-  flutter_hooks: ^0.21.3
-```
-
 ---
 
 ## Quality Assurance
 
 | Guarantee | How |
 |-----------|-----|
-| **Type-safe** | Full generic support with 8 production-ready hooks |
-| **Memory-safe** | Auto-cleanup on unmount |
-| **Lifecycle-aware** | No manual dispose needed |
-| **Battle-tested** | Built on flutter_debounce_throttle (450+ tests) |
+| **570+ tests** | Built on battle-tested core (100% verified) |
+| **Type-safe** | Full generic support for all 8 production-ready hooks |
+| **Memory-safe** | Automatic cleanup on unmount |
+| **Battle-tested** | Zero boilerplate, zero leaks |
 
 ---
 
-## Which Package Should I Use?
+## Which Package?
 
 | You are building... | Package |
 |---------------------|---------|
-| Flutter app + `flutter_hooks` | **`flutter_debounce_throttle_hooks`** ← you are here |
+| Flutter app + **hooks** | **`flutter_debounce_throttle_hooks`** ← you are here |
 | Flutter app (no hooks) | [`flutter_debounce_throttle`](https://pub.dev/packages/flutter_debounce_throttle) |
 | Dart server / CLI / Serverpod | [`dart_debounce_throttle`](https://pub.dev/packages/dart_debounce_throttle) |
 

@@ -324,8 +324,7 @@ void main() {
       final ref = _FakeRiverpodRef();
       final ctrl = _controller(ref);
 
-      ctrl.throttle('x', () {},
-          duration: const Duration(milliseconds: 200));
+      ctrl.throttle('x', () {}, duration: const Duration(milliseconds: 200));
       expect(ctrl.isActive('x'), true);
 
       ref.simulateDispose();
@@ -511,8 +510,7 @@ void main() {
       final ref = _FakeRiverpodRef();
       final ctrl = _controller(ref);
 
-      ctrl.debounce('x', () {},
-          duration: const Duration(milliseconds: 200));
+      ctrl.debounce('x', () {}, duration: const Duration(milliseconds: 200));
       expect(ctrl.isActive('x'), true);
 
       ref.simulateDispose();
@@ -522,8 +520,7 @@ void main() {
       final ref = _FakeRiverpodRef();
       final ctrl = _controller(ref);
 
-      ctrl.debounce('x', () {},
-          duration: const Duration(milliseconds: 200));
+      ctrl.debounce('x', () {}, duration: const Duration(milliseconds: 200));
       ctrl.cancel('x');
 
       expect(ctrl.isActive('x'), false);

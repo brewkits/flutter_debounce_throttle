@@ -685,7 +685,8 @@ void main() {
 
     throttler!.call(() => count++);
     expect(throttler!.isThrottled, isTrue);
-    throttler!.reset(); // reset() clears isThrottled; cancel() only cancels the timer
+    throttler!
+        .reset(); // reset() clears isThrottled; cancel() only cancels the timer
     expect(throttler!.isThrottled, isFalse);
 
     throttler!.call(() => count++);
@@ -933,7 +934,8 @@ void main() {
 
   // ─── useDebouncedValue expanded ─────────────────────────────────────────────
 
-  testWidgets('useDebouncedValue with int stays at initial until debounce fires',
+  testWidgets(
+      'useDebouncedValue with int stays at initial until debounce fires',
       (WidgetTester tester) async {
     int? debouncedValue;
     var counter = 0;
@@ -1155,7 +1157,8 @@ void main() {
     final f3 = debouncer!<String>(() async => 'third');
 
     // f1/f2 are cancelled by subsequent calls — resolve to null immediately
-    await tester.pump(const Duration(milliseconds: 120)); // fires debounce timer
+    await tester
+        .pump(const Duration(milliseconds: 120)); // fires debounce timer
 
     final r1 = await f1;
     final r2 = await f2;
@@ -1179,9 +1182,9 @@ void main() {
     );
 
     // Start the call but don't await yet — pump first to fire the debounce timer
-    final futureResult =
-        debouncer!.callWithResult<String?>(() async => null);
-    await tester.pump(const Duration(milliseconds: 120)); // fires debounce timer
+    final futureResult = debouncer!.callWithResult<String?>(() async => null);
+    await tester
+        .pump(const Duration(milliseconds: 120)); // fires debounce timer
     final result = await futureResult; // now resolves immediately
 
     expect(result.isSuccess, isTrue);
@@ -1303,7 +1306,8 @@ void main() {
     });
 
     await tester.pump();
-    expect(count, equals(1)); // only first call starts; subsequent calls dropped
+    expect(
+        count, equals(1)); // only first call starts; subsequent calls dropped
 
     await tester.pumpAndSettle(); // drain the 50ms async operation
   });
@@ -1538,8 +1542,7 @@ void main() {
     expect(submitCount, equals(2));
   });
 
-  testWidgets(
-      'System: async search — rapid queries collapse, result is latest',
+  testWidgets('System: async search — rapid queries collapse, result is latest',
       (WidgetTester tester) async {
     String? result;
     AsyncDebouncer? debouncer;
@@ -1575,10 +1578,8 @@ void main() {
 
     await tester.pumpWidget(
       HookBuilder(builder: (context) {
-        debouncer =
-            useDebouncer(duration: const Duration(milliseconds: 100));
-        throttler =
-            useThrottler(duration: const Duration(milliseconds: 100));
+        debouncer = useDebouncer(duration: const Duration(milliseconds: 100));
+        throttler = useThrottler(duration: const Duration(milliseconds: 100));
         return Container();
       }),
     );

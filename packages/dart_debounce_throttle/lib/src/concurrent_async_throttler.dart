@@ -161,8 +161,7 @@ class ConcurrentAsyncThrottler {
   }
 
   /// Enqueue mode: Queue calls and execute sequentially (FIFO).
-  Future<ThrottlerResult> _enqueueCall(
-      Future<void> Function() callback) async {
+  Future<ThrottlerResult> _enqueueCall(Future<void> Function() callback) async {
     final completer = Completer<ThrottlerResult>();
     final queuedCall = _QueuedCall(callback, completer);
 

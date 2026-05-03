@@ -10,3 +10,8 @@ dependencies:
     sdk: flutter
   flutter_hooks: ^0.21.3
   flutter_debounce_throttle_hooks: ^1.0.0
+  flutter_lints: ^6.0.0
+  flutter_driver:
+    sdk: flutter
+dev_dependencies:
+  test: ^1.30.0

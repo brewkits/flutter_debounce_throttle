@@ -1,7 +1,7 @@
 # flutter_debounce_throttle_riverpod
 
 [![pub package](https://img.shields.io/pub/v/flutter_debounce_throttle_riverpod.svg)](https://pub.dev/packages/flutter_debounce_throttle_riverpod)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Riverpod integration for [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle).  
 `EventLimiterController` ties debounce/throttle timers to a Riverpod `Ref` lifecycle — zero boilerplate, auto-cleanup on provider dispose.
@@ -9,6 +9,12 @@ Riverpod integration for [flutter_debounce_throttle](https://pub.dev/packages/fl
 | Debounced Search Notifier | Provider Auto-Dispose |
 |:---:|:---:|
 | ![Riverpod Search](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_riverpod_debounce.gif) | ![Auto-Dispose](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_riverpod_autodispose.gif) |
+
+---
+
+## Why this package?
+
+Most debounce/throttle solutions either cause memory leaks (manual `Timer`) or require 20+ lines of boilerplate in your `Notifier`. This package reduces it to **1 line** while ensuring perfect memory safety.
 
 ---
 
@@ -23,10 +29,6 @@ dependencies:
 
 ## Quick start
 
-```dart
-import 'package:flutter_debounce_throttle_riverpod/flutter_debounce_throttle_riverpod.dart';
-```
-
 ### Notifier (recommended)
 
 ```dart
@@ -36,7 +38,8 @@ class SearchNotifier extends _$SearchNotifier {
 
   @override
   SearchState build() {
-    _limiter = ref.eventLimiter(); // auto-disposes with provider
+    // ✅ 1 line: auto-disposes with provider
+    _limiter = ref.eventLimiter(); 
     return SearchState.initial();
   }
 
@@ -49,88 +52,34 @@ class SearchNotifier extends _$SearchNotifier {
 }
 ```
 
-### AsyncNotifier
+---
 
-```dart
-@riverpod
-class OrderNotifier extends _$OrderNotifier {
-  late final EventLimiterController _limiter;
+## Quality Assurance
 
-  @override
-  Future<Order?> build() async {
-    _limiter = ref.eventLimiter();
-    return null;
-  }
-
-  Future<void> submitOrder(Order order) async {
-    final result = await _limiter.debounceAsyncResult<Order>(
-      'submit',
-      () async => api.submit(order),
-    );
-    result.when(
-      onSuccess: (order) => state = AsyncData(order),
-      onCancelled: () {}, // stale — ignore
-    );
-  }
-}
-```
-
-### ConsumerStatefulWidget (standalone)
-
-```dart
-class _SearchPageState extends ConsumerState<SearchPage> {
-  late final EventLimiterController _limiter;
-
-  @override
-  void initState() {
-    super.initState();
-    _limiter = EventLimiterController.standalone();
-  }
-
-  @override
-  void dispose() {
-    _limiter.dispose();
-    super.dispose();
-  }
-
-  void _onQueryChanged(String q) {
-    _limiter.debounce('search', () => ref.read(searchProvider.notifier).search(q));
-  }
-}
-```
+| Guarantee | How |
+|-----------|-----|
+| **570+ tests** | Battle-tested core (verified in all UI packages) |
+| **Lifecycle-safe** | Tied to `Ref.onDispose()` — zero manual cleanup |
+| **Async Support** | Handles Futures, cancellation, and race conditions |
 
 ---
 
-## API
+## Which Package?
 
-### `EventLimiterController`
-
-| Method | Description |
-|---|---|
-| `debounce(id, action, {duration})` | Debounce by key — last call within duration wins |
-| `throttle(id, action, {duration})` | Throttle by key — first call executes, rest drop |
-| `debounceAsync<T>(id, action, {duration})` | Async debounce — returns `T?` (`null` = cancelled) |
-| `debounceAsyncResult<T>(id, action, {duration})` | Async debounce — returns `DebounceResult<T>` (distinguishes null from cancellation) |
-| `throttleAsync(id, action, {maxDuration})` | Async throttle — ignores concurrent calls while locked |
-| `cancel(id)` | Cancel and remove limiter with `id` |
-| `cancelAll()` | Cancel all pending operations |
-| `dispose()` | Cancel all and mark disposed (standalone usage) |
-| `isActive(id)` | Whether a limiter with `id` is currently active |
-
-### `Ref.eventLimiter()`
-
-Extension method on `Ref`. Equivalent to `EventLimiterController(ref)`.
+| You are building... | Package |
+|---------------------|---------|
+| Flutter app + **Riverpod** | **`flutter_debounce_throttle_riverpod`** ← you are here |
+| Flutter app + hooks | [`flutter_debounce_throttle_hooks`](https://pub.dev/packages/flutter_debounce_throttle_hooks) |
+| Flutter app (most users) | [`flutter_debounce_throttle`](https://pub.dev/packages/flutter_debounce_throttle) |
 
 ---
 
-## Why a separate package?
+<p align="center">
+  <a href="https://github.com/brewkits/flutter_debounce_throttle">GitHub</a> ·
+  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/FAQ.md">FAQ</a> ·
+  <a href="https://github.com/brewkits/flutter_debounce_throttle/blob/main/docs/API_REFERENCE.md">API Reference</a>
+</p>
 
-Riverpod's `Notifier<T>` and `AsyncNotifier<T>` classes don't share a Flutter-mixin-compatible base, so the `EventLimiterMixin` from `flutter_debounce_throttle` can't be applied directly. This package provides the equivalent functionality through a composable controller that hooks into `Ref.onDispose()`.
-
-For non-Riverpod state management (Provider, GetX, BLoC, MobX), use `EventLimiterMixin` from the main [`flutter_debounce_throttle`](https://pub.dev/packages/flutter_debounce_throttle) package instead.
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE)
+<p align="center">
+  Made with craftsmanship by <a href="https://github.com/brewkits">Brewkits</a>
+</p>
