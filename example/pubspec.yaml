@@ -56,6 +56,12 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
 
+dependency_overrides:
+  dart_debounce_throttle:
+    path: ../packages/dart_debounce_throttle
+  flutter_debounce_throttle:
+    path: ../packages/flutter_debounce_throttle
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
