@@ -1,6 +1,6 @@
 name: flutter_debounce_throttle
-description: Better than easy_debounce. Enterprise debounce/throttle with Redis rate limiting, gesture throttling, 360+ tests. Memory-safe, actively maintained.
-version: 2.4.5
+description: Prevent button spam, debounce search, and fix memory leaks in Flutter. Drop-in widgets, async loading states, auto-lifecycle management. Zero dependencies.
+version: 2.4.6
 homepage: https://github.com/brewkits/flutter_debounce_throttle
 repository: https://github.com/brewkits/flutter_debounce_throttle
 issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
@@ -10,7 +10,7 @@ topics:
   - throttle
   - rate-limiting
   - ui
-  - widgets
+  - async
 
 environment:
   sdk: ^3.0.0
@@ -19,13 +19,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dart_debounce_throttle: ^2.4.5
+  dart_debounce_throttle: ^2.4.6
   meta: ^1.16.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  leak_tracker_flutter_testing: ^3.0.10
 
 platforms:
   android:

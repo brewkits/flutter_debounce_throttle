@@ -57,8 +57,8 @@ void main() {
       final results1 = <int>[];
       final results2 = <int>[];
 
-      final debouncedStream = controller.stream
-          .debounce(const Duration(milliseconds: 100));
+      final debouncedStream =
+          controller.stream.debounce(const Duration(milliseconds: 100));
 
       final subscription1 = debouncedStream.listen(results1.add);
       final subscription2 = debouncedStream.listen(results2.add);
@@ -82,8 +82,8 @@ void main() {
       final results1 = <int>[];
       final results2 = <int>[];
 
-      final throttledStream = controller.stream
-          .throttle(const Duration(milliseconds: 100));
+      final throttledStream =
+          controller.stream.throttle(const Duration(milliseconds: 100));
 
       final subscription1 = throttledStream.listen(results1.add);
       final subscription2 = throttledStream.listen(results2.add);

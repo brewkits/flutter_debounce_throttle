@@ -10,7 +10,9 @@ void main() {
   // AUTO-CLEANUP IS NOW ENABLED BY DEFAULT! (10 minutes, 100 limiters)
   // This demo customizes the settings for faster demonstration
   DebounceThrottleConfig.init(
-    limiterAutoCleanupTTL: const Duration(seconds: 10), // Faster for demo (default: 10 minutes)
+    limiterAutoCleanupTTL: const Duration(
+      seconds: 10,
+    ), // Faster for demo (default: 10 minutes)
     limiterAutoCleanupThreshold: 50, // More aggressive for demo (default: 100)
     enableDebugLog: true, // Enable debug logs to see cleanup in action
   );
@@ -25,10 +27,7 @@ class MemoryCleanupDemoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Memory Cleanup Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: const MemoryCleanupDemo(),
     );
   }
@@ -41,7 +40,8 @@ class MemoryCleanupDemo extends StatefulWidget {
   State<MemoryCleanupDemo> createState() => _MemoryCleanupDemoState();
 }
 
-class _MemoryCleanupDemoState extends State<MemoryCleanupDemo> with EventLimiterMixin {
+class _MemoryCleanupDemoState extends State<MemoryCleanupDemo>
+    with EventLimiterMixin {
   int _dynamicLimiterCount = 0;
   int _likeCount = 0;
   Timer? _periodicCleanupTimer;
@@ -168,8 +168,11 @@ class _MemoryCleanupDemoState extends State<MemoryCleanupDemo> with EventLimiter
                     const SizedBox(height: 8),
                     Text(
                       'Active Limiters: $_dynamicLimiterCount',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: _dynamicLimiterCount > 50 ? Colors.red : Colors.green,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            color: _dynamicLimiterCount > 50
+                                ? Colors.red
+                                : Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -226,9 +229,7 @@ class _MemoryCleanupDemoState extends State<MemoryCleanupDemo> with EventLimiter
               onPressed: _manualCleanupInactive,
               icon: const Icon(Icons.cleaning_services),
               label: const Text('Cleanup Inactive Limiters'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
             ),
             const SizedBox(height: 8),
 
@@ -236,9 +237,7 @@ class _MemoryCleanupDemoState extends State<MemoryCleanupDemo> with EventLimiter
               onPressed: _manualCleanupUnused,
               icon: const Icon(Icons.timer_off),
               label: const Text('Cleanup Unused (>5s)'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
             ),
             const SizedBox(height: 8),
 
@@ -246,9 +245,7 @@ class _MemoryCleanupDemoState extends State<MemoryCleanupDemo> with EventLimiter
               onPressed: _clearAll,
               icon: const Icon(Icons.delete_forever),
               label: const Text('Clear All'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             ),
 
             const Spacer(),

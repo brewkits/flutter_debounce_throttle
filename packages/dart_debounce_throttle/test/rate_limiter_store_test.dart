@@ -108,12 +108,12 @@ void main() {
     test('keyCount tracks number of keys', () {
       expect(store.keyCount, 0);
 
-      store.saveState('key1',
-          const RateLimiterState(tokens: 1, lastRefillMicroseconds: 1));
+      store.saveState(
+          'key1', const RateLimiterState(tokens: 1, lastRefillMicroseconds: 1));
       expect(store.keyCount, 1);
 
-      store.saveState('key2',
-          const RateLimiterState(tokens: 2, lastRefillMicroseconds: 2));
+      store.saveState(
+          'key2', const RateLimiterState(tokens: 2, lastRefillMicroseconds: 2));
       expect(store.keyCount, 2);
 
       store.clearState('key1');
@@ -541,7 +541,48 @@ void main() {
       await limiter2.tryAcquire(2);
 
       // First limiter should also see only 1 token
-      expect(await limiter1.availableTokens, 1);
+      expect(limiter1.availableTokens, completion(1));
+    });
+
+    test('prevents race conditions with parallel tryAcquire', () async {
+      final slowStore = _SlowStore(const Duration(milliseconds: 10));
+      const maxTokens = 10;
+      final limiter = DistributedRateLimiter(
+        key: 'race-key',
+        store: slowStore,
+        maxTokens: maxTokens,
+        refillRate: 1,
+        refillInterval: const Duration(hours: 1),
+      );
+
+      // Try to acquire 1 token, 20 times in parallel.
+      // Serialization should ensure only 10 succeed.
+      final results = await Future.wait(
+        List.generate(20, (_) => limiter.tryAcquire(1)),
+      );
+
+      final successCount = results.where((r) => r).length;
+      final state = await slowStore.fetchState('race-key');
+
+      expect(successCount, equals(maxTokens));
+      expect(state.tokens, closeTo(0, 0.001));
     });
   });
+}
+
+class _SlowStore extends AsyncInMemoryRateLimiterStore {
+  final Duration delay;
+  _SlowStore(this.delay);
+
+  @override
+  Future<RateLimiterState> fetchState(String key) async {
+    await Future.delayed(delay);
+    return super.fetchState(key);
+  }
+
+  @override
+  Future<void> saveState(String key, RateLimiterState state) async {
+    await Future.delayed(delay);
+    return super.saveState(key, state);
+  }
 }

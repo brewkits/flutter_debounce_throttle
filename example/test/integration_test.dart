@@ -62,7 +62,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
     });
 
-    testWidgets('Search Demo - AsyncDebouncedTextController', (WidgetTester tester) async {
+    testWidgets('Search Demo - AsyncDebouncedTextController', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 1.0;
 
@@ -92,7 +94,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
     });
 
-    testWidgets('Button Demo - AsyncThrottledBuilder', (WidgetTester tester) async {
+    testWidgets('Button Demo - AsyncThrottledBuilder', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 1.0;
 
@@ -105,7 +109,10 @@ void main() {
       expect(find.text('Async Button Demo'), findsOneWidget);
 
       // Verify the demo loaded successfully - this verifies AsyncThrottledBuilder widget works
-      expect(find.textContaining('AsyncThrottledBuilder prevents'), findsOneWidget);
+      expect(
+        find.textContaining('AsyncThrottledBuilder prevents'),
+        findsOneWidget,
+      );
 
       // Note: Can't reliably test button tap in widget test due to async timing
       // Integration tests or manual testing should verify button functionality
@@ -113,7 +120,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
     });
 
-    testWidgets('Advanced Demo - ConcurrentAsyncThrottledBuilder', (WidgetTester tester) async {
+    testWidgets('Advanced Demo - ConcurrentAsyncThrottledBuilder', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 1.0;
 
@@ -148,7 +157,9 @@ void main() {
   });
 
   group('New API Coverage Tests', () {
-    testWidgets('Verifies EventLimiterMixin uses new cancel() API', (tester) async {
+    testWidgets('Verifies EventLimiterMixin uses new cancel() API', (
+      tester,
+    ) async {
       // This test verifies that the mixin is using the new cancel() method
       // by checking that the example app works correctly with the new API
       tester.view.physicalSize = const Size(1080, 1920);
@@ -175,7 +186,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
     });
 
-    testWidgets('Verifies DebouncedQueryBuilder in search demo', (tester) async {
+    testWidgets('Verifies DebouncedQueryBuilder in search demo', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 1920);
       tester.view.devicePixelRatio = 1.0;
 

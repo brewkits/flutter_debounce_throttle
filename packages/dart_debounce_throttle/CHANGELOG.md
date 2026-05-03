@@ -1,56 +1,75 @@
-## 2.4.5
+## 2.4.6
 
-- Updated package description for better SEO (targets Serverpod, Dart Frog developers)
-- Added topics: server, redis for improved discoverability
-- Synchronized dependency versions across monorepo
-- No API changes
+### 🚀 New: Honest API — No Silent Failures
 
-## 2.4.2
+#### `ThrottlerResult` — Know if the operation actually ran
+`ConcurrentAsyncThrottler.call()` now returns `Future<ThrottlerResult>` instead of `Future<void>`.
+This prevents a class of silent-failure bugs where dropped operations appeared to succeed.
 
-**World Class Release** - Production-grade distributed rate limiting architecture.
+```dart
+// ❌ Before: silent failure — showSuccessDialog() fires even if order was never submitted
+await throttler.call(() async => submitOrder(orderId));
+showSuccessDialog();
 
-### 🏗️ Architecture Refactoring
+// ✅ After: exhaustive handling required at compile time
+(await throttler.call(() async => submitOrder(orderId))).when(
+  onExecuted: () => showSuccessDialog(),
+  onDropped:  () => showError('Server busy — please try again.'),
+);
+```
 
-- **REMOVED: Redis/Memcached stores from core package**
-  - Moved to `example/server_demo/redis_rate_limiter/` as reference implementation
-  - **Rationale**: Optional dependencies should not bloat core package (95% users don't need Redis)
-  - **Impact**: Zero breaking changes (stores were never exported in public API)
-  - **Migration**: Copy implementation from examples if needed
+API:
+- `result.when(onExecuted:, onDropped:)` — both branches required; compiler rejects incomplete handling
+- `result.whenExecuted(() => ...)` — fluent side-effect helper, returns `this` for chaining
+- `result.whenDropped(() => ...)` — fluent side-effect helper, returns `this` for chaining
+- `result.isExecuted` / `result.isDropped` — boolean accessors
 
-### 🔒 Production Safety Enhancements
+#### `DebounceResult` — Exhaustive pattern matching (new methods)
+`callWithResult()` existed before; now `DebounceResult` gains `when()` and fluent helpers:
 
-- **ADDED: Race condition warnings in distributed rate limiting**
-  - Documented fetch-calculate-save race condition in `AsyncRateLimiterStore`
-  - Added concurrency warnings in `DistributedRateLimiter.tryAcquire()`
-  - Provided trade-off analysis (atomic vs non-atomic operations)
+```dart
+(await debouncer.callWithResult(() => searchApi(query)))
+  .whenSuccess((data) => setState(() => _results = data))
+  .whenCancelled(() => setState(() => _loading = false));
+```
 
-- **ADDED: Atomic operations guide**
-  - Redis Lua script example for 100% accurate rate limiting
-  - PostgreSQL transaction pattern with `SELECT FOR UPDATE`
-  - MongoDB `findAndModify` guidance
-  - Performance impact analysis (~2-5ms overhead)
+- `result.when(onSuccess:, onCancelled:)` — exhaustive match; `onSuccess` receives `T?`
+- `result.whenSuccess((v) => ...)` — runs only if not cancelled
+- `result.whenCancelled(() => ...)` — runs only if cancelled
 
-### 📚 Documentation Improvements
+#### `CancellationToken` support
+`ConcurrentAsyncThrottler.callWithToken()` allows cooperative cancellation of in-flight async work.
+Note: cooperative-only — cancels pending calls immediately; cannot preempt blocking I/O.
 
-- **Enhanced distributed rate limiting guide**
-  - Clear separation: Redis for servers, NOT for mobile apps
-  - Step-by-step Redis integration tutorial
-  - Dart Frog/Shelf middleware examples
-  - Security best practices (TLS, authentication)
+### 🔧 Fixed
+- `ConcurrentAsyncThrottler` enqueue overflow: previously threw an unhandled exception on overflow;
+  now resolves with `ThrottlerResult.dropped()` — no more fire-and-forget crashes.
+- `reset()` and `dispose()` now drain all pending completers with `ThrottlerResult.dropped()`
+  instead of leaving awaiting callers permanently suspended.
+- Race conditions in `AsyncThrottler` and `AsyncDebouncer`: execution count tracked to prevent
+  timeout callbacks from unlocking state for subsequent valid executions.
 
-### 🔄 Migration Guide
+## 2.4.4
 
-**If you were using RedisRateLimiterStore:**
+**SEO & Polish** - Improved pub.dev description for better search ranking.
 
-1. Copy implementation from `example/server_demo/redis_rate_limiter/redis_store_example.dart`
-2. Add to your pubspec.yaml:
-   ```yaml
-   dependencies:
-     redis: ^4.0.0
-   ```
-3. For production: Use Lua script (see `example/.../lua/atomic_rate_limit.lua`)
+### What Changed
+- Improved `description`: keyword-first — "Debounce, throttle, and rate limit for Dart servers and CLI..."
+- Replaced unverified "Production-proven" claim with "Battle-tested: 50+ tests"
 
-**No other breaking changes.**
+### No Breaking Changes
+
+---
+
+## 2.4.3
+
+**Documentation & Discovery** - Improved pub.dev discoverability and README structure.
+
+### 📚 Documentation
+- Restructured README: 5-Second Start moved to the top for faster onboarding
+- Comparisons vs rxdart/easy_debounce moved to the end (value-first content)
+- Improved pub.dev `description` — keyword-first for better search ranking
+- Updated `topics`: replaced `production` with `dart` for better discoverability
 
 ---
 

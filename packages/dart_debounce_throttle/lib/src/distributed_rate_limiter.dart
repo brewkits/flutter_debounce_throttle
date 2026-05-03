@@ -2,6 +2,7 @@
 //
 // Distributed rate limiter using async storage (Redis, Memcached, databases).
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'logger.dart';
@@ -130,6 +131,9 @@ class DistributedRateLimiter with EventLimiterLogging {
   /// Set to false only for testing with Stopwatch.
   final bool useEpochTime;
 
+  /// Internal locks to prevent race conditions on the same key within this process.
+  static final Map<String, Future<void>> _locks = {};
+
   /// Creates a distributed rate limiter.
   ///
   /// - [key]: Unique identifier (e.g., "user-123", "ip-192.168.1.1")
@@ -173,7 +177,8 @@ class DistributedRateLimiter with EventLimiterLogging {
 
     // First time initialization
     if (lastRefillMicros == 0) {
-      debugLog('First access for key "$key", initializing with $maxTokens tokens');
+      debugLog(
+          'First access for key "$key", initializing with $maxTokens tokens');
       return RateLimiterState(
         tokens: maxTokens.toDouble(),
         lastRefillMicroseconds: nowMicros,
@@ -211,18 +216,9 @@ class DistributedRateLimiter with EventLimiterLogging {
   /// It fetches state from storage, calculates refill, attempts acquisition,
   /// and saves the new state back.
   ///
-  /// **⚠️ CONCURRENCY WARNING**: This implementation uses a non-atomic
-  /// fetch-calculate-save pattern which can have race conditions in
-  /// high-concurrency scenarios (~0.1-1% error rate under heavy load).
-  ///
-  /// **For production systems requiring strict accuracy:**
-  /// - Implement atomic operations in your store (Lua scripts, database transactions)
-  /// - See `example/server_demo/redis_rate_limiter/` for Lua script example
-  /// - Or accept eventual consistency if millisecond precision isn't critical
-  ///
-  /// **Thread safety:** This implementation is eventually consistent.
-  /// For strict atomic operations, you need to use Redis Lua scripts
-  /// or database transactions in your store implementation.
+  /// **Thread safety:** This implementation uses process-level locking for the same [key]
+  /// to prevent race conditions within a single instance. For multi-server atomicity,
+  /// ensure your [store] implementation uses atomic operations (e.g., Redis Lua).
   Future<bool> tryAcquire([int tokens = 1]) async {
     if (!enabled) {
       debugLog('Rate limiting disabled for key "$key", allowing acquire');
@@ -230,32 +226,47 @@ class DistributedRateLimiter with EventLimiterLogging {
       return true;
     }
 
-    // 1. Fetch current state from store
-    final currentState = await store.fetchState(key);
+    // 1. Synchronize access to this key within the process
+    final previousLock = _locks[key] ?? Future.value();
+    final completer = Completer<void>();
+    _locks[key] = completer.future;
 
-    // 2. Calculate refill
-    final refilledState = _calculateRefill(currentState);
+    await previousLock;
 
-    // 3. Check if enough tokens
-    if (refilledState.tokens >= tokens) {
-      // 4. Consume tokens and save
-      final newState = RateLimiterState(
-        tokens: refilledState.tokens - tokens,
-        lastRefillMicroseconds: refilledState.lastRefillMicroseconds,
-      );
+    try {
+      // 2. Fetch current state from store
+      final currentState = await store.fetchState(key);
 
-      await store.saveState(key, newState);
+      // 3. Calculate refill
+      final refilledState = _calculateRefill(currentState);
 
-      debugLog('Acquired $tokens token(s) for key "$key", '
-          '${newState.tokens.toStringAsFixed(2)} remaining');
-      onMetrics?.call(newState.tokens.floor(), true);
-      return true;
+      // 4. Check if enough tokens
+      if (refilledState.tokens >= tokens) {
+        // 5. Consume tokens and save
+        final newState = RateLimiterState(
+          tokens: refilledState.tokens - tokens,
+          lastRefillMicroseconds: refilledState.lastRefillMicroseconds,
+        );
+
+        await store.saveState(key, newState);
+
+        debugLog('Acquired $tokens token(s) for key "$key", '
+            '${newState.tokens.toStringAsFixed(2)} remaining');
+        onMetrics?.call(newState.tokens.floor(), true);
+        return true;
+      }
+
+      debugLog('Failed to acquire $tokens token(s) for key "$key", '
+          'only ${refilledState.tokens.toStringAsFixed(2)} available');
+      onMetrics?.call(refilledState.tokens.floor(), false);
+      return false;
+    } finally {
+      // Release lock and clean up map
+      if (_locks[key] == completer.future) {
+        _locks.remove(key);
+      }
+      completer.complete();
     }
-
-    debugLog('Failed to acquire $tokens token(s) for key "$key", '
-        'only ${refilledState.tokens.toStringAsFixed(2)} available');
-    onMetrics?.call(refilledState.tokens.floor(), false);
-    return false;
   }
 
   /// Execute async [callback] if token is available, otherwise return null.

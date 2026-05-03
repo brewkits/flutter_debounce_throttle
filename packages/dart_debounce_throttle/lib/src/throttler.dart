@@ -16,7 +16,7 @@ typedef VoidCallback = void Function();
 ///
 /// Pure Dart implementation - can be used in Flutter apps, Dart servers, and CLI tools.
 abstract class CallbackController with EventLimiterLogging {
-  final Duration duration;
+  Duration duration;
   @override
   final bool debugMode;
   @override

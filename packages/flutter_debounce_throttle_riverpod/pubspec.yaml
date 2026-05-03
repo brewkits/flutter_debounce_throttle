@@ -1,0 +1,25 @@
+name: flutter_debounce_throttle_riverpod
+description: Riverpod integration for flutter_debounce_throttle. EventLimiterController auto-disposes with Ref lifecycle. Zero boilerplate.
+version: 1.0.0
+homepage: https://github.com/brewkits/flutter_debounce_throttle
+repository: https://github.com/brewkits/flutter_debounce_throttle
+issue_tracker: https://github.com/brewkits/flutter_debounce_throttle/issues
+
+topics:
+  - debounce
+  - throttle
+  - riverpod
+  - state-management
+  - async
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  riverpod: ^2.6.0
+  dart_debounce_throttle: ^2.4.6
+  meta: ^1.16.0
+
+dev_dependencies:
+  test: ^1.24.0
+  lints: ^5.0.0

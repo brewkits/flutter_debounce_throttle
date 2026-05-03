@@ -1,41 +1,57 @@
-## 2.4.5
+## 2.4.6
 
-- Updated package description emphasizing unique features (Redis, gesture throttling)
-- Changed topics: production → widgets for better categorization
-- Updated dart_debounce_throttle dependency to ^2.4.5
-- Fixed example test imports
-- No API changes
+### 🚀 New: Honest API — No Silent Failures
 
-## 2.4.2
+`EventLimiterMixin.debounceAsync()` and `throttleAsync()` now surface the underlying
+`DebounceResult` / `ThrottlerResult` from the core — making dropped or cancelled operations
+explicit instead of silently swallowed.
 
-**UI Enhancements** - Better gesture throttling for high-refresh-rate displays.
+```dart
+// MVI / BLoC — compiler rejects if either branch is missing
+final result = await debounceAsync('search', () => api.search(event.query));
+result?.when(
+  onSuccess:   (data) => emit(SearchLoaded(data ?? [])),
+  onCancelled: ()     => emit(SearchIdle()),
+);
+```
 
-### ✨ New Features
+### 🔧 Fixed
 
-- **ADDED: `ThrottleDuration` preset class**
-  - `ThrottleDuration.ultraSmooth` (8ms) - For 120Hz displays
-  - `ThrottleDuration.standard` (16ms) - Default 60fps
-  - `ThrottleDuration.conservative` (32ms) - For complex animations/older devices
+#### `EventLimiterMixin` — Background auto-cleanup (no more UI-thread stalls)
+- Cleanup was previously synchronous and ran on every new limiter creation (O(n) on the UI thread).
+- Now uses a `Timer.periodic` background timer (1-minute interval) — zero impact during normal usage.
+- Timer starts on first limiter creation; cancelled in `cancelAll()` and `dispose()`.
 
-### 📚 Documentation
-
-- **Enhanced `ThrottledGestureDetector` documentation**
-  - Device-specific refresh rate recommendations
-  - Examples for 120Hz displays (iPad Pro, iPhone 13 Pro+, flagship Android)
-  - Performance tuning guide for different device tiers
-  - Device-adaptive duration pattern
-
-### 🎨 Example Updates
-
-- **Updated gesture_detector_demo.dart**
-  - Added interactive throttle mode selector
-  - Demonstrates Ultra Smooth (120Hz), Standard (60fps), Conservative (30fps)
-  - Real-time feedback on throttle duration impact
+#### `EventLimiterMixin` — Warning instead of assertion crash
+- Exceeded limiter count (>100) previously called `assert(false)`, crashing debug builds unexpectedly.
+- Now logs a structured warning via `EventLimiterLogger` and triggers background cleanup.
 
 ### 📦 Dependencies
+- Updated `dart_debounce_throttle` to `^2.4.6`
 
-- `dart_debounce_throttle: ^2.4.2` (was ^2.4.0)
-  - Inherits production-grade distributed rate limiting improvements
+## 2.4.4
+
+**SEO & Polish** - Improved pub.dev description for better search ranking.
+
+### What Changed
+- Improved `description`: keyword-first — "Prevent button spam, debounce search, and fix memory leaks in Flutter..."
+- Updated dependency: `dart_debounce_throttle` to `^2.4.4`
+
+### No Breaking Changes
+
+---
+
+## 2.4.3
+
+**Documentation & Discovery** - Improved pub.dev discoverability and README structure.
+
+### 📚 Documentation
+- Restructured README: 30-Second Start moved to the top for faster onboarding
+- Expanded quick start with async and state management examples
+- Moved competitor comparisons to the end (value-first content)
+- Improved pub.dev `description` — keyword-first for better search ranking
+- Updated `topics`: replaced `production` with `async` for better discoverability
+- Added `## Which Package Should I Use?` section for new users
 
 ---
 

@@ -59,9 +59,11 @@ void main() {
       expect(tapCount, 2);
     });
 
-    testWidgets('onLongPress is throttled', (tester) async {}, skip: true); // LongPress timing is flaky in tests
+    testWidgets('onLongPress is throttled', (tester) async {},
+        skip: true); // LongPress timing is flaky in tests
 
-    testWidgets('onDoubleTap is throttled', (tester) async {}, skip: true); // DoubleTap has pending timers in tests
+    testWidgets('onDoubleTap is throttled', (tester) async {},
+        skip: true); // DoubleTap has pending timers in tests
 
     testWidgets('onPanUpdate uses high-frequency throttle', (tester) async {
       final List<Offset> positions = [];
@@ -396,7 +398,8 @@ void main() {
       expect(gestureDetector.behavior, HitTestBehavior.opaque);
     });
 
-    testWidgets('widget updates correctly when durations change',
-        (tester) async {}, skip: true); // Widget update timing needs refinement
+    testWidgets(
+        'widget updates correctly when durations change', (tester) async {},
+        skip: true); // Widget update timing needs refinement
   });
 }

@@ -13,19 +13,23 @@ import 'logger.dart';
 /// - Cancelled operation: `isCancelled = true`, `value = null`
 /// - Successful null result: `isCancelled = false`, `value = null`
 ///
-/// **Example:**
+/// Use [when] for exhaustive handling (both branches required at compile time):
 /// ```dart
 /// final result = await debouncer.callWithResult(() async {
-///   return await api.search(query); // May return null
+///   return await api.search(query);
 /// });
 ///
-/// if (result.isCancelled) {
-///   print('Cancelled by newer call');
-///   return;
-/// }
+/// result.when(
+///   onSuccess: (results) => emit(SearchLoaded(results)),
+///   onCancelled: () {},  // explicitly acknowledge the cancelled branch
+/// );
+/// ```
 ///
-/// // Safe to use result.value (may be null, but that's the actual result)
-/// updateUI(result.value);
+/// Use [whenSuccess] / [whenCancelled] for fluent side-effects:
+/// ```dart
+/// (await debouncer.callWithResult(() => searchApi(query)))
+///   .whenSuccess((data) => setState(() => _results = data))
+///   .whenCancelled(() => setState(() => _loading = false));
 /// ```
 class DebounceResult<T> {
   /// Whether this operation was cancelled by a newer call.
@@ -46,6 +50,44 @@ class DebounceResult<T> {
 
   /// Whether the operation completed successfully (not cancelled).
   bool get isSuccess => !isCancelled;
+
+  /// Exhaustive pattern match — both branches are required by the compiler.
+  ///
+  /// Preferred over `if (result.isCancelled)` because the compiler rejects
+  /// code that silently ignores the cancelled branch.
+  ///
+  /// ```dart
+  /// // In a ViewModel / BLoC handler:
+  /// result.when(
+  ///   onSuccess:   (data) => emit(SearchLoaded(data)),
+  ///   onCancelled: ()     => emit(SearchIdle()),
+  /// );
+  /// ```
+  R when<R>({
+    required R Function(T? value) onSuccess,
+    required R Function() onCancelled,
+  }) =>
+      isCancelled ? onCancelled() : onSuccess(value);
+
+  /// Run [action] with the result value only if the operation succeeded.
+  /// Returns `this` for chaining.
+  ///
+  /// ```dart
+  /// (await debouncer.callWithResult(() => fetchUser(id)))
+  ///   .whenSuccess((user) => _user = user)
+  ///   .whenCancelled(() => _loading = false);
+  /// ```
+  DebounceResult<T> whenSuccess(void Function(T? value) action) {
+    if (isSuccess) action(value);
+    return this;
+  }
+
+  /// Run [action] only if the operation was cancelled by a newer call.
+  /// Returns `this` for chaining.
+  DebounceResult<T> whenCancelled(void Function() action) {
+    if (isCancelled) action();
+    return this;
+  }
 
   @override
   String toString() => isCancelled
@@ -72,28 +114,25 @@ class DebounceResult<T> {
 /// - Real-time validation: Debounce + async server check
 ///
 /// **IMPORTANT:**
-/// - Returns `Future<T?>`. If cancelled, it returns `null`.
-/// - Always check for null if you need to handle cancellation.
+/// - **Type Safety:** We strongly recommend using `callWithResult` to avoid null-ambiguity,
+///   as standard `call` returns `null` when a debounce is cancelled.
 /// - Call `dispose()` to prevent memory leaks.
 ///
-/// **Example:**
+/// **Example (Recommended Standard):**
 /// ```dart
 /// final debouncer = AsyncDebouncer(
 ///   debugMode: true,
 ///   name: 'search',
-///   onMetrics: (duration, cancelled) {
-///     print('API call took: $duration, cancelled: $cancelled');
-///   },
 /// );
 ///
 /// void onSearch(String text) async {
-///   // Callable class - use like a function
-///   final result = await debouncer(() async {
+///   final result = await debouncer.callWithResult(() async {
 ///     return await searchApi(text);
 ///   });
 ///
-///   if (result == null) return; // Cancelled by newer call
-///   updateResults(result);
+///   if (result.isCancelled) return; // Safely ignore cancelled calls
+///
+///   updateResults(result.value);    // result.value contains the actual data
 /// }
 ///
 /// // Don't forget to dispose
@@ -104,7 +143,7 @@ class AsyncDebouncer with EventLimiterLogging {
   static Duration get defaultDuration =>
       DebounceThrottleConfig.config.defaultDebounceDuration;
 
-  final Duration duration;
+  Duration duration;
   @override
   final bool debugMode;
   @override
@@ -266,7 +305,7 @@ class AsyncDebouncer with EventLimiterLogging {
           completer.completeError(e, stackTrace);
         }
       } finally {
-        if (_cancelPendingCompleter != null) {
+        if (_cancelPendingCompleter != null && currentCallId == _latestCallId) {
           _cancelPendingCompleter = null;
         }
       }
@@ -388,7 +427,9 @@ class AsyncDebouncer with EventLimiterLogging {
           completer.completeError(e, stackTrace);
         }
       } finally {
-        _cancelPendingCompleter = null;
+        if (currentCallId == _latestCallId) {
+          _cancelPendingCompleter = null;
+        }
       }
     });
 
