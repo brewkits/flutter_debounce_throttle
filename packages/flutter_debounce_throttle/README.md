@@ -12,6 +12,10 @@
 
 **All-in-one package** for debounce, throttle, rate limiting, and async concurrency control. Memory-safe, lifecycle-aware, and works with any state management solution.
 
+| Debounced Search | Anti-Spam Button | Async Submit |
+|:---:|:---:|:---:|
+| ![Search](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_search_debounce.gif) | ![Throttle](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_throttle_antispam.gif) | ![Submit](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_async_submit.gif) |
+
 ---
 
 ## 30-Second Start

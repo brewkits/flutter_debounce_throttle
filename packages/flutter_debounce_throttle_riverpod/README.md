@@ -6,6 +6,10 @@
 Riverpod integration for [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle).  
 `EventLimiterController` ties debounce/throttle timers to a Riverpod `Ref` lifecycle — zero boilerplate, auto-cleanup on provider dispose.
 
+| Debounced Search Notifier | Provider Auto-Dispose |
+|:---:|:---:|
+| ![Riverpod Search](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_riverpod_debounce.gif) | ![Auto-Dispose](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_riverpod_autodispose.gif) |
+
 ---
 
 ## Installation

@@ -10,6 +10,8 @@
 
 > Debounce, throttle, rate limit, and batch — for Dart servers, CLI tools, and shared business logic. Zero Flutter dependencies.
 
+![Debounced Search Demo](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_search_debounce.gif)
+
 ---
 
 ## 5-Second Start
