@@ -11,6 +11,8 @@ High-performance, memory-safe, and lifecycle-aware traffic control for Flutter &
 | Debounced Search | Anti-Spam Button | Async Submit |
 |:---:|:---:|:---:|
 | ![Search](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_search_debounce.gif) | ![Throttle](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_throttle_antispam.gif) | ![Submit](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_async_submit.gif) |
+| **Concurrency Replace** | **Hooks Edition** | **Riverpod Integration** |
+| ![Replace](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_concurrency_replace.gif) | ![Hooks](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_hooks_debounce.gif) | ![Riverpod](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_riverpod_debounce.gif) |
 
 ---
 
