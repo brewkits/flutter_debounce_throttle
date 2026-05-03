@@ -65,10 +65,8 @@ class AtomicRedisRateLimiter {
   ///
   /// - [redis]: Command object from package:redis
   /// - [luaScriptPath]: Path to atomic_rate_limit.lua file
-  AtomicRedisRateLimiter({
-    required this.redis,
-    required String luaScriptPath,
-  }) : _luaScript = File(luaScriptPath).readAsStringSync();
+  AtomicRedisRateLimiter({required this.redis, required String luaScriptPath})
+    : _luaScript = File(luaScriptPath).readAsStringSync();
 
   /// Try to acquire tokens atomically (no race conditions).
   ///
@@ -101,18 +99,20 @@ class AtomicRedisRateLimiter {
 
     try {
       // Execute Lua script atomically on Redis server
-      final result = await redis.send_object([
-        'EVAL',
-        _luaScript,
-        1, // number of keys
-        key, // KEYS[1]
-        maxTokens, // ARGV[1]
-        refillRate, // ARGV[2]
-        refillInterval.inMicroseconds, // ARGV[3]
-        tokensToAcquire, // ARGV[4]
-        nowMicros, // ARGV[5]
-        ttlSeconds, // ARGV[6]
-      ]) as List;
+      final result =
+          await redis.send_object([
+                'EVAL',
+                _luaScript,
+                1, // number of keys
+                key, // KEYS[1]
+                maxTokens, // ARGV[1]
+                refillRate, // ARGV[2]
+                refillInterval.inMicroseconds, // ARGV[3]
+                tokensToAcquire, // ARGV[4]
+                nowMicros, // ARGV[5]
+                ttlSeconds, // ARGV[6]
+              ])
+              as List;
 
       final success = result[0] as int;
       final remainingTokens = result[1] as int;
@@ -139,18 +139,20 @@ class AtomicRedisRateLimiter {
     final nowMicros = DateTime.now().microsecondsSinceEpoch;
 
     try {
-      final result = await redis.send_object([
-        'EVAL',
-        _luaScript,
-        1,
-        key,
-        maxTokens,
-        refillRate,
-        refillInterval.inMicroseconds,
-        0, // Don't consume any tokens
-        nowMicros,
-        0, // No TTL
-      ]) as List;
+      final result =
+          await redis.send_object([
+                'EVAL',
+                _luaScript,
+                1,
+                key,
+                maxTokens,
+                refillRate,
+                refillInterval.inMicroseconds,
+                0, // Don't consume any tokens
+                nowMicros,
+                0, // No TTL
+              ])
+              as List;
 
       return result[1] as int;
     } catch (e) {

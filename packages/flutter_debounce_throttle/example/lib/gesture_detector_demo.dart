@@ -140,7 +140,8 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
                       selected: _selectedMode == 'Ultra Smooth (120Hz)',
                       onSelected: (selected) {
                         if (selected) {
-                          _setThrottleMode('Ultra Smooth (120Hz)', ThrottleDuration.ultraSmooth);
+                          _setThrottleMode('Ultra Smooth (120Hz)',
+                              ThrottleDuration.ultraSmooth);
                         }
                       },
                     ),
@@ -149,7 +150,8 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
                       selected: _selectedMode == 'Standard (60fps)',
                       onSelected: (selected) {
                         if (selected) {
-                          _setThrottleMode('Standard (60fps)', ThrottleDuration.standard);
+                          _setThrottleMode(
+                              'Standard (60fps)', ThrottleDuration.standard);
                         }
                       },
                     ),
@@ -158,7 +160,8 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
                       selected: _selectedMode == 'Conservative (30fps)',
                       onSelected: (selected) {
                         if (selected) {
-                          _setThrottleMode('Conservative (30fps)', ThrottleDuration.conservative);
+                          _setThrottleMode('Conservative (30fps)',
+                              ThrottleDuration.conservative);
                         }
                       },
                     ),
@@ -167,7 +170,8 @@ class _GestureDetectorDemoState extends State<GestureDetectorDemo> {
                 const SizedBox(height: 8),
                 Text(
                   'Current: $_selectedMode (${_continuousDuration.inMilliseconds}ms)',
-                  style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                  style: const TextStyle(
+                      fontSize: 12, fontStyle: FontStyle.italic),
                 ),
               ],
             ),

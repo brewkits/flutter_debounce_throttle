@@ -73,7 +73,9 @@ Future<void> example1BasicUsage() async {
   */
 
   print('\n💡 To run this example:');
-  print('   1. Install Redis: brew install redis (macOS) or apt-get install redis (Linux)');
+  print(
+    '   1. Install Redis: brew install redis (macOS) or apt-get install redis (Linux)',
+  );
   print('   2. Start Redis: redis-server');
   print('   3. Add to pubspec.yaml: redis: ^4.0.0');
   print('   4. Uncomment the code in this function');

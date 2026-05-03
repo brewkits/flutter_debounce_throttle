@@ -322,7 +322,8 @@ class MemcachedRateLimiterStore implements AsyncRateLimiterStore {
     // You would need to track keys separately or flush all cache
     // await client.flush(); // Nuclear option: clears ALL cache
     throw UnimplementedError(
-        'Memcached does not support pattern-based deletion. '
-        'Consider using Redis or tracking keys separately.');
+      'Memcached does not support pattern-based deletion. '
+      'Consider using Redis or tracking keys separately.',
+    );
   }
 }

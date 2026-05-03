@@ -33,12 +33,7 @@ jobs:
         run: dart analyze --fatal-infos
 
       - name: Run tests
-        run: |
-          if [ -d "test" ]; then
-            dart test
-          else
-            echo "No test directory found, skipping tests"
-          fi
+        run: dart test
 
   # Flutter package - flutter_debounce_throttle
   flutter:
@@ -64,15 +59,27 @@ jobs:
             dart_debounce_throttle:
               path: ../dart_debounce_throttle
           EOF
+          if [ -d "example" ]; then
+            cat > example/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../../dart_debounce_throttle
+            flutter_debounce_throttle:
+              path: ../
+          EOF
+          fi
 
       - name: Install dependencies
-        run: flutter pub get --no-example
+        run: flutter pub get
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Analyze project source
         run: flutter analyze --fatal-infos
+
+      - name: Run tests
+        run: flutter test
 
   # Flutter Hooks package - flutter_debounce_throttle_hooks
   hooks:
@@ -100,9 +107,20 @@ jobs:
             flutter_debounce_throttle:
               path: ../flutter_debounce_throttle
           EOF
+          if [ -d "example" ]; then
+            cat > example/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../../dart_debounce_throttle
+            flutter_debounce_throttle:
+              path: ../../flutter_debounce_throttle
+            flutter_debounce_throttle_hooks:
+              path: ../
+          EOF
+          fi
 
       - name: Install dependencies
-        run: flutter pub get --no-example
+        run: flutter pub get
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
@@ -110,11 +128,60 @@ jobs:
       - name: Analyze project source
         run: flutter analyze --fatal-infos
 
-  # Main package tests (root)
+      - name: Run tests
+        run: flutter test
+
+  # Riverpod package - flutter_debounce_throttle_riverpod
+  riverpod:
+    name: Riverpod Package
+    runs-on: ubuntu-latest
+    needs: core
+    defaults:
+      run:
+        working-directory: packages/flutter_debounce_throttle_riverpod
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: 'stable'
+
+      - name: Setup path dependencies
+        run: |
+          cat > pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../dart_debounce_throttle
+          EOF
+          if [ -d "example" ]; then
+            cat > example/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../../dart_debounce_throttle
+            flutter_debounce_throttle_riverpod:
+              path: ../
+          EOF
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze project source
+        run: dart analyze --fatal-infos
+
+      - name: Run tests
+        run: dart test
+
+  # Monorepo bootstrap verification
   main-tests:
     name: Main Package Tests
     runs-on: ubuntu-latest
-    needs: [core, flutter, hooks]
+    needs: [core, flutter, hooks, riverpod]
 
     steps:
       - uses: actions/checkout@v4
@@ -127,10 +194,61 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
+      - name: Setup path dependencies for all packages
+        run: |
+          # Package-level overrides
+          cat > packages/flutter_debounce_throttle/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../dart_debounce_throttle
+          EOF
+
+          cat > packages/flutter_debounce_throttle_hooks/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../dart_debounce_throttle
+            flutter_debounce_throttle:
+              path: ../flutter_debounce_throttle
+          EOF
+
+          cat > packages/flutter_debounce_throttle_riverpod/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../dart_debounce_throttle
+          EOF
+
+          cat > packages/flutter_debounce_throttle_core/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../dart_debounce_throttle
+          EOF
+
+          # Example-level overrides (flutter pub get also resolves example/)
+          cat > packages/flutter_debounce_throttle/example/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../../dart_debounce_throttle
+            flutter_debounce_throttle:
+              path: ../
+          EOF
+
+          cat > packages/flutter_debounce_throttle_hooks/example/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../../dart_debounce_throttle
+            flutter_debounce_throttle:
+              path: ../../flutter_debounce_throttle
+            flutter_debounce_throttle_hooks:
+              path: ../
+          EOF
+
+          cat > packages/flutter_debounce_throttle_riverpod/example/pubspec_overrides.yaml << 'EOF'
+          dependency_overrides:
+            dart_debounce_throttle:
+              path: ../../dart_debounce_throttle
+            flutter_debounce_throttle_riverpod:
+              path: ../
+          EOF
+
       - name: Bootstrap monorepo
         run: melos bootstrap
-        continue-on-error: true
-
-      - name: Run root tests
-        run: flutter test
-        continue-on-error: true

@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../lib/main.dart';
 
-
 void main() {
   testWidgets('App loads correctly', (WidgetTester tester) async {
     // Set a larger surface size to avoid layout issues
