@@ -1,3 +1,12 @@
+## 1.0.2
+
+- **Metadata**: Add missing CHANGELOG entries to fix pub.dev score validation.
+
+## 1.0.1
+
+- **Dependencies**: Broaden `riverpod` dependency to `">=2.6.0 <4.0.0"` to support Riverpod 3.x.
+- **Dependencies**: Bump `lints` to `^6.0.0`.
+
 ## 1.0.0
 
 ### Initial release
