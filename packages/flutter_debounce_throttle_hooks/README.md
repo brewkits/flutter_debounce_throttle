@@ -8,6 +8,8 @@
 
 > No dispose. No initState. No boilerplate. Just hooks.
 
+![Hooks Demo](https://raw.githubusercontent.com/brewkits/flutter_debounce_throttle/main/docs/images/demo_hooks_debounce.gif)
+
 All the power of [flutter_debounce_throttle](https://pub.dev/packages/flutter_debounce_throttle) — debounce, throttle, async cancellation, race condition control — with **automatic lifecycle management** the hooks way.
 
 ```dart
