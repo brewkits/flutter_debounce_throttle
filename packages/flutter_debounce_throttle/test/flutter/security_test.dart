@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Security & Robustness Tests for Flutter Widgets', () {
-    testWidgets('ThrottledGestureDetector handles rapid taps safely (DoS protection)', (WidgetTester tester) async {
+    testWidgets(
+        'ThrottledGestureDetector handles rapid taps safely (DoS protection)',
+        (WidgetTester tester) async {
       int tapCount = 0;
 
       await tester.pumpWidget(
@@ -28,7 +30,7 @@ void main() {
       for (int i = 0; i < 50; i++) {
         await tester.tap(finder);
       }
-      
+
       // Despite 50 taps instantly, it should only fire once initially
       expect(tapCount, 1);
     });

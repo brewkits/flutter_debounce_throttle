@@ -25,21 +25,19 @@ void main() {
     testWidgets('Dynamic limiters do not leak after cancelAll (dispose)',
         experimentalLeakTesting: LeakTesting.settings.withTrackedAll(),
         (WidgetTester tester) async {
-      
       final controller = TestController();
-      
+
       // Simulate dynamic usage
       for (int i = 0; i < 50; i++) {
         controller.simulateDynamicLimiter('dynamic_id_$i');
       }
-      
+
       expect(controller.totalLimitersCount, 50);
 
       // Verify that after disposing, all resources are freed
       controller.dispose();
-      
+
       expect(controller.totalLimitersCount, 0);
     });
   });
 }
-

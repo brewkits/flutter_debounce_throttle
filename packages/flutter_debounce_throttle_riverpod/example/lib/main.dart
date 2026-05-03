@@ -186,8 +186,9 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
     final theme = Theme.of(context);
     final searchState = ref.watch(searchNotifierProvider);
     final notifier = ref.read(searchNotifierProvider.notifier);
-    final saved =
-        _keystrokes - searchState.apiCalls > 0 ? _keystrokes - searchState.apiCalls : 0;
+    final saved = _keystrokes - searchState.apiCalls > 0
+        ? _keystrokes - searchState.apiCalls
+        : 0;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -199,7 +200,8 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Icon(Icons.search, size: 44, color: theme.colorScheme.primary),
+                  Icon(Icons.search,
+                      size: 44, color: theme.colorScheme.primary),
                   const SizedBox(height: 8),
                   Text(
                     'Debounced Search',
@@ -276,8 +278,8 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
                     child: Text(
                       'Results (${searchState.results.length})',
                       style: theme.textTheme.titleSmall,
@@ -293,8 +295,7 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
                       final item = searchState.results[index];
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor:
-                              theme.colorScheme.primaryContainer,
+                          backgroundColor: theme.colorScheme.primaryContainer,
                           child: Text(
                             '${index + 1}',
                             style: TextStyle(
@@ -428,7 +429,8 @@ class _SubmitTab extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Icon(Icons.payment, size: 44, color: theme.colorScheme.primary),
+                  Icon(Icons.payment,
+                      size: 44, color: theme.colorScheme.primary),
                   const SizedBox(height: 8),
                   Text(
                     'Submit Protection',
@@ -497,7 +499,8 @@ class _SubmitTab extends ConsumerWidget {
                     : isDone
                         ? 'Submitted!'
                         : 'Pay \$99',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -667,7 +670,8 @@ class _AutoDisposeTabState extends ConsumerState<_AutoDisposeTab> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Icon(Icons.delete_sweep, size: 44, color: theme.colorScheme.primary),
+                  Icon(Icons.delete_sweep,
+                      size: 44, color: theme.colorScheme.primary),
                   const SizedBox(height: 8),
                   Text(
                     'Auto-Dispose Demo',
@@ -940,8 +944,9 @@ class _LogTile extends StatelessWidget {
                 fontSize: 12,
                 height: 1.5,
                 color: textColor,
-                fontWeight:
-                    (isCancelled || isFired) ? FontWeight.bold : FontWeight.normal,
+                fontWeight: (isCancelled || isFired)
+                    ? FontWeight.bold
+                    : FontWeight.normal,
               ),
             ),
           ),

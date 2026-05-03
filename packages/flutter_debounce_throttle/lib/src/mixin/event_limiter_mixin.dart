@@ -406,10 +406,10 @@ mixin EventLimiterMixin {
     if (totalCount <= threshold) return;
 
     final now = DateTime.now();
-    _cleanupMapByTTL(_debouncers, _debouncersLastUsed, now, ttl,
-        (d) => d.dispose());
-    _cleanupMapByTTL(_throttlers, _throttlersLastUsed, now, ttl,
-        (t) => t.dispose());
+    _cleanupMapByTTL(
+        _debouncers, _debouncersLastUsed, now, ttl, (d) => d.dispose());
+    _cleanupMapByTTL(
+        _throttlers, _throttlersLastUsed, now, ttl, (t) => t.dispose());
     _cleanupMapByTTL(_asyncDebouncers, _asyncDebouncersLastUsed, now, ttl,
         (d) => d.dispose());
     _cleanupMapByTTL(_asyncThrottlers, _asyncThrottlersLastUsed, now, ttl,

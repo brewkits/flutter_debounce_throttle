@@ -96,8 +96,7 @@ void main() {
     });
 
     test('zero-duration throttler executes every call', () async {
-      final throttler =
-          Throttler(duration: const Duration(milliseconds: 0));
+      final throttler = Throttler(duration: const Duration(milliseconds: 0));
       var executions = 0;
 
       for (var i = 0; i < 5; i++) {
@@ -114,8 +113,7 @@ void main() {
 
   group('Debouncer stress', () {
     test('500 rapid calls produce exactly 1 execution', () async {
-      final debouncer =
-          Debouncer(duration: const Duration(milliseconds: 100));
+      final debouncer = Debouncer(duration: const Duration(milliseconds: 100));
       var executions = 0;
 
       for (var i = 0; i < 500; i++) {
@@ -129,8 +127,7 @@ void main() {
     });
 
     test('last value is captured, not first', () async {
-      final debouncer =
-          Debouncer(duration: const Duration(milliseconds: 80));
+      final debouncer = Debouncer(duration: const Duration(milliseconds: 80));
       var captured = 0;
 
       for (var i = 1; i <= 100; i++) {
@@ -145,8 +142,7 @@ void main() {
     });
 
     test('cancel prevents execution', () async {
-      final debouncer =
-          Debouncer(duration: const Duration(milliseconds: 100));
+      final debouncer = Debouncer(duration: const Duration(milliseconds: 100));
       var executed = false;
 
       debouncer.call(() => executed = true);
@@ -508,14 +504,12 @@ void main() {
           AsyncDebouncer(duration: const Duration(milliseconds: 30));
       final log = <String>[];
 
-      final f1 =
-          debouncer.callWithResult(() async {
+      final f1 = debouncer.callWithResult(() async {
         await Future.delayed(const Duration(milliseconds: 10));
         return 'first';
       });
 
-      final f2 =
-          debouncer.callWithResult(() async {
+      final f2 = debouncer.callWithResult(() async {
         await Future.delayed(const Duration(milliseconds: 10));
         return 'second';
       });
@@ -537,8 +531,7 @@ void main() {
         () async {
       final debouncer =
           AsyncDebouncer(duration: const Duration(milliseconds: 200));
-      final future =
-          debouncer.callWithResult(() async => 'result');
+      final future = debouncer.callWithResult(() async => 'result');
 
       debouncer.dispose();
 
@@ -549,8 +542,7 @@ void main() {
     test('cancel() resolves pending future as cancelled', () async {
       final debouncer =
           AsyncDebouncer(duration: const Duration(milliseconds: 200));
-      final future =
-          debouncer.callWithResult(() async => 'data');
+      final future = debouncer.callWithResult(() async => 'data');
 
       debouncer.cancel();
 
@@ -642,8 +634,7 @@ void main() {
   // ─── ConcurrentAsyncThrottler Stress ────────────────────────────────────
 
   group('ConcurrentAsyncThrottler stress', () {
-    test('drop mode: 50 concurrent calls → 1 executes, rest dropped',
-        () async {
+    test('drop mode: 50 concurrent calls → 1 executes, rest dropped', () async {
       final throttler = ConcurrentAsyncThrottler(
         mode: ConcurrencyMode.drop,
         maxDuration: const Duration(seconds: 2),
@@ -871,8 +862,7 @@ void main() {
 
   group('Memory safety under stress', () {
     test('dispose during pending debounce: no StateError or crash', () async {
-      final debouncer =
-          Debouncer(duration: const Duration(milliseconds: 100));
+      final debouncer = Debouncer(duration: const Duration(milliseconds: 100));
       var executed = false;
 
       debouncer.call(() => executed = true);
@@ -886,8 +876,7 @@ void main() {
         () async {
       final debouncer =
           AsyncDebouncer(duration: const Duration(milliseconds: 100));
-      final future =
-          debouncer.callWithResult(() async {
+      final future = debouncer.callWithResult(() async {
         await Future.delayed(const Duration(milliseconds: 300));
         return 'data';
       });
@@ -970,10 +959,8 @@ void main() {
 
     test('AsyncDebouncer with very long duration: cancel frees future',
         () async {
-      final debouncer =
-          AsyncDebouncer(duration: const Duration(hours: 1));
-      final future =
-          debouncer.callWithResult(() async => 'never');
+      final debouncer = AsyncDebouncer(duration: const Duration(hours: 1));
+      final future = debouncer.callWithResult(() async => 'never');
 
       debouncer.cancel();
       final result = await future;
